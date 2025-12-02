@@ -1,10 +1,6 @@
 {
   "$schema": "https://turborepo.com/schema.json",
   "ui": "tui",
-  "generators": {
-    "$schema": "https://turbo.build/schema.json",
-    "config": "turbo/generators/config.ts"
-  },
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
