@@ -1,6 +1,10 @@
-# Turborepo starter
+# Coral Libraries
 
-This Turborepo starter is maintained by the Turborepo core team.
+A monorepo for shared libraries and utilities.
+
+## 📦 Releasing Packages
+
+See the [Release Guide](./RELEASING.md) for detailed instructions on versioning and releasing packages.
 
 ## Using this example
 
@@ -14,23 +18,19 @@ npx create-turbo@latest
 
 This Turborepo includes the following packages/apps:
 
-### Apps and Packages
+### Packages
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+- `@repo/core`: Core utilities and functions
+- `@repo/typescript-config`: Shared TypeScript configurations
 
 Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
 
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
+### Tooling
 
 - [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+- [Biome](https://biomejs.dev/) for linting and formatting
+- [tsup](https://tsup.egoist.dev/) for bundling packages
+- [semantic-release](https://semantic-release.gitbook.io/) for automated versioning
 
 ### Build
 

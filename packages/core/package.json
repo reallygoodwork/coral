@@ -1,0 +1,33 @@
+{
+  "name": "@repo/core",
+  "version": "0.0.0",
+  "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "lint": "biome lint .",
+    "format": "biome format --write .",
+    "check-types": "tsc --noEmit",
+    "release": "semantic-release"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "semantic-release": "^25.0.2",
+    "tsup": "^8.3.5",
+    "typescript": "^5.9.2"
+  }
+}

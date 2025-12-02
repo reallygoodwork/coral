@@ -1,0 +1,34 @@
+---
+title: Coral Libraries
+description: A collection of shared libraries and utilities for the Coral ecosystem.
+template: splash
+hero:
+  tagline: A monorepo of TypeScript libraries with automated releases.
+  actions:
+    - text: Get Started
+      link: /guides/getting-started/
+      icon: right-arrow
+      variant: primary
+    - text: View on GitHub
+      link: https://github.com/reallygoodwork/coral-libraries
+      icon: external
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+## Features
+
+<CardGrid>
+  <Card title="TypeScript First" icon="seti:typescript">
+    All packages are built with TypeScript for type safety and better DX.
+  </Card>
+  <Card title="Automated Releases" icon="rocket">
+    Semantic versioning with automated changelog generation and npm publishing.
+  </Card>
+  <Card title="Fast Builds" icon="approve-check">
+    Powered by tsup and turborepo for lightning-fast builds and caching.
+  </Card>
+  <Card title="Modern Tooling" icon="setting">
+    Biome for linting and formatting, ensuring consistent code quality.
+  </Card>
+</CardGrid>
