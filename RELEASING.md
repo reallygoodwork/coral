@@ -127,51 +127,65 @@ This shows what would happen without making changes.
 
 ## CI/CD Setup
 
-For automated releases, configure your CI environment with:
+This repository includes two GitHub Actions workflows for continuous integration and automated releases.
 
-### Required Environment Variables
+### Workflows
 
-- `GITHUB_TOKEN` - GitHub Personal Access Token with `repo` permissions
-- `NPM_TOKEN` - npm authentication token for publishing
+#### 1. CI Workflow (`.github/workflows/ci.yml`)
 
-### GitHub Actions Example
+Runs on every push and pull request to `main`:
+- Runs tests
+- Runs linting
+- Checks TypeScript types
+- Builds all packages
+
+#### 2. Release Workflow (`.github/workflows/release.yml`)
+
+Runs on every push to `main` (after CI passes):
+- Builds packages
+- Analyzes commit messages
+- Publishes new versions to npm
+- Creates GitHub releases
+- Updates CHANGELOG.md
+
+### Required Secrets
+
+Configure these in your GitHub repository settings (Settings → Secrets and variables → Actions):
+
+#### `NPM_TOKEN` (Required)
+
+npm authentication token for publishing packages:
+
+1. Log in to [npmjs.com](https://www.npmjs.com/)
+2. Go to Access Tokens → Generate New Token
+3. Select "Automation" type
+4. Copy the token
+5. Add as `NPM_TOKEN` secret in GitHub
+
+#### `GITHUB_TOKEN` (Automatic)
+
+The `GITHUB_TOKEN` is automatically provided by GitHub Actions with the necessary permissions. No manual setup required.
+
+### Repository Permissions
+
+The release workflow requires these permissions (already configured in `.github/workflows/release.yml`):
 
 ```yaml
-name: Release
+permissions:
+  contents: write       # Create releases and tags
+  issues: write        # Comment on released issues
+  pull-requests: write # Comment on released PRs
+  id-token: write     # npm provenance
+```
 
-on:
-  push:
-    branches:
-      - main
+### Triggering Releases
 
-jobs:
-  release:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+Releases are triggered automatically when you push commits with conventional commit messages to `main`:
 
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9.0.0
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 18
-          cache: 'pnpm'
-
-      - run: pnpm install
-
-      - name: Build packages
-        run: pnpm build
-
-      - name: Release @repo/core
-        working-directory: packages/core
-        run: pnpm release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+```bash
+git commit -m "feat(core): add new feature"
+git push origin main
+# → Triggers release workflow → Publishes new version
 ```
 
 ## Adding New Packages
