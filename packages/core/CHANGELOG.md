@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/reallygoodwork/coral/compare/@reallygoodwork/coral-core@1.0.0...@reallygoodwork/coral-core@1.1.0) (2025-12-12)
+
+
+### Features
+
+* Adds licenses to packages. ([e35c992](https://github.com/reallygoodwork/coral/commit/e35c992e33f3b98dcb4a7d0dd4bf5d852c172c15))
+
 # 1.0.0 (2025-12-12)
 
 
