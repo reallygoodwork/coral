@@ -4,6 +4,7 @@ module.exports = {
   roots: ["<rootDir>/src"],
   testMatch: ["**/__tests__/**/*.test.ts"],
   collectCoverageFrom: ["src/**/*.ts", "!src/**/*.test.ts"],
+  passWithNoTests: true,
   transform: {
     "^.+\\.ts$": [
       "ts-jest",

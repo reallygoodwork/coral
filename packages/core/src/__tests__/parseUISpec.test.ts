@@ -13,7 +13,7 @@ describe('parseUISpec', () => {
 
     const result = await parseUISpec(validSpec)
 
-    expect(result).toEqual(validSpec)
+    expect(result).toEqual({ ...validSpec, type: 'NODE' })
     expect(result.name).toBe('TestComponent')
     expect(result.elementType).toBe('div')
   })
@@ -49,6 +49,7 @@ describe('parseUISpec', () => {
     expect(result.children).toHaveLength(1)
     expect(result.children?.[0]?.name).toBe('ChildComponent')
     expect(result.children?.[0]?.elementType).toBe('span')
+    expect(result.children?.[0]?.type).toBe('NODE')
   })
 
   it('should parse specification with component properties', async () => {
@@ -180,6 +181,11 @@ describe('parseUISpec', () => {
 
     const result = await parseUISpec(specWithVariants)
 
-    expect(result.variants).toEqual(specWithVariants.variants)
+    expect(result.variants).toEqual([
+      {
+        ...specWithVariants.variants[0],
+        type: 'NODE',
+      },
+    ])
   })
 })

@@ -7,7 +7,7 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
       {
         type: "input",
         name: "name",
-        message: "What is the name of the package? (without @repo/ prefix)",
+        message: "What is the name of the package? (without @reallygoodwork/ prefix)",
         validate: (input: string) => {
           if (input.includes(" ")) {
             return "Package name cannot include spaces";

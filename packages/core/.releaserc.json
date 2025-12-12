@@ -1,6 +1,6 @@
 {
   "branches": ["main"],
-  "tagFormat": "@repo/core@${version}",
+  "tagFormat": "@reallygoodwork/core@${version}",
   "plugins": [
     "@semantic-release/commit-analyzer",
     "@semantic-release/release-notes-generator",
@@ -10,7 +10,7 @@
       "@semantic-release/git",
       {
         "assets": ["CHANGELOG.md", "package.json"],
-        "message": "chore(release): @repo/core@${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+        "message": "chore(release): @reallygoodwork/core@${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
       }
     ],
     "@semantic-release/github"

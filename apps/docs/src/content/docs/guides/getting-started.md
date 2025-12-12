@@ -9,13 +9,13 @@ Install packages from the Coral Libraries monorepo using your preferred package 
 
 ```bash
 # Install a specific package
-pnpm add @repo/core
+pnpm add @reallygoodwork/core
 
 # Using npm
-npm install @repo/core
+npm install @reallygoodwork/core
 
 # Using yarn
-yarn add @repo/core
+yarn add @reallygoodwork/core
 ```
 
 ## Usage
@@ -23,7 +23,7 @@ yarn add @repo/core
 Import and use functions from the installed packages:
 
 ```typescript
-import { hello } from "@repo/core";
+import { hello } from "@reallygoodwork/core";
 
 console.log(hello()); // "Hello, World!"
 ```

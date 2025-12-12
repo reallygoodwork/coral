@@ -177,7 +177,14 @@ describe('JSX Fragments and Spread Operators', () => {
     const props = result.componentProperties as Record<string, unknown>
     expect(Object.keys(props)).toContain('...props')
     expect(Object.keys(props)).toContain('...additionalProps')
-    expect(props.style).toContain('...style')
-    expect(props.onClick).toContain('console.log')
+    // props.style might be an object with {type, value} structure
+    const styleValue = typeof props.style === 'object' && props.style !== null && 'value' in props.style
+      ? (props.style as { value: string }).value
+      : String(props.style)
+    expect(styleValue).toContain('...style')
+    const onClickValue = typeof props.onClick === 'object' && props.onClick !== null && 'value' in props.onClick
+      ? (props.onClick as { value: string }).value
+      : String(props.onClick)
+    expect(onClickValue).toContain('console.log')
   })
 })

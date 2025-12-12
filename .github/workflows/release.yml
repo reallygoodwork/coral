@@ -44,7 +44,7 @@ jobs:
       - name: Build packages
         run: pnpm build
 
-      - name: Release @repo/core
+      - name: Release @reallygoodwork/core
         working-directory: packages/core
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

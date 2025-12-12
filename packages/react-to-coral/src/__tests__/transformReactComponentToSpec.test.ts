@@ -103,7 +103,7 @@ describe('transformReactComponentToSpec', () => {
     const result = transformReactComponentToSpec(component)
 
     expect(result.componentName).toBe('FunctionComponent')
-    expect(result.type).toBe('Function')
+    expect(result.type).toBe('INSTANCE')
   })
 
   it('should handle nested JSX elements', () => {

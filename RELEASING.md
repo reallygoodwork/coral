@@ -54,7 +54,7 @@ To trigger a MAJOR version bump (1.0.0 → 2.0.0), use either:
 
 The scope indicates which package is affected:
 
-- `core` - For @repo/core package
+- `core` - For @reallygoodwork/core package
 - Add new scopes for future packages
 
 ### Examples
@@ -202,7 +202,7 @@ When adding a new package to release:
    ```json
    {
      "branches": ["main"],
-     "tagFormat": "@repo/your-package@${version}",
+     "tagFormat": "@reallygoodwork/your-package@${version}",
      "plugins": [
        "@semantic-release/commit-analyzer",
        "@semantic-release/release-notes-generator",
@@ -212,7 +212,7 @@ When adding a new package to release:
          "@semantic-release/git",
          {
            "assets": ["CHANGELOG.md", "package.json"],
-           "message": "chore(release): @repo/your-package@${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+           "message": "chore(release): @reallygoodwork/your-package@${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
          }
        ],
        "@semantic-release/github"

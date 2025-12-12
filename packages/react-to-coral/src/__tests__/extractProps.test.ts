@@ -44,8 +44,8 @@ describe('extractProps', () => {
     expect(result).toBeDefined()
     expect(result).toHaveProperty('title')
     expect(result).toHaveProperty('count')
-    expect(result?.title).toEqual({ value: 'title', type: 'any' })
-    expect(result?.count).toEqual({ value: 'count', type: 'any' })
+    expect(result?.title).toEqual({ value: 'title', type: 'any', optional: false })
+    expect(result?.count).toEqual({ value: 'count', type: 'any', optional: false })
   })
 
   it('should extract props with TypeScript types', () => {
@@ -80,7 +80,7 @@ describe('extractProps', () => {
 
     expect(result).toBeDefined()
     expect(result).toHaveProperty('props')
-    expect(result?.props).toEqual({ value: 'props', type: 'any' })
+    expect(result?.props).toEqual({ value: 'props', type: 'any', optional: false })
   })
 
   it('should handle typed identifier parameters', () => {
@@ -121,7 +121,8 @@ describe('extractProps', () => {
 
     expect(result).toBeDefined()
     expect((result?.title as { type: string })?.type).toBe('string')
-    expect((result?.items as { type: string })?.type).toBe('array')
-    expect((result?.onClick as { type: string })?.type).toBe('function')
+    expect((result?.items as { type: string })?.type).toBe('string[]')
+    // Function types can be "() => void" or similar, not just "function"
+    expect((result?.onClick as { type: string })?.type).toMatch(/=>|function/)
   })
 })

@@ -20,8 +20,8 @@ This Turborepo includes the following packages/apps:
 
 ### Packages
 
-- `@repo/core`: Core utilities and functions
-- `@repo/typescript-config`: Shared TypeScript configurations
+- `@reallygoodwork/core`: Core utilities and functions
+- `@reallygoodwork/typescript-config`: Shared TypeScript configurations
 
 Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
 
