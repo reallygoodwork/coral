@@ -26,6 +26,8 @@
     "release": "semantic-release"
   },
   "devDependencies": {
+    "@reallygoodwork/coral-core": "workspace:*",
+    "@reallygoodwork/coral-tw2css": "workspace:*",
     "@reallygoodwork/typescript-config": "workspace:*",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
@@ -42,8 +44,10 @@
     "@babel/generator": "^7.28.5",
     "@babel/parser": "^7.28.5",
     "@babel/traverse": "^7.28.5",
-    "@babel/types": "^7.28.5",
-    "@reallygoodwork/coral-core": "workspace:*",
-    "@reallygoodwork/coral-tw2css": "workspace:*"
+    "@babel/types": "^7.28.5"
+  },
+  "peerDependencies": {
+    "@reallygoodwork/coral-core": "^1.3.0",
+    "@reallygoodwork/coral-tw2css": "^1.0.0"
   }
 }
