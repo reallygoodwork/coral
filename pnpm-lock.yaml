@@ -59,11 +59,10 @@ importers:
         version: 5.9.2
 
   packages/coral-to-html:
-    dependencies:
+    devDependencies:
       '@reallygoodwork/coral-core':
         specifier: workspace:*
         version: link:../core
-    devDependencies:
       '@reallygoodwork/typescript-config':
         specifier: workspace:*
         version: link:../../utilities/typescript-config
@@ -94,13 +93,13 @@ importers:
 
   packages/coral-to-react:
     dependencies:
-      '@reallygoodwork/coral-core':
-        specifier: workspace:*
-        version: link:../core
       prettier:
         specifier: ^3.0.0
         version: 3.7.3
     devDependencies:
+      '@reallygoodwork/coral-core':
+        specifier: workspace:*
+        version: link:../core
       '@reallygoodwork/typescript-config':
         specifier: workspace:*
         version: link:../../utilities/typescript-config
@@ -186,13 +185,13 @@ importers:
       '@babel/types':
         specifier: ^7.28.5
         version: 7.28.5
+    devDependencies:
       '@reallygoodwork/coral-core':
         specifier: workspace:*
         version: link:../core
       '@reallygoodwork/coral-tw2css':
         specifier: workspace:*
         version: link:../tw2css
-    devDependencies:
       '@reallygoodwork/typescript-config':
         specifier: workspace:*
         version: link:../../utilities/typescript-config
