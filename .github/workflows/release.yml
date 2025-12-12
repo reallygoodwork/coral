@@ -49,47 +49,48 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      # Required for trusted publishing - npm 11.5.1+ needed for OIDC
+      - name: Update npm for trusted publishing
+        run: npm install -g npm@latest
+
       - name: Build packages
         run: pnpm build
+
+      # Note: NPM_TOKEN is NOT used - trusted publishing uses OIDC tokens automatically
+      # The id-token: write permission above enables OIDC authentication
 
       - name: Release @reallygoodwork/coral-core
         working-directory: packages/core
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: pnpm release
 
       - name: Release @reallygoodwork/coral-tw2css
         working-directory: packages/tw2css
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: pnpm release
 
       - name: Release @reallygoodwork/style-to-tailwind
         working-directory: packages/style-to-tailwind
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: pnpm release
 
       - name: Release @reallygoodwork/react-to-coral
         working-directory: packages/react-to-coral
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: pnpm release
 
       - name: Release @reallygoodwork/coral-to-react
         working-directory: packages/coral-to-react
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: pnpm release
 
       - name: Release @reallygoodwork/coral-to-html
         working-directory: packages/coral-to-html
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: pnpm release
