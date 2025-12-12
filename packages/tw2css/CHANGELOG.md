@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/reallygoodwork/coral/compare/@reallygoodwork/coral-tw2css@1.1.0...@reallygoodwork/coral-tw2css@1.2.0) (2025-12-12)
+
+
+### Features
+
+* update peerDependencies for coral packages to specify version constraints for @reallygoodwork/coral-core and @reallygoodwork/coral-tw2css ([b0e88d8](https://github.com/reallygoodwork/coral/commit/b0e88d8242b776a83ef74466e8647bc5b3ed1ef5))
+
 # [1.1.0](https://github.com/reallygoodwork/coral/compare/@reallygoodwork/coral-tw2css@1.0.0...@reallygoodwork/coral-tw2css@1.1.0) (2025-12-12)
 
 
