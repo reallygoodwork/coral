@@ -1,3 +1,12 @@
+# [1.1.0](https://github.com/reallygoodwork/coral/compare/@reallygoodwork/coral-to-react@1.0.0...@reallygoodwork/coral-to-react@1.1.0) (2025-12-12)
+
+
+### Features
+
+* Adds licenses to packages. ([e35c992](https://github.com/reallygoodwork/coral/commit/e35c992e33f3b98dcb4a7d0dd4bf5d852c172c15))
+* update core version ([42d20e0](https://github.com/reallygoodwork/coral/commit/42d20e0490411090a4bf20fea02299c87df51d2b))
+* updates version for core ([956d93b](https://github.com/reallygoodwork/coral/commit/956d93b05b2992598ad13ac037437ca60ab4c9a9))
+
 # 1.0.0 (2025-12-12)
 
 
