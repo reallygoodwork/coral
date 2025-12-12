@@ -2,7 +2,9 @@
   "extends": "@reallygoodwork/typescript-config/base.json",
   "compilerOptions": {
     "outDir": "dist",
-    "rootDir": "src"
+    "paths": {
+      "@reallygoodwork/coral-tw2css": ["../tw2css/src/index.ts"]
+    }
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist"]
