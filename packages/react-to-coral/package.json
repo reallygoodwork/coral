@@ -41,6 +41,7 @@
     "@babel/generator": "^7.28.5",
     "@babel/parser": "^7.28.5",
     "@babel/traverse": "^7.28.5",
+    "@babel/types": "^7.28.5",
     "@reallygoodwork/coral-core": "workspace:*",
     "@reallygoodwork/coral-tw2css": "workspace:*"
   }

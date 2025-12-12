@@ -183,6 +183,9 @@ importers:
       '@babel/traverse':
         specifier: ^7.28.5
         version: 7.28.5
+      '@babel/types':
+        specifier: ^7.28.5
+        version: 7.28.5
       '@reallygoodwork/coral-core':
         specifier: workspace:*
         version: link:../core
