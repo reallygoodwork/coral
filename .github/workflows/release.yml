@@ -37,6 +37,7 @@ jobs:
         with:
           node-version: 20
           cache: "pnpm"
+          registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
         run: pnpm install
@@ -44,8 +45,43 @@ jobs:
       - name: Build packages
         run: pnpm build
 
-      - name: Release @reallygoodwork/core
+      - name: Release @reallygoodwork/coral-core
         working-directory: packages/core
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm release
+
+      - name: Release @reallygoodwork/coral-tw2css
+        working-directory: packages/tw2css
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm release
+
+      - name: Release @reallygoodwork/style-to-tailwind
+        working-directory: packages/style-to-tailwind
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm release
+
+      - name: Release @reallygoodwork/react-to-coral
+        working-directory: packages/react-to-coral
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm release
+
+      - name: Release @reallygoodwork/coral-to-react
+        working-directory: packages/coral-to-react
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm release
+
+      - name: Release @reallygoodwork/coral-to-html
+        working-directory: packages/coral-to-html
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -1,6 +1,6 @@
 {
   "branches": ["main"],
-  "tagFormat": "@reallygoodwork/core@${version}",
+  "tagFormat": "@reallygoodwork/coral-core@${version}",
   "plugins": [
     "@semantic-release/commit-analyzer",
     "@semantic-release/release-notes-generator",
@@ -10,7 +10,7 @@
       "@semantic-release/git",
       {
         "assets": ["CHANGELOG.md", "package.json"],
-        "message": "chore(release): @reallygoodwork/core@${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+        "message": "chore(release): @reallygoodwork/coral-core@${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
       }
     ],
     "@semantic-release/github"
