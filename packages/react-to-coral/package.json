@@ -1,0 +1,47 @@
+{
+  "name": "@reallygoodwork/react-to-coral",
+  "version": "0.0.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.mjs"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "biome lint .",
+    "format": "biome format --write .",
+    "check-types": "tsc --noEmit",
+    "release": "semantic-release"
+  },
+  "devDependencies": {
+    "@reallygoodwork/typescript-config": "workspace:*",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "@types/babel__generator": "^7.27.0",
+    "@types/babel__traverse": "^7.28.0",
+    "@types/jest": "^30.0.0",
+    "jest": "^30.2.0",
+    "semantic-release": "^25.0.2",
+    "ts-jest": "^29.4.6",
+    "tsup": "^8.3.5",
+    "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "@babel/generator": "^7.28.5",
+    "@babel/parser": "^7.28.5",
+    "@babel/traverse": "^7.28.5",
+    "@reallygoodwork/coral-core": "workspace:*",
+    "@reallygoodwork/coral-tw2css": "workspace:*"
+  }
+}

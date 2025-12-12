@@ -173,9 +173,37 @@ declare module 'astro:content' {
   collection: "docs";
   data: InferEntrySchema<"docs">
 } & { render(): Render[".mdx"] };
+"packages/coral-to-html.mdx": {
+	id: "packages/coral-to-html.mdx";
+  slug: "packages/coral-to-html";
+  body: string;
+  collection: "docs";
+  data: InferEntrySchema<"docs">
+} & { render(): Render[".mdx"] };
+"packages/coral-to-react.md": {
+	id: "packages/coral-to-react.md";
+  slug: "packages/coral-to-react";
+  body: string;
+  collection: "docs";
+  data: InferEntrySchema<"docs">
+} & { render(): Render[".md"] };
 "packages/core.md": {
 	id: "packages/core.md";
   slug: "packages/core";
+  body: string;
+  collection: "docs";
+  data: InferEntrySchema<"docs">
+} & { render(): Render[".md"] };
+"packages/react-to-coral.md": {
+	id: "packages/react-to-coral.md";
+  slug: "packages/react-to-coral";
+  body: string;
+  collection: "docs";
+  data: InferEntrySchema<"docs">
+} & { render(): Render[".md"] };
+"packages/tw2css.md": {
+	id: "packages/tw2css.md";
+  slug: "packages/tw2css";
   body: string;
   collection: "docs";
   data: InferEntrySchema<"docs">

@@ -1,0 +1,1 @@
+export { transformReactComponentToSpec } from "./transformReactComponentToCoralSpec";

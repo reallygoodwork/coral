@@ -1,0 +1,42 @@
+{
+  "name": "@reallygoodwork/coral-to-react",
+  "version": "0.0.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.mjs"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "biome lint .",
+    "format": "biome format --write .",
+    "check-types": "tsc --noEmit",
+    "release": "semantic-release"
+  },
+  "devDependencies": {
+    "@reallygoodwork/typescript-config": "workspace:*",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "@types/jest": "^30.0.0",
+    "jest": "^30.2.0",
+    "semantic-release": "^25.0.2",
+    "ts-jest": "^29.4.6",
+    "tsup": "^8.3.5",
+    "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "@reallygoodwork/coral-core": "workspace:*",
+    "prettier": "^3.0.0"
+  }
+}
