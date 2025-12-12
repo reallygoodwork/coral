@@ -1,135 +1,206 @@
 # Coral Libraries
 
-A monorepo for shared libraries and utilities.
+A monorepo of libraries for transforming UI components between different representations: React components, HTML, and a universal Coral specification format.
+
+## 📦 Packages
+
+| Package | Description | npm |
+|---------|-------------|-----|
+| [@reallygoodwork/coral-core](./packages/core) | Core types, schemas, and utilities for the Coral specification | [![npm](https://img.shields.io/npm/v/@reallygoodwork/coral-core)](https://www.npmjs.com/package/@reallygoodwork/coral-core) |
+| [@reallygoodwork/coral-tw2css](./packages/tw2css) | Convert Tailwind CSS classes to CSS style objects | [![npm](https://img.shields.io/npm/v/@reallygoodwork/coral-tw2css)](https://www.npmjs.com/package/@reallygoodwork/coral-tw2css) |
+| [@reallygoodwork/style-to-tailwind](./packages/style-to-tailwind) | Convert CSS style objects to Tailwind CSS classes | [![npm](https://img.shields.io/npm/v/@reallygoodwork/style-to-tailwind)](https://www.npmjs.com/package/@reallygoodwork/style-to-tailwind) |
+| [@reallygoodwork/react-to-coral](./packages/react-to-coral) | Transform React components to Coral specification | [![npm](https://img.shields.io/npm/v/@reallygoodwork/react-to-coral)](https://www.npmjs.com/package/@reallygoodwork/react-to-coral) |
+| [@reallygoodwork/coral-to-react](./packages/coral-to-react) | Generate React components from Coral specification | [![npm](https://img.shields.io/npm/v/@reallygoodwork/coral-to-react)](https://www.npmjs.com/package/@reallygoodwork/coral-to-react) |
+| [@reallygoodwork/coral-to-html](./packages/coral-to-html) | Generate HTML from Coral specification | [![npm](https://img.shields.io/npm/v/@reallygoodwork/coral-to-html)](https://www.npmjs.com/package/@reallygoodwork/coral-to-html) |
+
+## 🚀 What is Coral?
+
+Coral is a universal specification format for describing UI components. It captures:
+
+- **Structure**: Element types, children, and hierarchy
+- **Styles**: CSS properties with responsive breakpoint support
+- **State**: React hooks and state management
+- **Methods**: Event handlers and component logic
+- **Props**: Component properties with TypeScript types
+- **Imports**: Dependencies and module imports
+
+This allows you to:
+- Parse React components into a structured format
+- Generate React components from the specification
+- Convert to/from HTML
+- Analyze component structure programmatically
+
+## 📋 Quick Start
+
+### Installation
+
+Install the packages you need:
+
+```bash
+# Core package (required for all transformations)
+npm install @reallygoodwork/coral-core
+
+# Transform React to Coral specification
+npm install @reallygoodwork/react-to-coral
+
+# Generate React from Coral specification
+npm install @reallygoodwork/coral-to-react
+
+# Generate HTML from Coral specification
+npm install @reallygoodwork/coral-to-html
+
+# Tailwind CSS utilities
+npm install @reallygoodwork/coral-tw2css
+npm install @reallygoodwork/style-to-tailwind
+```
+
+### Example: React → Coral → React
+
+```typescript
+import { transformReactComponentToSpec } from '@reallygoodwork/react-to-coral'
+import { coralToReact } from '@reallygoodwork/coral-to-react'
+
+// Your React component as a string
+const reactCode = `
+export const Button = ({ label, onClick }) => {
+  return (
+    <button className="px-4 py-2 bg-blue-500 text-white rounded" onClick={onClick}>
+      {label}
+    </button>
+  )
+}
+`
+
+// Transform to Coral specification
+const spec = transformReactComponentToSpec(reactCode)
+
+// Generate React component from specification
+const { reactCode: generatedCode, cssCode } = await coralToReact(spec, {
+  componentFormat: 'arrow',
+  styleFormat: 'inline',
+})
+```
+
+### Example: HTML → Coral
+
+```typescript
+import { transformHTMLToSpec } from '@reallygoodwork/coral-core'
+
+const html = `
+<div class="container mx-auto">
+  <h1 style="font-size: 24px; color: blue;">Hello World</h1>
+  <p>Welcome to Coral</p>
+</div>
+`
+
+const spec = transformHTMLToSpec(html)
+```
+
+### Example: Coral → HTML
+
+```typescript
+import { coralToHTML } from '@reallygoodwork/coral-to-html'
+
+const spec = {
+  elementType: 'div',
+  styles: { padding: '20px', backgroundColor: '#f0f0f0' },
+  children: [
+    { elementType: 'h1', textContent: 'Hello World' }
+  ]
+}
+
+const html = await coralToHTML(spec)
+```
+
+## 🏗️ Architecture
+
+```
+┌─────────────────┐
+│  React Component │
+└────────┬────────┘
+         │ react-to-coral
+         ▼
+┌─────────────────┐       ┌─────────────────┐
+│      HTML       │◄─────►│ Coral Spec      │
+└─────────────────┘       │ (Universal)     │
+  transformHTMLToSpec     └────────┬────────┘
+  coralToHTML                      │
+                                   │ coral-to-react
+                                   ▼
+                          ┌─────────────────┐
+                          │ React Component │
+                          └─────────────────┘
+```
+
+## 🛠️ Development
+
+### Prerequisites
+
+- Node.js 22+
+- pnpm 9+
+
+### Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/reallygoodwork/coral.git
+cd coral
+
+# Install dependencies
+pnpm install
+
+# Build all packages
+pnpm build
+
+# Run tests
+pnpm test
+
+# Run linting
+pnpm lint
+
+# Type check
+pnpm check-types
+```
+
+### Development Mode
+
+```bash
+# Watch and rebuild all packages
+pnpm dev
+
+# Build a specific package
+pnpm build --filter=@reallygoodwork/coral-core
+```
+
+## 📖 Documentation
+
+- [Getting Started Guide](./apps/docs/src/content/docs/guides/getting-started.md)
+- [Release Guide](./RELEASING.md)
+- [API Documentation](./apps/docs)
 
 ## 📦 Releasing Packages
 
-See the [Release Guide](./RELEASING.md) for detailed instructions on versioning and releasing packages.
+This monorepo uses [semantic-release](https://semantic-release.gitbook.io/) for automated versioning and releases.
 
-## Using this example
+Commits must follow the [Conventional Commits](https://www.conventionalcommits.org/) format:
 
-Run the following command:
+```bash
+# Feature (minor version bump)
+git commit -m "feat(coral-core): add new utility function"
 
-```sh
-npx create-turbo@latest
+# Bug fix (patch version bump)
+git commit -m "fix(coral-to-react): correct JSX generation"
+
+# Breaking change (major version bump)
+git commit -m "feat(coral-core)!: change API signature"
 ```
 
-## What's inside?
+See the [Release Guide](./RELEASING.md) for detailed instructions.
 
-This Turborepo includes the following packages/apps:
+## 🤝 Contributing
 
-### Packages
+Contributions are welcome! Please read our contributing guidelines before submitting a pull request.
 
-- `@reallygoodwork/core`: Core utilities and functions
-- `@reallygoodwork/typescript-config`: Shared TypeScript configurations
+## 📄 License
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Tooling
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [Biome](https://biomejs.dev/) for linting and formatting
-- [tsup](https://tsup.egoist.dev/) for bundling packages
-- [semantic-release](https://semantic-release.gitbook.io/) for automated versioning
-
-### Build
-
-To build all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
-```
-
-You can build a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
-
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
-
-### Develop
-
-To develop all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
-```
-
-You can develop a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
-
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+MIT © [Really Good Work](https://reallygoodwork.com)

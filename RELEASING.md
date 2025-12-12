@@ -152,19 +152,62 @@ Runs on every push to `main` (after CI passes):
 
 Configure these in your GitHub repository settings (Settings → Secrets and variables → Actions):
 
-#### `NPM_TOKEN` (Required)
-
-npm authentication token for publishing packages:
-
-1. Log in to [npmjs.com](https://www.npmjs.com/)
-2. Go to Access Tokens → Generate New Token
-3. Select "Automation" type
-4. Copy the token
-5. Add as `NPM_TOKEN` secret in GitHub
-
 #### `GITHUB_TOKEN` (Automatic)
 
 The `GITHUB_TOKEN` is automatically provided by GitHub Actions with the necessary permissions. No manual setup required.
+
+### npm Authentication
+
+This repository uses **npm Trusted Publishing (OIDC)** for secure, token-free publishing. This is the recommended approach by npm for CI/CD environments.
+
+#### How it Works
+
+1. GitHub Actions requests a short-lived token from npm using OpenID Connect
+2. npm verifies the request against your package's trusted publisher configuration
+3. The package is published without needing to store long-lived tokens
+
+#### Setting Up Trusted Publishing
+
+For each package you want to publish:
+
+1. **Publish the package initially** (requires one-time local publish or granular token)
+2. Go to [npmjs.com](https://www.npmjs.com/) → Your Package → Settings → Publishing access
+3. Under "Configure trusted publishers", click "Add new"
+4. Configure the GitHub repository and workflow:
+   - **Repository owner**: `reallygoodwork`
+   - **Repository name**: `coral`
+   - **Workflow name**: `release.yml`
+   - **Environment**: (leave blank for now)
+5. Save the configuration
+
+#### Initial Package Publishing
+
+For new packages not yet on npm, you need to publish once using a granular access token:
+
+1. Go to [npmjs.com](https://www.npmjs.com/) → Access Tokens → Generate New Token
+2. Select **Granular Access Token**
+3. Configure:
+   - **Expiration**: Short (e.g., 7 days)
+   - **Packages and scopes**: Select "Read and write"
+   - **Organization**: Select `@reallygoodwork`
+4. Copy the token and run locally:
+   ```bash
+   npm login --registry=https://registry.npmjs.org
+   cd packages/your-package
+   npm publish --access public
+   ```
+5. After publishing, configure Trusted Publishing as described above
+6. Delete the granular token from npmjs.com
+
+#### Fallback: Granular Access Token
+
+If you can't use Trusted Publishing, you can use a granular access token as a secret:
+
+1. Create a granular token on npmjs.com with:
+   - **Packages and scopes**: Read and write
+   - **Organization**: `@reallygoodwork` (or specific packages)
+2. Add as `NPM_TOKEN` secret in GitHub repository settings
+3. Update the release workflow to use `NPM_TOKEN` environment variable
 
 ### Repository Permissions
 

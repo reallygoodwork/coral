@@ -1,697 +1,303 @@
 # @reallygoodwork/coral-to-html
 
-Convert Coral specifications to HTML markup. This package transforms Coral JSON specifications into clean, formatted HTML with inline styles.
+Generate HTML from Coral UI specifications.
+
+[![npm](https://img.shields.io/npm/v/@reallygoodwork/coral-to-html)](https://www.npmjs.com/package/@reallygoodwork/coral-to-html)
 
 ## Installation
 
 ```bash
 npm install @reallygoodwork/coral-to-html
-```
-
-```bash
+# or
 pnpm add @reallygoodwork/coral-to-html
-```
-
-```bash
+# or
 yarn add @reallygoodwork/coral-to-html
 ```
 
-## Features
+## Overview
 
-- **HTML Generation** - Convert Coral specs to semantic HTML
-- **Inline Styles** - Automatic conversion of Coral styles to CSS inline styles
-- **Automatic Formatting** - Beautiful, formatted HTML output via Prettier
-- **Self-Closing Tags** - Proper handling of void elements (img, br, hr, etc.)
-- **Attribute Conversion** - Convert element attributes to HTML attributes
-- **Color Support** - Convert Coral color objects to hex values
-- **Dimension Support** - Convert dimension objects to CSS units
-- **Nested Elements** - Full support for nested component structures
-- **Text Content** - Preserve text content in elements
+This package generates formatted HTML from a Coral UI specification. It produces clean, properly indented HTML with inline styles.
 
----
+## API Reference
 
-## Functions
+### Functions
 
-### `coralToHTML`
+#### `coralToHTML(spec)`
 
-Converts a Coral specification to formatted HTML markup.
+Converts a Coral specification to formatted HTML.
 
-**Signature:**
 ```typescript
-async function coralToHTML(coralSpec: CoralRootNode): Promise<string>
-```
-
-**Parameters:**
-- `coralSpec` - A Coral root node specification
-
-**Returns:** Promise resolving to formatted HTML string
-
-**Example:**
-```typescript
-import { coralToHTML } from '@reallygoodwork/coral-to-html';
-import type { CoralRootNode } from '@reallygoodwork/coral-core';
+import { coralToHTML } from '@reallygoodwork/coral-to-html'
+import type { CoralRootNode } from '@reallygoodwork/coral-core'
 
 const spec: CoralRootNode = {
-  name: 'card',
   elementType: 'div',
   styles: {
     padding: '20px',
-    backgroundColor: '#ffffff',
-    borderRadius: '8px',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+    backgroundColor: '#f5f5f5',
+    borderRadius: '8px'
   },
   children: [
     {
-      name: 'title',
-      elementType: 'h2',
-      textContent: 'Card Title',
+      elementType: 'h1',
+      textContent: 'Hello World',
       styles: {
         fontSize: '24px',
-        marginBottom: '10px',
-        color: '#333'
+        color: '#333',
+        marginBottom: '16px'
       }
     },
     {
-      name: 'content',
       elementType: 'p',
-      textContent: 'This is the card content.',
+      textContent: 'Welcome to Coral',
       styles: {
-        fontSize: '16px',
-        color: '#666'
+        color: '#666',
+        lineHeight: '1.5'
       }
     }
   ]
-};
+}
 
-const html = await coralToHTML(spec);
-console.log(html);
+const html = await coralToHTML(spec)
+
+// Output:
+// <div style="padding: 20px; background-color: #f5f5f5; border-radius: 8px">
+//   <h1 style="font-size: 24px; color: #333; margin-bottom: 16px">Hello World</h1>
+//   <p style="color: #666; line-height: 1.5">Welcome to Coral</p>
+// </div>
 ```
 
-**Output:**
-```html
-<div
-  style="padding: 20px; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1)"
->
-  <h2 style="font-size: 24px; margin-bottom: 10px; color: #333">
-    Card Title
-  </h2>
-  <p style="font-size: 16px; color: #666">
-    This is the card content.
-  </p>
-</div>
-```
+**Parameters:**
+- `spec: CoralRootNode` - Coral specification
+
+**Returns:**
+- `Promise<string>` - Formatted HTML string
 
 ---
 
-## Style Conversion
+## Features
 
-The package automatically converts various Coral style formats to CSS:
+### Style Conversion
+
+CSS properties are converted from camelCase to kebab-case:
+
+```typescript
+const spec = {
+  elementType: 'div',
+  styles: {
+    backgroundColor: 'blue',    // → background-color: blue
+    fontSize: '16px',           // → font-size: 16px
+    borderRadius: '4px',        // → border-radius: 4px
+    paddingTop: '10px'          // → padding-top: 10px
+  }
+}
+```
 
 ### Dimension Objects
 
-Coral dimension objects are converted to CSS values:
+Coral dimension objects are converted to CSS strings:
 
 ```typescript
-// Coral
-{
-  padding: { value: 20, unit: 'px' },
-  width: { value: 50, unit: '%' }
+const spec = {
+  elementType: 'div',
+  styles: {
+    width: { value: 100, unit: '%' },   // → width: 100%
+    height: { value: 200, unit: 'px' }, // → height: 200px
+    padding: { value: 2, unit: 'rem' }  // → padding: 2rem
+  }
 }
-
-// HTML
-style="padding: 20px; width: 50%"
-```
-
-### Numeric Values
-
-Numeric values are automatically converted to pixels (except for specific properties):
-
-```typescript
-// Coral
-{
-  padding: 20,
-  fontSize: 16,
-  fontWeight: 700  // Remains unitless
-}
-
-// HTML
-style="padding: 20px; font-size: 16px; font-weight: 700"
 ```
 
 ### Color Objects
 
-Coral color objects are converted to hex values:
-
-```typescript
-// Coral
-{
-  backgroundColor: {
-    hex: '#007bff',
-    rgb: { r: 0, g: 123, b: 255, a: 1 },
-    hsl: { h: 211, s: 100, l: 50, a: 1 }
-  }
-}
-
-// HTML
-style="background-color: #007bff"
-```
-
-### String Values
-
-String values are passed through directly:
-
-```typescript
-// Coral
-{
-  display: 'flex',
-  justifyContent: 'center',
-  boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-}
-
-// HTML
-style="display: flex; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1)"
-```
-
-### CamelCase to Kebab-Case
-
-CSS property names are automatically converted:
-
-```typescript
-// Coral (camelCase)
-{
-  backgroundColor: '#fff',
-  fontSize: '16px',
-  borderRadius: '4px'
-}
-
-// HTML (kebab-case)
-style="background-color: #fff; font-size: 16px; border-radius: 4px"
-```
-
----
-
-## Element Attributes
-
-### Basic Attributes
-
-Element attributes are converted to HTML attributes:
+Coral color objects are converted using the hex value:
 
 ```typescript
 const spec = {
-  name: 'link',
+  elementType: 'div',
+  styles: {
+    color: {
+      hex: '#3b82f6',
+      rgb: { r: 59, g: 130, b: 246, a: 1 },
+      hsl: { h: 217, s: 91, l: 60, a: 1 }
+    }
+  }
+}
+// → color: #3b82f6
+```
+
+### Element Attributes
+
+HTML attributes are properly formatted:
+
+```typescript
+const spec = {
   elementType: 'a',
   elementAttributes: {
     href: 'https://example.com',
     target: '_blank',
-    rel: 'noopener noreferrer'
+    rel: 'noopener noreferrer',
+    'data-tracking': 'link-click'
   },
-  textContent: 'Visit Example'
-};
-
-// Output:
-// <a href="https://example.com" target="_blank" rel="noopener noreferrer">
-//   Visit Example
-// </a>
+  textContent: 'Click here'
+}
+// → <a href="https://example.com" target="_blank" rel="noopener noreferrer" data-tracking="link-click">Click here</a>
 ```
 
-### Boolean Attributes
+### Self-Closing Tags
 
-Boolean attributes are handled correctly:
+Self-closing HTML elements are handled correctly:
 
 ```typescript
 const spec = {
-  name: 'input',
-  elementType: 'input',
-  elementAttributes: {
-    type: 'checkbox',
-    checked: true,
-    disabled: false
-  }
-};
-
-// Output:
-// <input type="checkbox" checked />
-// (disabled is omitted because it's false)
-```
-
-### Array Attributes
-
-Array values are joined with spaces:
-
-```typescript
-const spec = {
-  name: 'div',
-  elementType: 'div',
-  elementAttributes: {
-    class: ['container', 'mx-auto', 'p-4']
-  }
-};
-
-// Output:
-// <div class="container mx-auto p-4"></div>
-```
-
----
-
-## Self-Closing Tags
-
-The package properly handles void/self-closing HTML elements:
-
-```typescript
-const imageSpec = {
-  name: 'image',
   elementType: 'img',
   elementAttributes: {
-    src: '/image.jpg',
+    src: 'image.jpg',
     alt: 'Description'
-  },
-  styles: {
-    width: '100%',
-    borderRadius: '8px'
   }
-};
-
-const html = await coralToHTML(imageSpec);
-// Output:
-// <img src="/image.jpg" alt="Description" style="width: 100%; border-radius: 8px" />
+}
+// → <img src="image.jpg" alt="Description" />
 ```
 
-**Supported self-closing tags:**
-- `area`, `base`, `br`, `col`, `embed`, `hr`, `img`, `input`, `link`, `meta`, `param`, `source`, `track`, `wbr`
+Supported self-closing tags: `area`, `base`, `br`, `col`, `embed`, `hr`, `img`, `input`, `link`, `meta`, `param`, `source`, `track`, `wbr`
+
+### Nested Children
+
+Children are properly nested and indented:
+
+```typescript
+const spec = {
+  elementType: 'ul',
+  children: [
+    { elementType: 'li', textContent: 'Item 1' },
+    { elementType: 'li', textContent: 'Item 2' },
+    { elementType: 'li', textContent: 'Item 3' }
+  ]
+}
+// → <ul>
+//     <li>Item 1</li>
+//     <li>Item 2</li>
+//     <li>Item 3</li>
+//   </ul>
+```
 
 ---
 
-## Usage Examples
-
-### Simple Button
+## Complete Example
 
 ```typescript
-import { coralToHTML } from '@reallygoodwork/coral-to-html';
+import { coralToHTML } from '@reallygoodwork/coral-to-html'
 
-const buttonSpec = {
-  name: 'button',
-  elementType: 'button',
-  textContent: 'Click Me',
-  styles: {
-    padding: '10px 20px',
-    backgroundColor: '#007bff',
-    color: '#ffffff',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer'
-  }
-};
-
-const html = await coralToHTML(buttonSpec);
-```
-
-**Output:**
-```html
-<button
-  style="padding: 10px 20px; background-color: #007bff; color: #ffffff; border: none; border-radius: 4px; cursor: pointer"
->
-  Click Me
-</button>
-```
-
-### Card Component
-
-```typescript
 const cardSpec = {
-  name: 'card',
-  elementType: 'div',
+  elementType: 'article',
   styles: {
-    padding: '24px',
-    backgroundColor: '#fff',
+    maxWidth: { value: 400, unit: 'px' },
+    padding: { value: 24, unit: 'px' },
+    backgroundColor: 'white',
     borderRadius: '12px',
-    boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
   },
   children: [
     {
-      name: 'image',
       elementType: 'img',
       elementAttributes: {
-        src: '/product.jpg',
-        alt: 'Product'
+        src: 'https://example.com/image.jpg',
+        alt: 'Card image'
       },
       styles: {
         width: '100%',
-        height: '200px',
-        objectFit: 'cover',
         borderRadius: '8px',
         marginBottom: '16px'
       }
     },
     {
-      name: 'title',
-      elementType: 'h3',
-      textContent: 'Product Name',
+      elementType: 'h2',
+      textContent: 'Card Title',
       styles: {
         fontSize: '20px',
-        fontWeight: 600,
-        marginBottom: '8px',
-        color: '#333'
+        fontWeight: 'bold',
+        color: '#1a1a1a',
+        marginBottom: '8px'
       }
     },
     {
-      name: 'description',
       elementType: 'p',
-      textContent: 'Product description goes here.',
+      textContent: 'This is a description of the card content.',
       styles: {
         fontSize: '14px',
         color: '#666',
-        lineHeight: '1.5'
+        lineHeight: '1.6'
       }
     },
     {
-      name: 'price',
-      elementType: 'p',
-      textContent: '$99.99',
-      styles: {
-        fontSize: '18px',
-        fontWeight: 700,
-        color: '#007bff',
-        marginTop: '12px'
-      }
-    }
-  ]
-};
-
-const html = await coralToHTML(cardSpec);
-```
-
-### Form Elements
-
-```typescript
-const formSpec = {
-  name: 'form',
-  elementType: 'form',
-  elementAttributes: {
-    action: '/submit',
-    method: 'POST'
-  },
-  styles: {
-    maxWidth: '400px',
-    margin: '0 auto'
-  },
-  children: [
-    {
-      name: 'label',
-      elementType: 'label',
-      elementAttributes: {
-        for: 'email'
-      },
-      textContent: 'Email:',
-      styles: {
-        display: 'block',
-        marginBottom: '8px',
-        fontWeight: 600
-      }
-    },
-    {
-      name: 'input',
-      elementType: 'input',
-      elementAttributes: {
-        type: 'email',
-        id: 'email',
-        name: 'email',
-        required: true
-      },
-      styles: {
-        width: '100%',
-        padding: '8px 12px',
-        border: '1px solid #ccc',
-        borderRadius: '4px',
-        marginBottom: '16px'
-      }
-    },
-    {
-      name: 'submit',
       elementType: 'button',
-      elementAttributes: {
-        type: 'submit'
-      },
-      textContent: 'Submit',
+      textContent: 'Learn More',
       styles: {
+        marginTop: '16px',
         padding: '10px 20px',
-        backgroundColor: '#28a745',
-        color: '#fff',
+        backgroundColor: '#3b82f6',
+        color: 'white',
         border: 'none',
-        borderRadius: '4px',
+        borderRadius: '6px',
         cursor: 'pointer'
       }
     }
   ]
-};
-
-const html = await coralToHTML(formSpec);
-```
-
-### Navigation Menu
-
-```typescript
-const navSpec = {
-  name: 'nav',
-  elementType: 'nav',
-  styles: {
-    backgroundColor: '#333',
-    padding: '16px'
-  },
-  children: [
-    {
-      name: 'list',
-      elementType: 'ul',
-      styles: {
-        display: 'flex',
-        listStyle: 'none',
-        margin: 0,
-        padding: 0,
-        gap: '24px'
-      },
-      children: [
-        {
-          name: 'item1',
-          elementType: 'li',
-          children: [
-            {
-              name: 'link1',
-              elementType: 'a',
-              elementAttributes: {
-                href: '/'
-              },
-              textContent: 'Home',
-              styles: {
-                color: '#fff',
-                textDecoration: 'none'
-              }
-            }
-          ]
-        },
-        {
-          name: 'item2',
-          elementType: 'li',
-          children: [
-            {
-              name: 'link2',
-              elementType: 'a',
-              elementAttributes: {
-                href: '/about'
-              },
-              textContent: 'About',
-              styles: {
-                color: '#fff',
-                textDecoration: 'none'
-              }
-            }
-          ]
-        }
-      ]
-    }
-  ]
-};
-
-const html = await coralToHTML(navSpec);
-```
-
-### Saving to File
-
-```typescript
-import fs from 'fs';
-import { coralToHTML } from '@reallygoodwork/coral-to-html';
-
-const spec = { /* your Coral spec */ };
-
-const html = await coralToHTML(spec);
-
-// Save to file
-fs.writeFileSync('./output.html', html);
-
-// Or create a complete HTML document
-const document = `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Generated Component</title>
-</head>
-<body>
-  ${html}
-</body>
-</html>`;
-
-fs.writeFileSync('./document.html', document);
-```
-
-### Batch Processing
-
-```typescript
-import { coralToHTML } from '@reallygoodwork/coral-to-html';
-import fs from 'fs';
-import glob from 'glob';
-
-const specFiles = glob.sync('./specs/**/*.coral.json');
-
-for (const specFile of specFiles) {
-  const spec = JSON.parse(fs.readFileSync(specFile, 'utf-8'));
-  const html = await coralToHTML(spec);
-
-  const outputPath = specFile.replace('.coral.json', '.html');
-  fs.writeFileSync(outputPath, html);
-
-  console.log(`✓ Generated ${outputPath}`);
 }
+
+const html = await coralToHTML(cardSpec)
+
+// Output:
+// <article style="max-width: 400px; padding: 24px; background-color: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1)">
+//   <img src="https://example.com/image.jpg" alt="Card image" style="width: 100%; border-radius: 8px; margin-bottom: 16px" />
+//   <h2 style="font-size: 20px; font-weight: bold; color: #1a1a1a; margin-bottom: 8px">Card Title</h2>
+//   <p style="font-size: 14px; color: #666; line-height: 1.6">This is a description of the card content.</p>
+//   <button style="margin-top: 16px; padding: 10px 20px; background-color: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer">Learn More</button>
+// </article>
 ```
 
 ---
 
-## Special Features
-
-### Font Family Fallbacks
+## Font Family Handling
 
 The package automatically adds `sans-serif` fallback for Inter font:
 
 ```typescript
-// Coral
-{
-  fontFamily: 'Inter'
-}
-
-// HTML
-style="font-family: Inter, sans-serif"
-```
-
-### Nested Styles
-
-Nested objects (like pseudo-selectors or media queries) are filtered out, as they cannot be represented in inline styles:
-
-```typescript
-// Coral
-{
-  color: '#333',
-  ':hover': {
-    color: '#000'  // This will be ignored in HTML output
+const spec = {
+  elementType: 'p',
+  styles: {
+    fontFamily: 'Inter'
   }
 }
-
-// HTML (hover styles omitted)
-style="color: #333"
+// → font-family: Inter, sans-serif
 ```
-
-**Note:** For responsive and pseudo-class styles, consider using the `@reallygoodwork/coral-to-react` package which can output CSS files.
 
 ---
 
-## Output Format
+## Numeric Values
 
-The generated HTML is automatically formatted using Prettier with:
-- Proper indentation
-- Consistent spacing
-- Readable structure
-- Self-closing tag syntax
-
-This ensures clean, production-ready HTML output.
-
----
-
-## Use Cases
-
-### Static Site Generation
+Numeric style values are handled intelligently:
 
 ```typescript
-// Generate static HTML pages from Coral specs
-const pages = [homeSpec, aboutSpec, contactSpec];
-
-for (const spec of pages) {
-  const html = await coralToHTML(spec);
-  // Save to static files
-}
-```
-
-### Email Templates
-
-```typescript
-// Convert Coral specs to email-friendly HTML
-const emailSpec = {
-  name: 'email',
+const spec = {
   elementType: 'div',
   styles: {
-    fontFamily: 'Arial, sans-serif',
-    maxWidth: '600px',
-    margin: '0 auto'
-  },
-  children: [/* email content */]
-};
-
-const emailHTML = await coralToHTML(emailSpec);
+    fontWeight: 600,    // → font-weight: 600 (no unit)
+    fontSize: 16,       // → font-size: 16px (adds px)
+    lineHeight: 1.5,    // → line-height: 1.5 (no unit)
+    zIndex: 10          // → z-index: 10 (no unit)
+  }
+}
 ```
-
-### Preview Generation
-
-```typescript
-// Generate HTML previews of components
-const preview = await coralToHTML(componentSpec);
-// Display in iframe or preview pane
-```
-
-### Documentation
-
-```typescript
-// Generate HTML examples for documentation
-const exampleHTML = await coralToHTML(exampleSpec);
-// Include in docs
-```
-
----
-
-## Limitations
-
-- **No CSS Classes** - Only inline styles are supported (no external CSS)
-- **No Pseudo-Classes** - `:hover`, `:focus`, etc. cannot be represented inline
-- **No Media Queries** - Responsive styles are filtered out
-- **No Animations** - CSS animations and transitions are limited
-- **Email Compatibility** - Some CSS properties may not work in email clients
-
-For applications requiring CSS classes, media queries, or pseudo-classes, use the `@reallygoodwork/coral-to-react` package instead.
-
----
-
-## Dependencies
-
-- `@reallygoodwork/coral-core` - Core Coral types and utilities
-- `prettier` - HTML formatting
 
 ---
 
 ## Related Packages
 
-- `@reallygoodwork/coral-core` - Core utilities and types for Coral
-- `@reallygoodwork/coral-to-react` - Convert Coral specs to React components
-- `@reallygoodwork/react-to-coral` - Convert React components to Coral specs
-- `@reallygoodwork/coral-tw2css` - Convert Tailwind classes to CSS
-- `@reallygoodwork/style-to-tailwind` - Convert CSS styles to Tailwind classes
-
----
+- [@reallygoodwork/coral-core](https://www.npmjs.com/package/@reallygoodwork/coral-core) - Core Coral types
+- [@reallygoodwork/coral-to-react](https://www.npmjs.com/package/@reallygoodwork/coral-to-react) - Coral to React
+- [@reallygoodwork/react-to-coral](https://www.npmjs.com/package/@reallygoodwork/react-to-coral) - React to Coral
 
 ## License
 
-MIT
+MIT © [Really Good Work](https://reallygoodwork.com)

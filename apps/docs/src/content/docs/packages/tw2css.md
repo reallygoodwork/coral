@@ -3,6 +3,8 @@ title: "@reallygoodwork/coral-tw2css"
 description: Convert Tailwind CSS classes to CSS-in-JS style objects.
 ---
 
+[![npm](https://img.shields.io/npm/v/@reallygoodwork/coral-tw2css)](https://www.npmjs.com/package/@reallygoodwork/coral-tw2css)
+
 Convert Tailwind CSS classes to CSS-in-JS style objects. This utility package transforms Tailwind utility classes into JavaScript objects with CSS properties, making it easy to work with Tailwind styles in programmatic contexts.
 
 ## Features
@@ -510,8 +512,8 @@ tailwindToCSS('text-lg/8');
 
 ## Related Packages
 
-- `@reallygoodwork/coral-core` - Core utilities and types for Coral
-- `@reallygoodwork/coral-to-html` - Convert Coral specs to HTML
-- `@reallygoodwork/coral-to-react` - Convert Coral specs to React components
-- `@reallygoodwork/react-to-coral` - Convert React components to Coral specs
-- `@reallygoodwork/style-to-tailwind` - Convert CSS styles to Tailwind classes
+- [@reallygoodwork/coral-core](https://www.npmjs.com/package/@reallygoodwork/coral-core) - Core utilities and types for Coral
+- [@reallygoodwork/coral-to-html](https://www.npmjs.com/package/@reallygoodwork/coral-to-html) - Convert Coral specs to HTML
+- [@reallygoodwork/coral-to-react](https://www.npmjs.com/package/@reallygoodwork/coral-to-react) - Convert Coral specs to React components
+- [@reallygoodwork/react-to-coral](https://www.npmjs.com/package/@reallygoodwork/react-to-coral) - Convert React components to Coral specs
+- [@reallygoodwork/style-to-tailwind](https://www.npmjs.com/package/@reallygoodwork/style-to-tailwind) - Convert CSS styles to Tailwind classes

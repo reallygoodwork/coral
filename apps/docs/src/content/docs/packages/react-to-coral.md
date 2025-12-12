@@ -3,6 +3,8 @@ title: "@reallygoodwork/react-to-coral"
 description: Transform React component source code into Coral specifications.
 ---
 
+[![npm](https://img.shields.io/npm/v/@reallygoodwork/react-to-coral)](https://www.npmjs.com/package/@reallygoodwork/react-to-coral)
+
 Transform React component source code into Coral specifications. This package uses static analysis to parse React components and extract their structure, props, state, methods, and styling into a portable Coral format.
 
 ## Features
@@ -470,8 +472,8 @@ const specs = await Promise.all(
 
 ## Related Packages
 
-- `@reallygoodwork/coral-core` - Core utilities and types for Coral
-- `@reallygoodwork/coral-to-react` - Convert Coral specs to React components (reverse operation)
-- `@reallygoodwork/coral-to-html` - Convert Coral specs to HTML
-- `@reallygoodwork/coral-tw2css` - Convert Tailwind classes to CSS
-- `@reallygoodwork/style-to-tailwind` - Convert CSS styles to Tailwind classes
+- [@reallygoodwork/coral-core](https://www.npmjs.com/package/@reallygoodwork/coral-core) - Core utilities and types for Coral
+- [@reallygoodwork/coral-to-react](https://www.npmjs.com/package/@reallygoodwork/coral-to-react) - Convert Coral specs to React components (reverse operation)
+- [@reallygoodwork/coral-to-html](https://www.npmjs.com/package/@reallygoodwork/coral-to-html) - Convert Coral specs to HTML
+- [@reallygoodwork/coral-tw2css](https://www.npmjs.com/package/@reallygoodwork/coral-tw2css) - Convert Tailwind classes to CSS
+- [@reallygoodwork/style-to-tailwind](https://www.npmjs.com/package/@reallygoodwork/style-to-tailwind) - Convert CSS styles to Tailwind classes

@@ -1,85 +1,64 @@
 # @reallygoodwork/coral-to-react
 
-Generate React component code from Coral specifications. This package transforms Coral JSON specifications into fully functional React components with TypeScript support, state management, event handlers, and styling.
+Generate React components from Coral UI specifications.
+
+[![npm](https://img.shields.io/npm/v/@reallygoodwork/coral-to-react)](https://www.npmjs.com/package/@reallygoodwork/coral-to-react)
 
 ## Installation
 
 ```bash
 npm install @reallygoodwork/coral-to-react
-```
-
-```bash
+# or
 pnpm add @reallygoodwork/coral-to-react
-```
-
-```bash
+# or
 yarn add @reallygoodwork/coral-to-react
 ```
 
-## Features
+## Overview
 
-- **Code Generation** - Generate complete React components from Coral specs
-- **TypeScript Support** - Automatically generate TypeScript interfaces for props
-- **Component Formats** - Choose between function declarations or arrow functions
-- **Style Options** - Output inline styles or separate CSS classes
-- **State Management** - Generate React hooks (useState, useEffect, etc.)
-- **Event Handlers** - Create methods and event handler functions
-- **Prettier Integration** - Optional code formatting with Prettier
-- **Import Management** - Generate necessary import statements
-- **Props Interface** - Auto-generate TypeScript prop types
+This package generates React component code from a Coral UI specification. It produces:
 
----
+- React component with proper structure
+- TypeScript props interface
+- State hooks
+- Event handler methods
+- Styled JSX (inline or CSS classes)
 
-## Functions
+## API Reference
 
-### `coralToReact`
+### Functions
 
-Main function to convert a Coral specification into React component code.
+#### `coralToReact(spec, options?)`
 
-**Signature:**
+Converts a Coral specification to React component code.
+
 ```typescript
-async function coralToReact(
-  spec: CoralRootNode,
-  options?: Options
-): Promise<{ reactCode: string; cssCode: string }>
-```
-
-**Parameters:**
-- `spec` - A Coral root node specification
-- `options` (optional) - Generation options
-
-**Returns:** Promise resolving to an object with:
-- `reactCode` - Generated React component code (string)
-- `cssCode` - Generated CSS code (string, empty if using inline styles)
-
-**Example:**
-```typescript
-import { coralToReact } from '@reallygoodwork/coral-to-react';
-import type { CoralRootNode } from '@reallygoodwork/coral-core';
+import { coralToReact } from '@reallygoodwork/coral-to-react'
+import type { CoralRootNode } from '@reallygoodwork/coral-core'
 
 const spec: CoralRootNode = {
-  name: 'Button',
   componentName: 'Button',
   elementType: 'button',
   componentProperties: {
-    label: { type: 'string' },
-    onClick: { type: 'function' }
+    label: { type: 'string', value: 'label' },
+    onClick: { type: '() => void', value: 'onClick', optional: true }
   },
   styles: {
-    padding: '10px 20px',
-    backgroundColor: '#007bff',
-    color: '#ffffff',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer'
+    padding: '12px 24px',
+    backgroundColor: '#3b82f6',
+    color: 'white',
+    borderRadius: '8px'
   },
-  textContent: '{props.label}'
-};
+  children: []
+}
 
-const { reactCode, cssCode } = await coralToReact(spec);
+const { reactCode, cssCode } = await coralToReact(spec, {
+  componentFormat: 'arrow',
+  styleFormat: 'inline',
+  includeTypes: true
+})
 
-console.log(reactCode);
-// Output:
+// reactCode:
 // import React from 'react'
 //
 // interface ButtonProps {
@@ -87,745 +66,266 @@ console.log(reactCode);
 //   onClick?: () => void
 // }
 //
-// export function Button(props: ButtonProps) {
+// export const Button = (props: ButtonProps) => {
 //   return (
-//     <button style={{ padding: '10px 20px', backgroundColor: '#007bff', ... }}>
+//     <button style={{ padding: '12px 24px', backgroundColor: '#3b82f6', color: 'white', borderRadius: '8px' }}>
 //       {props.label}
 //     </button>
 //   )
 // }
 ```
 
----
-
-### `generateComponent`
-
-Lower-level function to generate a complete React component (used internally by `coralToReact`).
-
-**Signature:**
-```typescript
-async function generateComponent(
-  spec: CoralRootNode,
-  options?: Options
-): Promise<{ reactCode: string; cssCode: string }>
-```
-
 **Parameters:**
-- `spec` - Coral root node specification
-- `options` - Generation options
+- `spec: CoralRootNode` - Coral specification
+- `options?: Options` - Generation options
 
-**Returns:** Object with generated code
-
----
-
-### `generateImports`
-
-Generate import statements from Coral import specifications.
-
-**Signature:**
-```typescript
-function generateImports(imports?: Array<CoralImportType>): string
-```
-
-**Parameters:**
-- `imports` - Array of Coral import specifications
-
-**Returns:** Generated import statements as a string
-
-**Example:**
-```typescript
-import { generateImports } from '@reallygoodwork/coral-to-react';
-
-const imports = generateImports([
-  {
-    source: 'react',
-    version: 'latest',
-    specifiers: [
-      { name: 'useState', isDefault: false },
-      { name: 'useEffect', isDefault: false }
-    ]
-  }
-]);
-
-console.log(imports);
-// import { useState, useEffect } from 'react'
-```
+**Returns:**
+- `Promise<{ reactCode: string; cssCode: string }>` - Generated code
 
 ---
 
-### `generatePropsInterface`
-
-Generate TypeScript interface for component props.
-
-**Signature:**
-```typescript
-function generatePropsInterface(
-  props?: CoralComponentPropertyType,
-  componentName?: string
-): string
-```
-
-**Parameters:**
-- `props` - Component properties from Coral spec
-- `componentName` - Name of the component
-
-**Returns:** TypeScript interface definition
-
-**Example:**
-```typescript
-import { generatePropsInterface } from '@reallygoodwork/coral-to-react';
-
-const propsInterface = generatePropsInterface(
-  {
-    label: { type: 'string' },
-    count: { type: 'number' },
-    onClick: { type: 'function' }
-  },
-  'Button'
-);
-
-console.log(propsInterface);
-// interface ButtonProps {
-//   label: string
-//   count: number
-//   onClick?: () => void
-// }
-```
-
----
-
-### `generateStateHooks`
-
-Generate React state hook code from Coral state specifications.
-
-**Signature:**
-```typescript
-function generateStateHooks(stateHooks?: Array<CoralStateType>): string
-```
-
-**Parameters:**
-- `stateHooks` - Array of state hook specifications
-
-**Returns:** Generated hook code
-
-**Example:**
-```typescript
-import { generateStateHooks } from '@reallygoodwork/coral-to-react';
-
-const hooks = generateStateHooks([
-  {
-    name: 'count',
-    setterName: 'setCount',
-    initialValue: 0,
-    tsType: 'number',
-    hookType: 'useState'
-  }
-]);
-
-console.log(hooks);
-// const [count, setCount] = useState<number>(0)
-```
-
----
-
-### `generateMethods`
-
-Generate method/function code from Coral method specifications.
-
-**Signature:**
-```typescript
-function generateMethods(methods?: Array<CoralMethodType>): string
-```
-
-**Parameters:**
-- `methods` - Array of method specifications
-
-**Returns:** Generated method code
-
-**Example:**
-```typescript
-import { generateMethods } from '@reallygoodwork/coral-to-react';
-
-const methods = generateMethods([
-  {
-    name: 'handleClick',
-    body: 'console.log("clicked")',
-    parameters: []
-  }
-]);
-
-console.log(methods);
-// const handleClick = () => {
-//   console.log("clicked")
-// }
-```
-
----
-
-### `generateJSXElement`
-
-Generate JSX code from a Coral node.
-
-**Signature:**
-```typescript
-function generateJSXElement(
-  node: CoralNode,
-  depth?: number,
-  idMapping?: Map<CoralNode, string>
-): string
-```
-
-**Parameters:**
-- `node` - Coral node to convert
-- `depth` - Indentation depth (default: 0)
-- `idMapping` - Map for tracking CSS class IDs
-
-**Returns:** Generated JSX string
-
----
-
-### `generateCSS`
-
-Generate CSS code from Coral styles.
-
-**Signature:**
-```typescript
-function generateCSS(
-  spec: CoralRootNode,
-  idMapping?: Map<CoralNode, string>
-): string
-```
-
-**Parameters:**
-- `spec` - Coral specification
-- `idMapping` - Map for tracking CSS class IDs
-
-**Returns:** Generated CSS string
-
----
-
-### `stylesToInlineStyle`
-
-Convert Coral style objects to React inline style objects.
-
-**Signature:**
-```typescript
-function stylesToInlineStyle(styles: CoralStyleType): Record<string, string | number>
-```
-
-**Parameters:**
-- `styles` - Coral style object
-
-**Returns:** React-compatible inline style object
-
-**Example:**
-```typescript
-import { stylesToInlineStyle } from '@reallygoodwork/coral-to-react';
-
-const inlineStyle = stylesToInlineStyle({
-  padding: { value: 10, unit: 'px' },
-  backgroundColor: { hex: '#007bff', rgb: {...}, hsl: {...} },
-  fontSize: '16px'
-});
-
-console.log(inlineStyle);
-// { padding: '10px', backgroundColor: '#007bff', fontSize: '16px' }
-```
-
----
-
-## Options
-
-### `Options` Interface
-
-Configuration options for code generation.
+### Options
 
 ```typescript
 interface Options {
-  /**
-   * Component declaration style
-   * @default 'function'
-   */
-  componentFormat?: 'function' | 'arrow'
+  // Component format: 'arrow' or 'function' (default: 'function')
+  componentFormat?: 'arrow' | 'function'
 
-  /**
-   * How to output styles
-   * @default 'inline'
-   */
+  // Style format: 'inline' or 'className' (default: 'inline')
   styleFormat?: 'inline' | 'className'
 
-  /**
-   * Generate TypeScript types for props
-   * @default true
-   */
+  // Include TypeScript types (default: true)
   includeTypes?: boolean
 
-  /**
-   * Indentation size in spaces
-   * @default 2
-   */
+  // Indent size in spaces (default: 2)
   indentSize?: number
 
-  /**
-   * Format output with Prettier
-   * @default false
-   */
+  // Format with Prettier (default: false)
   prettier?: boolean
 }
 ```
 
-### Option Details
+---
 
-#### `componentFormat`
+#### `generateComponent(spec, options?)`
 
-Choose between function declaration or arrow function style.
+Lower-level function for component generation.
 
-**Function declaration (`'function'`):**
 ```typescript
-export function Button(props: ButtonProps) {
-  return <button>Click me</button>
-}
+import { generateComponent } from '@reallygoodwork/coral-to-react'
+
+const { reactCode, cssCode } = await generateComponent(spec, options)
 ```
-
-**Arrow function (`'arrow'`):**
-```typescript
-export const Button = (props: ButtonProps) => {
-  return <button>Click me</button>
-}
-```
-
-#### `styleFormat`
-
-Choose between inline styles or CSS classes.
-
-**Inline styles (`'inline'`):**
-```typescript
-<button style={{ padding: '10px', backgroundColor: '#007bff' }}>
-  Click me
-</button>
-```
-
-**CSS classes (`'className'`):**
-```typescript
-// Component
-<button className="coral-root-Button">Click me</button>
-
-// Separate CSS file
-.coral-root-Button {
-  padding: 10px;
-  background-color: #007bff;
-}
-```
-
-#### `includeTypes`
-
-Control TypeScript type generation.
-
-**With types (`true`, default):**
-```typescript
-interface ButtonProps {
-  label: string
-  onClick?: () => void
-}
-
-export function Button(props: ButtonProps) {
-  // ...
-}
-```
-
-**Without types (`false`):**
-```typescript
-export function Button(props) {
-  // ...
-}
-```
-
-#### `indentSize`
-
-Set the number of spaces for indentation (default: 2).
-
-#### `prettier`
-
-Format the generated code with Prettier (default: false).
 
 ---
 
-## Usage Examples
+#### `generateJSXElement(node, depth?, idMapping?)`
 
-### Basic Component Generation
+Generates JSX for a single node.
 
 ```typescript
-import { coralToReact } from '@reallygoodwork/coral-to-react';
+import { generateJSXElement } from '@reallygoodwork/coral-to-react'
 
-const spec = {
-  name: 'Card',
-  componentName: 'Card',
-  elementType: 'div',
-  styles: {
-    padding: '20px',
-    borderRadius: '8px',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-  },
-  children: [
-    {
-      name: 'title',
-      elementType: 'h2',
-      textContent: 'Card Title',
-      styles: { fontSize: '24px', marginBottom: '10px' }
-    },
-    {
-      name: 'content',
-      elementType: 'p',
-      textContent: 'Card content goes here.',
-      styles: { color: '#666' }
-    }
-  ]
-};
-
-const { reactCode } = await coralToReact(spec);
-console.log(reactCode);
+const jsx = generateJSXElement(node)
+// '<div style={{ padding: "20px" }}>...</div>'
 ```
 
-### Component with Props
+---
+
+#### `generatePropsInterface(properties, componentName)`
+
+Generates TypeScript props interface.
 
 ```typescript
-const spec = {
-  name: 'Greeting',
-  componentName: 'Greeting',
-  elementType: 'div',
-  componentProperties: {
-    name: { type: 'string' },
-    age: { type: 'number' },
-    onGreet: { type: 'function' }
-  },
-  children: [
-    {
-      name: 'message',
-      elementType: 'p',
-      textContent: 'Hello, {props.name}! You are {props.age} years old.'
-    },
-    {
-      name: 'button',
-      elementType: 'button',
-      elementAttributes: {
-        onClick: '{props.onGreet}'
-      },
-      textContent: 'Greet'
-    }
-  ]
-};
+import { generatePropsInterface } from '@reallygoodwork/coral-to-react'
 
+const propsInterface = generatePropsInterface(
+  { title: { type: 'string', value: 'title' } },
+  'Card'
+)
+// 'interface CardProps {\n  title: string\n}'
+```
+
+---
+
+#### `generateStateHooks(stateHooks)`
+
+Generates useState hooks.
+
+```typescript
+import { generateStateHooks } from '@reallygoodwork/coral-to-react'
+
+const hooks = generateStateHooks([
+  { name: 'count', setter: 'setCount', initialValue: 0 }
+])
+// 'const [count, setCount] = useState(0)'
+```
+
+---
+
+#### `generateMethods(methods)`
+
+Generates method declarations.
+
+```typescript
+import { generateMethods } from '@reallygoodwork/coral-to-react'
+
+const methods = generateMethods([
+  { name: 'handleClick', parameters: [], body: 'console.log("clicked")' }
+])
+// 'const handleClick = () => {\n  console.log("clicked")\n}'
+```
+
+---
+
+#### `generateImports(imports)`
+
+Generates import statements.
+
+```typescript
+import { generateImports } from '@reallygoodwork/coral-to-react'
+
+const imports = generateImports([
+  { source: 'react', specifiers: [{ name: 'useState' }] }
+])
+// "import { useState } from 'react'"
+```
+
+---
+
+#### `generateCSS(spec, idMapping?)`
+
+Generates CSS for className style format.
+
+```typescript
+import { generateCSS } from '@reallygoodwork/coral-to-react'
+
+const css = generateCSS(spec, new Map())
+// '.component-root { padding: 20px; }'
+```
+
+---
+
+#### `stylesToInlineStyle(styles)`
+
+Converts a styles object to an inline style string.
+
+```typescript
+import { stylesToInlineStyle } from '@reallygoodwork/coral-to-react'
+
+const inlineStyle = stylesToInlineStyle({ padding: '20px', margin: '10px' })
+// 'style={{ padding: "20px", margin: "10px" }}'
+```
+
+---
+
+## Examples
+
+### Arrow Function Component
+
+```typescript
 const { reactCode } = await coralToReact(spec, {
   componentFormat: 'arrow',
   includeTypes: true
-});
+})
+
+// Output:
+// export const MyComponent = (props: MyComponentProps) => {
+//   return (...)
+// }
 ```
 
-### Component with State
+### Function Declaration
 
 ```typescript
-const spec = {
-  name: 'Counter',
-  componentName: 'Counter',
-  elementType: 'div',
-  stateHooks: [
-    {
-      name: 'count',
-      setterName: 'setCount',
-      initialValue: 0,
-      tsType: 'number',
-      hookType: 'useState'
-    }
-  ],
-  methods: [
-    {
-      name: 'increment',
-      body: 'setCount(count + 1)',
-      parameters: []
-    }
-  ],
-  children: [
-    {
-      name: 'display',
-      elementType: 'p',
-      textContent: 'Count: {count}'
-    },
-    {
-      name: 'button',
-      elementType: 'button',
-      elementAttributes: {
-        onClick: '{increment}'
-      },
-      textContent: 'Increment'
-    }
-  ]
-};
+const { reactCode } = await coralToReact(spec, {
+  componentFormat: 'function',
+  includeTypes: true
+})
 
-const { reactCode } = await coralToReact(spec);
+// Output:
+// export function MyComponent(props: MyComponentProps) {
+//   return (...)
+// }
 ```
 
-### Using CSS Classes
+### With CSS Classes
 
 ```typescript
-const spec = {
-  name: 'StyledButton',
-  componentName: 'StyledButton',
-  elementType: 'button',
-  styles: {
-    padding: '12px 24px',
-    backgroundColor: '#007bff',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    ':hover': {
-      backgroundColor: '#0056b3'
-    }
-  },
-  textContent: 'Click me'
-};
-
 const { reactCode, cssCode } = await coralToReact(spec, {
   styleFormat: 'className'
-});
+})
 
-console.log(reactCode);
-// Component with className="coral-root-StyledButton"
-
-console.log(cssCode);
-// .coral-root-StyledButton {
-//   padding: 12px 24px;
-//   background-color: #007bff;
-//   ...
-// }
-// .coral-root-StyledButton:hover {
-//   background-color: #0056b3;
-// }
+// reactCode includes: className="component-root"
+// cssCode includes: .component-root { ... }
 ```
 
 ### With Prettier Formatting
 
 ```typescript
 const { reactCode } = await coralToReact(spec, {
-  prettier: true,
-  indentSize: 4
-});
-
-// Output will be formatted with Prettier
-```
-
-### Saving to Files
-
-```typescript
-import fs from 'fs';
-import { coralToReact } from '@reallygoodwork/coral-to-react';
-
-const spec = { /* your Coral spec */ };
-
-const { reactCode, cssCode } = await coralToReact(spec, {
-  styleFormat: 'className'
-});
-
-// Save React component
-fs.writeFileSync('./components/MyComponent.tsx', reactCode);
-
-// Save CSS file (if using className style)
-if (cssCode) {
-  fs.writeFileSync('./components/MyComponent.css', cssCode);
-}
-```
-
-### Batch Processing
-
-```typescript
-import { coralToReact } from '@reallygoodwork/coral-to-react';
-import fs from 'fs';
-import path from 'path';
-import glob from 'glob';
-
-// Read all Coral specs
-const specFiles = glob.sync('./specs/**/*.coral.json');
-
-for (const specFile of specFiles) {
-  const spec = JSON.parse(fs.readFileSync(specFile, 'utf-8'));
-  const { reactCode, cssCode } = await coralToReact(spec, {
-    componentFormat: 'function',
-    styleFormat: 'className',
-    prettier: true
-  });
-
-  const componentName = spec.componentName || spec.name;
-  const outputDir = './src/components';
-
-  fs.writeFileSync(
-    path.join(outputDir, `${componentName}.tsx`),
-    reactCode
-  );
-
-  if (cssCode) {
-    fs.writeFileSync(
-      path.join(outputDir, `${componentName}.css`),
-      cssCode
-    );
-  }
-
-  console.log(`✓ Generated ${componentName}`);
-}
+  prettier: true
+})
+// Formatted with Prettier
 ```
 
 ---
 
-## Generated Code Features
+## Complete Example
 
-### Imports
-
-Automatically generates necessary imports:
 ```typescript
-import React from 'react'
-import { useState, useEffect } from 'react'
-import { CustomComponent } from './CustomComponent'
-```
+import { coralToReact } from '@reallygoodwork/coral-to-react'
 
-### Props Interface
-
-TypeScript interface for props:
-```typescript
-interface ComponentNameProps {
-  requiredProp: string
-  optionalProp?: number
-  callback?: () => void
-  complexType?: Array<string>
-}
-```
-
-### State Hooks
-
-React hooks for state management:
-```typescript
-const [count, setCount] = useState<number>(0)
-const [user, setUser] = useState<User | null>(null)
-```
-
-### Methods
-
-Event handlers and helper functions:
-```typescript
-const handleClick = () => {
-  setCount(count + 1)
-}
-
-const processData = (data: string[]) => {
-  // method body
-}
-```
-
-### JSX Elements
-
-Component rendering:
-```typescript
-return (
-  <div className="container">
-    <h1>{props.title}</h1>
-    <button onClick={handleClick}>Click me</button>
-  </div>
-)
-```
-
----
-
-## Style Conversion
-
-The package handles various Coral style formats:
-
-### Dimension Objects
-```typescript
-// Coral
-{ padding: { value: 10, unit: 'px' } }
-
-// React
-{ padding: '10px' }
-```
-
-### Color Objects
-```typescript
-// Coral
-{ backgroundColor: { hex: '#007bff', rgb: {...}, hsl: {...} } }
-
-// React
-{ backgroundColor: '#007bff' }
-```
-
-### Nested Styles (Pseudo-classes)
-```typescript
-// Coral
-{
-  color: '#333',
-  ':hover': { color: '#000' }
-}
-
-// CSS
-.component {
-  color: #333;
-}
-.component:hover {
-  color: #000;
-}
-```
-
-### Responsive Styles
-```typescript
-// Coral
-{
-  padding: '10px',
-  responsiveStyles: [
+const spec = {
+  componentName: 'UserCard',
+  elementType: 'div',
+  componentProperties: {
+    name: { type: 'string', value: 'name' },
+    email: { type: 'string', value: 'email' },
+    onEdit: { type: '() => void', value: 'onEdit', optional: true }
+  },
+  stateHooks: [
+    { name: 'isExpanded', setter: 'setIsExpanded', initialValue: false }
+  ],
+  methods: [
+    { name: 'toggleExpand', parameters: [], body: 'setIsExpanded(!isExpanded)' }
+  ],
+  styles: {
+    padding: '16px',
+    backgroundColor: 'white',
+    borderRadius: '8px',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+  },
+  children: [
     {
-      breakpoint: { type: 'min-width', value: '768px' },
-      styles: { padding: '20px' }
+      elementType: 'h3',
+      textContent: '{props.name}',
+      styles: { fontSize: '18px', fontWeight: 'bold' }
+    },
+    {
+      elementType: 'p',
+      textContent: '{props.email}',
+      styles: { color: '#666' }
     }
   ]
 }
 
-// CSS
-.component {
-  padding: 10px;
-}
-@media (min-width: 768px) {
-  .component {
-    padding: 20px;
-  }
-}
+const { reactCode, cssCode } = await coralToReact(spec, {
+  componentFormat: 'arrow',
+  styleFormat: 'inline',
+  includeTypes: true,
+  prettier: true
+})
 ```
-
----
-
-## Limitations
-
-- **Complex Logic** - Advanced component logic may need manual adjustment
-- **Dynamic Imports** - Dynamic import() statements are not generated
-- **Refs** - React refs are not automatically generated
-- **Context** - Context providers/consumers require manual setup
-- **Fragments** - Fragment shorthand may not be preserved
-- **Comments** - Code comments are not preserved in generated output
-
----
-
-## Dependencies
-
-- `@reallygoodwork/coral-core` - Core Coral types and utilities
-- `prettier` - Code formatting (optional)
 
 ---
 
 ## Related Packages
 
-- `@reallygoodwork/coral-core` - Core utilities and types for Coral
-- `@reallygoodwork/react-to-coral` - Convert React components to Coral specs (reverse operation)
-- `@reallygoodwork/coral-to-html` - Convert Coral specs to HTML
-- `@reallygoodwork/coral-tw2css` - Convert Tailwind classes to CSS
-- `@reallygoodwork/style-to-tailwind` - Convert CSS styles to Tailwind classes
-
----
+- [@reallygoodwork/coral-core](https://www.npmjs.com/package/@reallygoodwork/coral-core) - Core Coral types
+- [@reallygoodwork/react-to-coral](https://www.npmjs.com/package/@reallygoodwork/react-to-coral) - React to Coral
+- [@reallygoodwork/coral-to-html](https://www.npmjs.com/package/@reallygoodwork/coral-to-html) - Coral to HTML
 
 ## License
 
-MIT
+MIT © [Really Good Work](https://reallygoodwork.com)

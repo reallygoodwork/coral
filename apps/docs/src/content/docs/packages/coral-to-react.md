@@ -3,6 +3,8 @@ title: "@reallygoodwork/coral-to-react"
 description: Generate React component code from Coral specifications.
 ---
 
+[![npm](https://img.shields.io/npm/v/@reallygoodwork/coral-to-react)](https://www.npmjs.com/package/@reallygoodwork/coral-to-react)
+
 Generate React component code from Coral specifications. This package transforms Coral JSON specifications into fully functional React components with TypeScript support, state management, event handlers, and styling.
 
 ## Features
@@ -435,7 +437,7 @@ return (
 
 ## Related Packages
 
-- `@reallygoodwork/coral-core` - Core utilities and types for Coral
-- `@reallygoodwork/react-to-coral` - Convert React components to Coral specs (reverse operation)
-- `@reallygoodwork/coral-to-html` - Convert Coral specs to HTML
-- `@reallygoodwork/coral-tw2css` - Convert Tailwind classes to CSS
+- [@reallygoodwork/coral-core](https://www.npmjs.com/package/@reallygoodwork/coral-core) - Core utilities and types for Coral
+- [@reallygoodwork/react-to-coral](https://www.npmjs.com/package/@reallygoodwork/react-to-coral) - Convert React components to Coral specs (reverse operation)
+- [@reallygoodwork/coral-to-html](https://www.npmjs.com/package/@reallygoodwork/coral-to-html) - Convert Coral specs to HTML
+- [@reallygoodwork/coral-tw2css](https://www.npmjs.com/package/@reallygoodwork/coral-tw2css) - Convert Tailwind classes to CSS

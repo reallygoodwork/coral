@@ -1,21 +1,74 @@
 ---
 title: Coral Libraries
-description: A collection of shared libraries and utilities for the Coral ecosystem.
+description: Transform UI components between React, HTML, and a universal specification format.
 template: splash
 hero:
-  tagline: A monorepo of TypeScript libraries with automated releases.
+  tagline: A monorepo of TypeScript libraries for transforming UI components between different representations.
   actions:
     - text: Get Started
       link: /guides/getting-started/
       icon: right-arrow
       variant: primary
     - text: View on GitHub
-      link: https://github.com/reallygoodwork/coral-libraries
+      link: https://github.com/reallygoodwork/coral
       icon: external
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
+import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
 
+## What is Coral?
+
+Coral is a universal specification format for describing UI components. It captures structure, styles, state, methods, and props, allowing you to transform between different UI representations.
+
+<CardGrid>
+  <Card title="React → Coral" icon="seti:react">
+    Parse React components into a structured Coral specification.
+  </Card>
+  <Card title="Coral → React" icon="seti:typescript">
+    Generate React components from Coral specifications.
+  </Card>
+  <Card title="Coral → HTML" icon="seti:html">
+    Generate static HTML from Coral specifications.
+  </Card>
+  <Card title="HTML → Coral" icon="document">
+    Transform HTML into Coral specifications.
+  </Card>
+</CardGrid>
+
+## Packages
+
+<CardGrid>
+  <LinkCard
+    title="@reallygoodwork/coral-core"
+    description="Core types, schemas, and utilities for the Coral specification."
+    href="https://www.npmjs.com/package/@reallygoodwork/coral-core"
+  />
+  <LinkCard
+    title="@reallygoodwork/react-to-coral"
+    description="Transform React components to Coral specification."
+    href="https://www.npmjs.com/package/@reallygoodwork/react-to-coral"
+  />
+  <LinkCard
+    title="@reallygoodwork/coral-to-react"
+    description="Generate React components from Coral specification."
+    href="https://www.npmjs.com/package/@reallygoodwork/coral-to-react"
+  />
+  <LinkCard
+    title="@reallygoodwork/coral-to-html"
+    description="Generate HTML from Coral specification."
+    href="https://www.npmjs.com/package/@reallygoodwork/coral-to-html"
+  />
+  <LinkCard
+    title="@reallygoodwork/coral-tw2css"
+    description="Convert Tailwind CSS classes to CSS style objects."
+    href="https://www.npmjs.com/package/@reallygoodwork/coral-tw2css"
+  />
+  <LinkCard
+    title="@reallygoodwork/style-to-tailwind"
+    description="Convert CSS style objects to Tailwind CSS classes."
+    href="https://www.npmjs.com/package/@reallygoodwork/style-to-tailwind"
+  />
+</CardGrid>
 
 ## Features
 
