@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/reallygoodwork/coral/compare/@reallygoodwork/coral-core@1.1.0...@reallygoodwork/coral-core@1.2.0) (2025-12-12)
+
+
+### Features
+
+* updates version for core ([956d93b](https://github.com/reallygoodwork/coral/commit/956d93b05b2992598ad13ac037437ca60ab4c9a9))
+
 # [1.1.0](https://github.com/reallygoodwork/coral/compare/@reallygoodwork/coral-core@1.0.0...@reallygoodwork/coral-core@1.1.0) (2025-12-12)
 
 
