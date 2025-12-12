@@ -1,6 +1,7 @@
 {
   "name": "@reallygoodwork/coral-to-react",
   "version": "0.0.0",
+  "license": "MIT",
   "publishConfig": {
     "access": "public"
   },

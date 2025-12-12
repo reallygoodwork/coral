@@ -1,6 +1,7 @@
 {
   "name": "@reallygoodwork/style-to-tailwind",
   "version": "0.0.0",
+  "license": "MIT",
   "publishConfig": {
     "access": "public"
   },
