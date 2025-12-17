@@ -6,9 +6,9 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
   return {
     ...defaultMdxComponents,
     pre: ({ ref: _ref, ...props }) => (
-      // @ts-expect-error - React 19 type compatibility
+
       <CodeBlock {...props}>
-        {/* @ts-expect-error - React 19 type compatibility */}
+
         <Pre>{props.children}</Pre>
       </CodeBlock>
     ),
