@@ -21,7 +21,6 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
   const MDX = page.data.body
   const components = getMDXComponents({
     // this allows you to link to other pages with relative file paths
-    // @ts-expect-error - React 19 type compatibility
     a: createRelativeLink(source, page),
   })
 
