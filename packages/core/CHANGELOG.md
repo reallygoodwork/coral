@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/reallygoodwork/coral/compare/@reallygoodwork/coral-core@1.4.0...@reallygoodwork/coral-core@1.5.0) (2025-12-17)
+
+
+### Features
+
+* add coral-docs application with initial setup and documentation ([45a6958](https://github.com/reallygoodwork/coral/commit/45a695878a2228b0923ddc7b57324d062af46250))
+
 # [1.4.0](https://github.com/reallygoodwork/coral/compare/@reallygoodwork/coral-core@1.3.0...@reallygoodwork/coral-core@1.4.0) (2025-12-12)
 
 
