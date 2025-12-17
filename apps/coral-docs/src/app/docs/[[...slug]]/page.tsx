@@ -36,7 +36,6 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
         />
       </div>
       <DocsBody>
-        {/* @ts-expect-error - MDX component type compatibility with React 19 */}
         <MDX components={components} />
       </DocsBody>
     </DocsPage>
