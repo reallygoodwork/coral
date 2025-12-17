@@ -13,7 +13,8 @@
       "!!**/.next",
       "!!**/dist",
       "!!**/build",
-      "!!**/.astro"
+      "!!**/.astro",
+      "!!apps/coral-docs"
     ]
   },
   "formatter": {
