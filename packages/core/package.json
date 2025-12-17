@@ -2,6 +2,10 @@
   "name": "@reallygoodwork/coral-core",
   "version": "1.4.0",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/reallygoodwork/coral.git"
+  },
   "publishConfig": {
     "access": "public"
   },

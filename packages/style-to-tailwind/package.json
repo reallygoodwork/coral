@@ -2,6 +2,10 @@
   "name": "@reallygoodwork/style-to-tailwind",
   "version": "1.1.0",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/reallygoodwork/coral.git"
+  },
   "publishConfig": {
     "access": "public"
   },
