@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/reallygoodwork/coral/compare/@reallygoodwork/coral-tw2css@1.3.0...@reallygoodwork/coral-tw2css@1.4.0) (2025-12-17)
+
+
+### Features
+
+* **core:** force release ([813b30a](https://github.com/reallygoodwork/coral/commit/813b30a54c78746b37d0ad52742fc13293608696))
+
 # [1.3.0](https://github.com/reallygoodwork/coral/compare/@reallygoodwork/coral-tw2css@1.2.0...@reallygoodwork/coral-tw2css@1.3.0) (2025-12-17)
 
 
