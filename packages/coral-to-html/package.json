@@ -29,6 +29,7 @@
     "@reallygoodwork/coral-core": "workspace:*",
     "@reallygoodwork/typescript-config": "workspace:*",
     "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/exec": "^7.0.0",
     "@semantic-release/git": "^10.0.1",
     "@types/jest": "^30.0.0",
     "jest": "^30.2.0",
