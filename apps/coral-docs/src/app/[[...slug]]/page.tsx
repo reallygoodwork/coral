@@ -11,7 +11,7 @@ import { LLMCopyButton, ViewOptions } from '@/components/page-actions'
 import { getPageImage, source } from '@/lib/source'
 import { getMDXComponents } from '@/mdx-components'
 
-export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
+export default async function Page(props: PageProps<'/[[...slug]]'>) {
   const params = await props.params
   const page = source.getPage(params.slug)
   if (!page) notFound()
@@ -29,10 +29,10 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
       <div className="flex flex-row gap-2 items-center border-b pt-2 pb-6">
-        <LLMCopyButton markdownUrl={`${page.url}.mdx`} />
+        <LLMCopyButton markdownUrl={`/llms.mdx${page.url}.mdx`} />
         <ViewOptions
-          markdownUrl={`${page.url}.mdx`}
-          githubUrl={`https://github.com/${owner}/${repo}/blob/dev/apps/docs/content/docs/${page.path}`}
+          markdownUrl={`/llms.mdx${page.url}.mdx`}
+          githubUrl={`https://github.com/${owner}/${repo}/blob/dev/apps/coral-docs/content/docs/${page.path}`}
         />
       </div>
       <DocsBody>
@@ -47,7 +47,7 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata(
-  props: PageProps<'/docs/[[...slug]]'>,
+  props: PageProps<'/[[...slug]]'>,
 ): Promise<Metadata> {
   const params = await props.params
   const page = source.getPage(params.slug)

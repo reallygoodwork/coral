@@ -1,0 +1,1587 @@
+---
+title: "Utility Functions"
+description: Core utility functions for working with Coral specifications.
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+# Utility Functions
+
+Core utility functions for parsing, transforming, and working with Coral specifications.
+
+## Parsing & Validation
+
+### `parseUISpec`
+
+Parses and validates a UI specification against the Coral schema.
+
+<TypeTable
+  type={{
+    spec: {
+      description: 'The UI specification object to parse and validate',
+      type: 'CoralRootNode',
+      required: true,
+    },
+  }}
+/>
+
+```typescript
+import { parseUISpec } from '@reallygoodwork/coral-core'
+
+const validatedSpec = await parseUISpec({
+  name: 'Button',
+  elementType: 'button',
+  styles: { padding: '10px', backgroundColor: '#007bff' },
+})
+```
+
+**Returns:** `Promise<CoralRootNode>` - The validated and parsed specification
+
+---
+
+### `transformHTMLToSpec`
+
+Transforms an HTML string into a Coral specification.
+
+<TypeTable
+  type={{
+    html: {
+      description: 'The HTML string to transform',
+      type: 'string',
+      required: true,
+    },
+  }}
+/>
+
+```typescript
+import { transformHTMLToSpec } from '@reallygoodwork/coral-core'
+
+const spec = transformHTMLToSpec(`
+  <div class="card">
+    <h2>Card Title</h2>
+    <p>Card content</p>
+  </div>
+`)
+```
+
+**Returns:** `CoralRootNode` - The transformed Coral specification
+
+---
+
+## Dimension Utilities
+
+### `dimensionToCSS`
+
+Converts a dimension object or number to a CSS string.
+
+<TypeTable
+  type={{
+    dimension: {
+      description: 'Dimension value (number or Dimension object)',
+      type: 'number | Dimension',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `string` - CSS dimension string
+
+```typescript
+import { dimensionToCSS } from '@reallygoodwork/coral-core'
+
+dimensionToCSS(16) // "16px"
+dimensionToCSS({ value: 2, unit: 'rem' }) // "2rem"
+dimensionToCSS({ value: 50, unit: '%' }) // "50%"
+```
+
+---
+
+### `normalizeDimension`
+
+Normalizes dimension values to a standard Dimension format.
+
+<TypeTable
+  type={{
+    value: {
+      description: 'Dimension value (string, number, or Dimension object)',
+      type: 'string | number | Dimension',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `Dimension` - Normalized dimension object
+
+```typescript
+import { normalizeDimension } from '@reallygoodwork/coral-core'
+
+normalizeDimension('16px') // { value: 16, unit: 'px' }
+normalizeDimension(16) // { value: 16, unit: 'px' }
+normalizeDimension('2rem') // { value: 2, unit: 'rem' }
+normalizeDimension({ value: 50, unit: '%' }) // { value: 50, unit: '%' }
+```
+
+---
+
+## Media Query Utilities
+
+### `parseMediaQuery`
+
+Parses a CSS media query string into a structured format.
+
+<TypeTable
+  type={{
+    query: {
+      description: 'CSS media query string (e.g., "@media (min-width: 768px)")',
+      type: 'string',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `Breakpoint | RangeBreakpoint` - Parsed breakpoint object
+
+```typescript
+import { parseMediaQuery } from '@reallygoodwork/coral-core'
+
+parseMediaQuery('@media (min-width: 768px)')
+// { type: 'min-width', value: '768px' }
+
+parseMediaQuery('@media (min-width: 768px) and (max-width: 1024px)')
+// { min: { type: 'min-width', value: '768px' }, max: { type: 'max-width', value: '1024px' } }
+```
+
+---
+
+### `extractMediaQueriesFromCSS`
+
+Extracts media queries and their associated styles from CSS.
+
+<TypeTable
+  type={{
+    css: {
+      description: 'CSS string to extract from',
+      type: 'string',
+      required: true,
+    },
+    selector: {
+      description: 'CSS selector to extract styles for',
+      type: 'string',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `Array<{ mediaQuery: string; styles: Record<string, string> }>` - Array of media queries with styles
+
+```typescript
+import { extractMediaQueriesFromCSS } from '@reallygoodwork/coral-core'
+
+const css = `
+  .container { padding: 10px; }
+  @media (min-width: 768px) {
+    .container { padding: 20px; }
+  }
+`
+
+extractMediaQueriesFromCSS(css, '.container')
+// [{ mediaQuery: '@media (min-width: 768px)', styles: { padding: '20px' } }]
+```
+
+---
+
+### `mediaQueriesToResponsiveStyles`
+
+Converts media query objects to ResponsiveStyle format.
+
+<TypeTable
+  type={{
+    mediaQueries: {
+      description: 'Array of media query objects with styles',
+      type: 'Array<{ mediaQuery: string; styles: Record<string, string> }>',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `ResponsiveStyle[]` - Array of responsive styles
+
+```typescript
+import { mediaQueriesToResponsiveStyles } from '@reallygoodwork/coral-core'
+
+const mediaQueries = [
+  { mediaQuery: '@media (min-width: 768px)', styles: { padding: '20px' } }
+]
+
+mediaQueriesToResponsiveStyles(mediaQueries)
+// [{ breakpoint: { type: 'min-width', value: '768px' }, styles: { padding: '20px' } }]
+```
+
+---
+
+### `extractResponsiveStylesFromObject`
+
+Extracts responsive styles from an object with media query keys.
+
+<TypeTable
+  type={{
+    styles: {
+      description: 'Style object with media query keys',
+      type: 'Record<string, unknown>',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `{ baseStyles: Record<string, string>; responsiveStyles: ResponsiveStyle[] }` - Separated base and responsive styles
+
+```typescript
+import { extractResponsiveStylesFromObject } from '@reallygoodwork/coral-core'
+
+const styles = {
+  padding: '10px',
+  '@media (min-width: 768px)': { padding: '20px' },
+  '@media (min-width: 1024px)': { padding: '30px' }
+}
+
+const { baseStyles, responsiveStyles } = extractResponsiveStylesFromObject(styles)
+// baseStyles: { padding: '10px' }
+// responsiveStyles: [{ breakpoint: {...}, styles: {...} }, ...]
+```
+
+---
+
+## String Utilities
+
+### `pascalCaseString`
+
+Converts a string to PascalCase.
+
+<TypeTable
+  type={{
+    str: {
+      description: 'String to convert',
+      type: 'string',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `string` - PascalCase string
+
+```typescript
+import { pascalCaseString } from '@reallygoodwork/coral-core'
+
+pascalCaseString('hello world') // "HelloWorld"
+pascalCaseString('my-component-name') // "MyComponentName"
+pascalCaseString('user_profile') // "UserProfile"
+```
+
+---
+
+### `toPascalCase`
+
+Converts a string to PascalCase (alternative implementation).
+
+<TypeTable
+  type={{
+    str: {
+      description: 'String to convert',
+      type: 'string',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `string` - PascalCase string
+
+```typescript
+import { toPascalCase } from '@reallygoodwork/coral-core'
+
+toPascalCase('hello-world') // "HelloWorld"
+toPascalCase('my_component') // "MyComponent"
+```
+
+---
+
+### `toKebabCase`
+
+Converts a string to kebab-case.
+
+<TypeTable
+  type={{
+    str: {
+      description: 'String to convert',
+      type: 'string',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `string` - kebab-case string
+
+```typescript
+import { toKebabCase } from '@reallygoodwork/coral-core'
+
+toKebabCase('HelloWorld') // "hello-world"
+toKebabCase('MyComponent') // "my-component"
+```
+
+---
+
+## Package Utilities
+
+### `loadPackage`
+
+Load a Coral package from disk or other source.
+
+<TypeTable
+  type={{
+    configPath: {
+      description: 'Path to the coral.config.json file',
+      type: 'string',
+      required: true,
+    },
+    options: {
+      description: 'Package loader options',
+      type: 'PackageLoaderOptions',
+      required: true,
+    },
+  }}
+/>
+
+<TypeTable
+  type={{
+    'options.readFile': {
+      description: 'Custom file reader function (for different environments)',
+      type: '(path: string) => Promise<string>',
+      required: true,
+    },
+    'options.resolvePackage': {
+      description: 'Resolve package from registry (for extends)',
+      type: '(name: string) => Promise<string>',
+      required: false,
+    },
+    'options.resolveExtends': {
+      description: 'Whether to load extended packages',
+      type: 'boolean',
+      default: true,
+      required: false,
+    },
+  }}
+/>
+
+```typescript
+import { loadPackage } from '@reallygoodwork/coral-core'
+import * as fs from 'fs/promises'
+
+const pkg = await loadPackage('./coral.config.json', {
+  readFile: (path) => fs.readFile(path, 'utf-8'),
+  resolveExtends: true,
+})
+
+console.log(`Loaded ${pkg.components.size} components`)
+```
+
+**Returns:** `Promise<LoadedPackage>` - The loaded package with components, tokens, and indexes
+
+---
+
+### `validatePackage`
+
+Validate all references and structure in a loaded package.
+
+<TypeTable
+  type={{
+    pkg: {
+      description: 'The loaded package to validate',
+      type: 'LoadedPackage',
+      required: true,
+    },
+  }}
+/>
+
+```typescript
+import { validatePackage } from '@reallygoodwork/coral-core'
+
+const result = validatePackage(pkg)
+if (!result.valid) {
+  for (const error of result.errors) {
+    console.error(`[${error.type}] ${error.message}`)
+  }
+}
+```
+
+**Returns:** `ValidationResult` - Validation result with errors and warnings
+
+<TypeTable
+  type={{
+    'result.valid': {
+      description: 'Whether the package is valid',
+      type: 'boolean',
+      required: true,
+    },
+    'result.errors': {
+      description: 'List of validation errors',
+      type: 'ValidationError[]',
+      required: true,
+    },
+    'result.warnings': {
+      description: 'List of validation warnings',
+      type: 'ValidationWarning[]',
+      required: true,
+    },
+  }}
+/>
+
+---
+
+### `getComponent`
+
+Get a component from a loaded package by name.
+
+<TypeTable
+  type={{
+    pkg: {
+      description: 'The loaded package',
+      type: 'LoadedPackage',
+      required: true,
+    },
+    name: {
+      description: 'Component name',
+      type: 'string',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `CoralRootNode | undefined` - The component definition, or undefined if not found
+
+---
+
+### `hasComponent`
+
+Check if a component exists in a package.
+
+<TypeTable
+  type={{
+    pkg: {
+      description: 'The loaded package',
+      type: 'LoadedPackage',
+      required: true,
+    },
+    name: {
+      description: 'Component name to check',
+      type: 'string',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `boolean` - Whether the component exists
+
+```typescript
+import { getComponent, hasComponent } from '@reallygoodwork/coral-core'
+
+if (hasComponent(pkg, 'Button')) {
+  const button = getComponent(pkg, 'Button')
+}
+```
+
+---
+
+### `getComponentNames`
+
+Get all component names in a package.
+
+<TypeTable
+  type={{
+    pkg: {
+      description: 'The loaded package',
+      type: 'LoadedPackage',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `string[]` - Array of component names
+
+```typescript
+import { getComponentNames } from '@reallygoodwork/coral-core'
+
+const names = getComponentNames(pkg)
+// ['Button', 'Card', 'Input', ...]
+```
+
+---
+
+## Variant Utilities
+
+### `resolveNodeStyles`
+
+Resolve all styles for a node given active variant values. Merges base styles with variant-specific overrides and compound variant styles.
+
+<TypeTable
+  type={{
+    node: {
+      description: 'The node to resolve styles for',
+      type: 'CoralNode',
+      required: true,
+    },
+    activeVariants: {
+      description: 'The currently active variant values (e.g., { intent: "primary", size: "md" })',
+      type: 'VariantContext',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `Partial<CoralStyleType>` - Merged styles with variant overrides applied
+
+```typescript
+import { resolveNodeStyles } from '@reallygoodwork/coral-core'
+
+const node = {
+  styles: { backgroundColor: '#ffffff' },
+  variantStyles: {
+    intent: {
+      primary: { backgroundColor: '#007bff' },
+      secondary: { backgroundColor: '#6c757d' },
+    },
+  },
+}
+
+const styles = resolveNodeStyles(node, { intent: 'primary' })
+// { backgroundColor: '#007bff' }
+```
+
+---
+
+### `resolveTreeStyles`
+
+Resolve styles for an entire component tree, returning a map of node IDs to their resolved styles.
+
+<TypeTable
+  type={{
+    node: {
+      description: 'Root node of the tree',
+      type: 'CoralNode',
+      required: true,
+    },
+    activeVariants: {
+      description: 'Currently active variant values',
+      type: 'VariantContext',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `Map<string, Partial<CoralStyleType>>` - Map of node IDs to resolved styles
+
+```typescript
+import { resolveTreeStyles } from '@reallygoodwork/coral-core'
+
+const styleMap = resolveTreeStyles(rootNode, { intent: 'primary', size: 'md' })
+
+// Access styles by node ID
+const buttonStyles = styleMap.get('button-1')
+```
+
+---
+
+### `resolveStateStyles`
+
+Resolve state styles (hover, focus, disabled, etc.) for a node with active variants.
+
+<TypeTable
+  type={{
+    node: {
+      description: 'The node to resolve state styles for',
+      type: 'CoralNode',
+      required: true,
+    },
+    state: {
+      description: 'The state to resolve (e.g., "hover", "focus", "disabled")',
+      type: 'string',
+      required: true,
+    },
+    activeVariants: {
+      description: 'Currently active variant values',
+      type: 'VariantContext',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `Partial<CoralStyleType> | null` - State styles, or null if not defined
+
+```typescript
+import { resolveStateStyles } from '@reallygoodwork/coral-core'
+
+const hoverStyles = resolveStateStyles(node, 'hover', { intent: 'primary' })
+```
+
+---
+
+### `getVariantCombinations`
+
+Get all possible variant combinations from a list of variant axes.
+
+<TypeTable
+  type={{
+    axes: {
+      description: 'Array of variant axes with their values',
+      type: 'VariantAxis[]',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `Record<string, string>[]` - Array of all possible variant combinations
+
+```typescript
+import { getVariantCombinations } from '@reallygoodwork/coral-core'
+
+const combinations = getVariantCombinations([
+  { name: 'intent', values: ['primary', 'secondary'] },
+  { name: 'size', values: ['sm', 'md', 'lg'] }
+])
+// [
+//   { intent: 'primary', size: 'sm' },
+//   { intent: 'primary', size: 'md' },
+//   { intent: 'primary', size: 'lg' },
+//   { intent: 'secondary', size: 'sm' },
+//   { intent: 'secondary', size: 'md' },
+//   { intent: 'secondary', size: 'lg' }
+// ]
+```
+
+---
+
+### `getDefaultVariantValues`
+
+Get the default values for all variant axes.
+
+<TypeTable
+  type={{
+    variants: {
+      description: 'Component variants definition',
+      type: 'ComponentVariants',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `Record<string, string>` - Map of axis names to their default values
+
+```typescript
+import { getDefaultVariantValues } from '@reallygoodwork/coral-core'
+
+const defaults = getDefaultVariantValues(component.componentVariants)
+// { intent: 'primary', size: 'md' }
+```
+
+---
+
+### `validateVariantValues`
+
+Validate that variant values match the component's variant definition.
+
+<TypeTable
+  type={{
+    variants: {
+      description: 'Component variants definition',
+      type: 'ComponentVariants',
+      required: true,
+    },
+    values: {
+      description: 'Variant values to validate',
+      type: 'Record<string, string>',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `{ valid: boolean; errors: string[] }` - Validation result
+
+```typescript
+import { validateVariantValues } from '@reallygoodwork/coral-core'
+
+const result = validateVariantValues(component.componentVariants, {
+  intent: 'primary',
+  size: 'xl' // Invalid - not in size values
+})
+```
+
+---
+
+## Type Generation
+
+### `generatePropsInterface`
+
+Generate a TypeScript interface for a component's props, including variant props, component props, and event handlers.
+
+<TypeTable
+  type={{
+    component: {
+      description: 'The component to generate types for',
+      type: 'CoralRootNode',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `string` - TypeScript interface code
+
+```typescript
+import { generatePropsInterface } from '@reallygoodwork/coral-core'
+
+const code = generatePropsInterface(buttonComponent)
+// export interface ButtonProps {
+//   intent?: "primary" | "secondary" | "destructive";
+//   size?: "sm" | "md" | "lg";
+//   label: string;
+//   disabled?: boolean;
+//   onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
+//   className?: string;
+//   style?: React.CSSProperties;
+// }
+```
+
+---
+
+### `generateComponentTypes`
+
+Generate a complete TypeScript declaration file for a component.
+
+<TypeTable
+  type={{
+    component: {
+      description: 'The component to generate types for',
+      type: 'CoralRootNode',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `string` - Complete TypeScript declaration file content
+
+```typescript
+import { generateComponentTypes } from '@reallygoodwork/coral-core'
+
+const dts = generateComponentTypes(buttonComponent)
+// Includes props interface, variant types, and JSDoc comments
+```
+
+---
+
+### `propTypeToTS`
+
+Convert a Coral prop type to a TypeScript type string.
+
+<TypeTable
+  type={{
+    type: {
+      description: 'The prop type to convert',
+      type: 'PropType',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `string` - TypeScript type string
+
+```typescript
+import { propTypeToTS } from '@reallygoodwork/coral-core'
+
+propTypeToTS('string') // 'string'
+propTypeToTS('number') // 'number'
+propTypeToTS('boolean') // 'boolean'
+propTypeToTS({ enum: ['a', 'b'] }) // '"a" | "b"'
+propTypeToTS({ array: 'string' }) // 'string[]'
+propTypeToTS('ReactNode') // 'React.ReactNode'
+propTypeToTS('function') // '(...args: unknown[]) => void'
+```
+
+---
+
+### `generateVariantTypes`
+
+Generate TypeScript types for component variants.
+
+<TypeTable
+  type={{
+    variants: {
+      description: 'Component variants definition',
+      type: 'ComponentVariants',
+      required: true,
+    },
+    componentName: {
+      description: 'Name of the component',
+      type: 'string',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `string` - TypeScript type definitions for variants
+
+```typescript
+import { generateVariantTypes } from '@reallygoodwork/coral-core'
+
+const types = generateVariantTypes(component.componentVariants, 'Button')
+// export type ButtonIntent = "primary" | "secondary" | "destructive";
+// export type ButtonSize = "sm" | "md" | "lg";
+```
+
+---
+
+### `generateVariantDefaults`
+
+Generate default variant values as a TypeScript constant.
+
+<TypeTable
+  type={{
+    variants: {
+      description: 'Component variants definition',
+      type: 'ComponentVariants',
+      required: true,
+    },
+    componentName: {
+      description: 'Name of the component',
+      type: 'string',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `string` - TypeScript constant definition
+
+```typescript
+import { generateVariantDefaults } from '@reallygoodwork/coral-core'
+
+const defaults = generateVariantDefaults(component.componentVariants, 'Button')
+// export const ButtonDefaultVariants = { intent: "primary", size: "md" } as const;
+```
+
+---
+
+## Reference Utilities
+
+### `createReferenceResolver`
+
+Create a reference resolver for resolving token, prop, and asset references in a loaded package.
+
+<TypeTable
+  type={{
+    pkg: {
+      description: 'The loaded package',
+      type: 'LoadedPackage',
+      required: true,
+    },
+    options: {
+      description: 'Resolver options',
+      type: 'ReferenceResolverOptions',
+      required: false,
+    },
+  }}
+/>
+
+<TypeTable
+  type={{
+    'options.tokenContext': {
+      description: 'Token context (e.g., "light" or "dark")',
+      type: 'string',
+      default: 'light',
+      required: false,
+    },
+  }}
+/>
+
+**Returns:** `ReferenceResolver` - Reference resolver with methods to resolve tokens, props, and assets
+
+```typescript
+import { createReferenceResolver } from '@reallygoodwork/coral-core'
+
+const resolver = createReferenceResolver(pkg, { tokenContext: 'dark' })
+
+// Resolve token references
+const color = resolver.resolveToken({ $token: 'color.primary.500' })
+
+// Resolve prop references
+const label = resolver.resolveProp({ $prop: 'label' }, { label: 'Click me' })
+
+// Resolve asset references
+const imagePath = resolver.resolveAsset({ $asset: 'logo.png' })
+```
+
+---
+
+### `resolveStyleReferences`
+
+Resolve all token and prop references in a style object.
+
+<TypeTable
+  type={{
+    styles: {
+      description: 'Style object with potential references',
+      type: 'CoralStyleType',
+      required: true,
+    },
+    resolver: {
+      description: 'Reference resolver',
+      type: 'ReferenceResolver',
+      required: true,
+    },
+    props: {
+      description: 'Component props for resolving prop references',
+      type: 'Record<string, unknown>',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `CoralStyleType` - Style object with all references resolved
+
+```typescript
+import { resolveStyleReferences } from '@reallygoodwork/coral-core'
+
+const resolvedStyles = resolveStyleReferences(
+  {
+    color: { $token: 'color.text.primary' },
+    padding: { $prop: 'padding' }
+  },
+  resolver,
+  { padding: '16px' }
+)
+// { color: '#000000', padding: '16px' }
+```
+
+---
+
+### `resolveValue`
+
+Resolve a single value that may contain references.
+
+<TypeTable
+  type={{
+    value: {
+      description: 'Value that may contain token or prop references',
+      type: 'unknown',
+      required: true,
+    },
+    resolver: {
+      description: 'Reference resolver',
+      type: 'ReferenceResolver',
+      required: true,
+    },
+    props: {
+      description: 'Component props for resolving prop references',
+      type: 'Record<string, unknown>',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `unknown` - Resolved value
+
+```typescript
+import { resolveValue } from '@reallygoodwork/coral-core'
+
+const resolved = resolveValue(
+  { $token: 'spacing.md' },
+  resolver,
+  {}
+)
+// '16px'
+```
+
+---
+
+### `collectTokenReferences`
+
+Collect all token references from a node tree.
+
+<TypeTable
+  type={{
+    node: {
+      description: 'Root node to search',
+      type: 'CoralNode',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `Set<string>` - Set of all token reference paths
+
+```typescript
+import { collectTokenReferences } from '@reallygoodwork/coral-core'
+
+const tokens = collectTokenReferences(rootNode)
+// Set(['color.primary.500', 'spacing.md', 'typography.body'])
+```
+
+---
+
+### `collectPropReferences`
+
+Collect all prop references from a node tree.
+
+<TypeTable
+  type={{
+    node: {
+      description: 'Root node to search',
+      type: 'CoralNode',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `Set<string>` - Set of all prop names referenced
+
+```typescript
+import { collectPropReferences } from '@reallygoodwork/coral-core'
+
+const props = collectPropReferences(rootNode)
+// Set(['label', 'disabled', 'onClick'])
+```
+
+---
+
+## Composition Utilities
+
+### `resolveComponentInstance`
+
+Resolve a component instance to its full definition with props and slots resolved.
+
+<TypeTable
+  type={{
+    instance: {
+      description: 'The component instance to resolve',
+      type: 'ComponentInstance',
+      required: true,
+    },
+    parentProps: {
+      description: 'Props from the parent component',
+      type: 'Record<string, unknown>',
+      required: true,
+    },
+    parentSlots: {
+      description: 'Slot content from the parent component',
+      type: 'Record<string, CoralNode[]>',
+      required: true,
+    },
+    pkg: {
+      description: 'Loaded package for component lookup',
+      type: 'LoadedPackage',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `ResolvedInstance` - Resolved instance with component, props, and slots
+
+<TypeTable
+  type={{
+    'result.component': {
+      description: 'The resolved component definition',
+      type: 'CoralRootNode',
+      required: true,
+    },
+    'result.resolvedProps': {
+      description: 'Props resolved from bindings',
+      type: 'Record<string, unknown>',
+      required: true,
+    },
+    'result.resolvedSlots': {
+      description: 'Slot content resolved from bindings',
+      type: 'Record<string, CoralNode[]>',
+      required: true,
+    },
+  }}
+/>
+
+```typescript
+import { resolveComponentInstance } from '@reallygoodwork/coral-core'
+
+const resolved = resolveComponentInstance(
+  buttonInstance,
+  { intent: 'primary', label: 'Click me' },
+  {},
+  pkg
+)
+
+console.log(resolved.resolvedProps) // { intent: 'primary', label: 'Click me', ... }
+```
+
+---
+
+### `flattenComponentTree`
+
+Flatten a component tree by resolving all component instances to their actual node structures.
+
+<TypeTable
+  type={{
+    rootNode: {
+      description: 'Root node of the component tree',
+      type: 'CoralRootNode',
+      required: true,
+    },
+    parentProps: {
+      description: 'Props from parent component',
+      type: 'Record<string, unknown>',
+      required: false,
+    },
+    parentSlots: {
+      description: 'Slot content from parent component',
+      type: 'Record<string, CoralNode[]>',
+      required: false,
+    },
+    pkg: {
+      description: 'Loaded package for component lookup',
+      type: 'LoadedPackage',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `CoralNode` - Flattened component tree with all instances resolved
+
+```typescript
+import { flattenComponentTree } from '@reallygoodwork/coral-core'
+
+const flattened = flattenComponentTree(rootNode, {}, {}, pkg)
+// All component instances are now resolved to their actual node structures
+```
+
+---
+
+### `findComponentInstances`
+
+Find all component instances in a node tree.
+
+<TypeTable
+  type={{
+    node: {
+      description: 'Root node to search',
+      type: 'CoralNode',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `ComponentInstance[]` - Array of all component instances found
+
+```typescript
+import { findComponentInstances } from '@reallygoodwork/coral-core'
+
+const instances = findComponentInstances(rootNode)
+// All nodes with $component references
+```
+
+---
+
+### `getComponentDependencies`
+
+Get all component dependencies for a given component.
+
+<TypeTable
+  type={{
+    component: {
+      description: 'The component to analyze',
+      type: 'CoralRootNode',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `string[]` - Array of component names that this component depends on
+
+```typescript
+import { getComponentDependencies } from '@reallygoodwork/coral-core'
+
+const deps = getComponentDependencies(cardComponent)
+// ['Button', 'Icon']
+```
+
+---
+
+### `getComponentOrder`
+
+Get the order in which components should be built (topological sort).
+
+<TypeTable
+  type={{
+    pkg: {
+      description: 'The loaded package',
+      type: 'LoadedPackage',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `string[]` - Array of component names in build order
+
+```typescript
+import { getComponentOrder } from '@reallygoodwork/coral-core'
+
+const order = getComponentOrder(pkg)
+// Components are ordered so dependencies come before dependents
+```
+
+---
+
+### `findCircularDependencies`
+
+Check for circular component dependencies in a package.
+
+<TypeTable
+  type={{
+    pkg: {
+      description: 'The loaded package to check',
+      type: 'LoadedPackage',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `string[][]` - Array of circular dependency chains (each chain is an array of component names)
+
+```typescript
+import { findCircularDependencies } from '@reallygoodwork/coral-core'
+
+const circles = findCircularDependencies(pkg)
+if (circles.length > 0) {
+  console.error('Circular dependencies found:', circles)
+}
+```
+
+---
+
+### `validateComposition`
+
+Validate that all component instances in a package can be resolved.
+
+<TypeTable
+  type={{
+    pkg: {
+      description: 'The loaded package to validate',
+      type: 'LoadedPackage',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `{ valid: boolean; errors: string[] }` - Validation result
+
+```typescript
+import { validateComposition } from '@reallygoodwork/coral-core'
+
+const result = validateComposition(pkg)
+if (!result.valid) {
+  console.error('Composition errors:', result.errors)
+}
+```
+
+---
+
+### `hasComponentInstances`
+
+Check if a node tree contains any component instances.
+
+<TypeTable
+  type={{
+    node: {
+      description: 'Root node to check',
+      type: 'CoralNode',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `boolean` - Whether the tree contains component instances
+
+```typescript
+import { hasComponentInstances } from '@reallygoodwork/coral-core'
+
+if (hasComponentInstances(rootNode)) {
+  // Tree contains component instances
+}
+```
+
+---
+
+### `countComponentInstances`
+
+Count the number of component instances in a node tree.
+
+<TypeTable
+  type={{
+    node: {
+      description: 'Root node to count',
+      type: 'CoralNode',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `number` - Number of component instances
+
+```typescript
+import { countComponentInstances } from '@reallygoodwork/coral-core'
+
+const count = countComponentInstances(rootNode)
+console.log(`Found ${count} component instances`)
+```
+
+---
+
+## Conditional Utilities
+
+### `evaluateCondition`
+
+Evaluate a conditional expression against a set of props.
+
+<TypeTable
+  type={{
+    expression: {
+      description: 'The conditional expression to evaluate',
+      type: 'ConditionalExpression',
+      required: true,
+    },
+    props: {
+      description: 'Props to evaluate the expression against',
+      type: 'Record<string, unknown>',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `boolean` - The result of the conditional expression
+
+```typescript
+import { evaluateCondition } from '@reallygoodwork/coral-core'
+
+// Simple prop check
+evaluateCondition({ $prop: 'enabled' }, { enabled: true })
+// true
+
+// Complex expression
+const result = evaluateCondition(
+  { $and: [{ $prop: 'enabled' }, { $not: { $prop: 'loading' } }] },
+  { enabled: true, loading: false }
+)
+// true
+
+// Equality check
+evaluateCondition(
+  { $eq: [{ $prop: 'status' }, 'active'] },
+  { status: 'active' }
+)
+// true
+```
+
+**Supported operators:**
+- `{ $prop: string }` - Check if prop is truthy
+- `{ $not: ConditionalExpression }` - Logical NOT
+- `{ $and: ConditionalExpression[] }` - Logical AND
+- `{ $or: ConditionalExpression[] }` - Logical OR
+- `{ $eq: [ConditionalExpression, unknown] }` - Equality check
+- `{ $ne: [ConditionalExpression, unknown] }` - Inequality check
+
+---
+
+## Props Validation Utilities
+
+### `validateProps`
+
+Validate all prop bindings in a package, checking for missing required props, type mismatches, and constraint violations.
+
+<TypeTable
+  type={{
+    pkg: {
+      description: 'The loaded package to validate',
+      type: 'LoadedPackage',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `PropValidationResult` - Validation result with errors and warnings
+
+<TypeTable
+  type={{
+    'result.valid': {
+      description: 'Whether all props are valid',
+      type: 'boolean',
+      required: true,
+    },
+    'result.errors': {
+      description: 'List of prop validation errors',
+      type: 'PropValidationError[]',
+      required: true,
+    },
+    'result.warnings': {
+      description: 'List of prop validation warnings',
+      type: 'PropValidationWarning[]',
+      required: true,
+    },
+  }}
+/>
+
+```typescript
+import { validateProps } from '@reallygoodwork/coral-core'
+
+const result = validateProps(pkg)
+if (!result.valid) {
+  for (const error of result.errors) {
+    console.error(`[${error.type}] ${error.path}: ${error.message}`)
+  }
+}
+```
+
+---
+
+### `findUnusedProps`
+
+Find props that are defined but never used in a component.
+
+<TypeTable
+  type={{
+    component: {
+      description: 'The component to analyze',
+      type: 'CoralRootNode',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `string[]` - Array of unused prop names
+
+```typescript
+import { findUnusedProps } from '@reallygoodwork/coral-core'
+
+const unused = findUnusedProps(component)
+if (unused.length > 0) {
+  console.warn(`Unused props: ${unused.join(', ')}`)
+}
+```
+
+---
+
+## Package Writer Utilities
+
+### `writePackage`
+
+Write a complete Coral package to disk.
+
+<TypeTable
+  type={{
+    basePath: {
+      description: 'Base directory path for the package',
+      type: 'string',
+      required: true,
+    },
+    data: {
+      description: 'Package data to write',
+      type: 'PackageData',
+      required: true,
+    },
+    options: {
+      description: 'Writer options',
+      type: 'PackageWriterOptions',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `Promise<void>`
+
+```typescript
+import { writePackage } from '@reallygoodwork/coral-core'
+import * as fs from 'fs/promises'
+
+await writePackage('./my-package', {
+  config: packageConfig,
+  components: componentMap,
+  tokens: tokenMap,
+}, {
+  writeFile: (path, content) => fs.writeFile(path, content, 'utf-8'),
+})
+```
+
+---
+
+### `writeComponent`
+
+Write a single component to disk.
+
+<TypeTable
+  type={{
+    filePath: {
+      description: 'Path to write the component file',
+      type: 'string',
+      required: true,
+    },
+    component: {
+      description: 'Component to write',
+      type: 'CoralRootNode',
+      required: true,
+    },
+    options: {
+      description: 'Writer options',
+      type: 'PackageWriterOptions',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `Promise<void>`
+
+```typescript
+import { writeComponent } from '@reallygoodwork/coral-core'
+
+await writeComponent(
+  './components/button/button.coral.json',
+  buttonComponent,
+  { writeFile: (path, content) => fs.writeFile(path, content, 'utf-8') }
+)
+```
+
+---
+
+### `createComponentScaffold`
+
+Create a scaffold for a new component with default structure.
+
+<TypeTable
+  type={{
+    name: {
+      description: 'Component name',
+      type: 'string',
+      required: true,
+    },
+    category: {
+      description: 'Component category',
+      type: 'string',
+      required: false,
+    },
+  }}
+/>
+
+**Returns:** `CoralRootNode` - Scaffolded component with default structure
+
+```typescript
+import { createComponentScaffold } from '@reallygoodwork/coral-core'
+
+const scaffold = createComponentScaffold('Button', 'Actions')
+// Returns a basic component structure ready for customization
+```
+
+---
+
+## Related
+
+- [Types & Guards](/docs/packages/core/types) - Type definitions
+- [CLI Commands](/docs/packages/core/cli) - Command-line interface
+- [Package System](/docs/packages/core/packages) - Package management

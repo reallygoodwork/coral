@@ -1,0 +1,970 @@
+---
+title: "@reallygoodwork/coral-to-react"
+description: Generate React component code from Coral specifications.
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+[![npm](https://img.shields.io/npm/v/@reallygoodwork/coral-to-react)](https://www.npmjs.com/package/@reallygoodwork/coral-to-react)
+
+Generate React component code from Coral specifications. This package transforms Coral JSON specifications into fully functional React components with TypeScript support, state management, event handlers, styling, and component composition.
+
+## Features
+
+- **Complete React Components** - Generate fully functional React components from Coral specs
+- **TypeScript Support** - Automatically generate TypeScript interfaces for props (supports both legacy and new props systems)
+- **Component Formats** - Choose between function declarations or arrow functions
+- **Style Options** - Output inline styles or separate CSS classes with Tailwind support
+- **Variant Strategies** - Support for CVA (Class Variance Authority), inline styles, or custom variant handling
+- **Component Composition** - Render component instances with prop/slot/event bindings
+- **Package Generation** - Generate entire component libraries from Coral packages
+- **State Management** - Generate React hooks (useState, useEffect, etc.)
+- **Event Handlers** - Create methods and event handler functions
+- **Prettier Integration** - Optional code formatting with Prettier
+- **Import Management** - Generate necessary import statements automatically
+
+## Installation
+
+```bash
+npm install @reallygoodwork/coral-to-react
+```
+
+```bash
+pnpm add @reallygoodwork/coral-to-react
+```
+
+```bash
+yarn add @reallygoodwork/coral-to-react
+```
+
+---
+
+## API Reference
+
+### `coralToReact`
+
+Main function to convert a Coral specification into React component code.
+
+<TypeTable
+  type={{
+    spec: {
+      description: 'The Coral root node specification to convert to React',
+      type: 'CoralRootNode',
+      required: true,
+    },
+    options: {
+      description: 'Optional configuration for React generation',
+      type: 'Options',
+      required: false,
+    },
+  }}
+/>
+
+**Returns:** `Promise<{ reactCode: string; cssCode: string }>` - Object containing generated React code and CSS (if using className format)
+
+#### Basic Example
+
+```typescript
+import { coralToReact } from '@reallygoodwork/coral-to-react';
+import type { CoralRootNode } from '@reallygoodwork/coral-core';
+
+const spec: CoralRootNode = {
+  name: 'Button',
+  componentName: 'Button',
+  elementType: 'button',
+  componentProperties: {
+    label: { type: 'string' },
+    onClick: { type: 'function' }
+  },
+  styles: {
+    padding: '10px 20px',
+    backgroundColor: '#007bff',
+    color: '#ffffff',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer'
+  },
+  textContent: '{props.label}'
+};
+
+const { reactCode, cssCode } = await coralToReact(spec);
+```
+
+**Generated Output:**
+```typescript
+import React from 'react'
+
+interface ButtonProps {
+  label: string
+  onClick?: () => void
+}
+
+export function Button(props: ButtonProps) {
+  return (
+    <button style={{ padding: '10px 20px', backgroundColor: '#007bff', color: '#ffffff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+      {props.label}
+    </button>
+  )
+}
+```
+
+---
+
+### `generatePackage`
+
+**NEW** - Generate an entire component library from a Coral package. This function processes all components in a package, resolves dependencies, and generates a complete React component library with proper imports and exports.
+
+<TypeTable
+  type={{
+    package: {
+      description: 'Loaded Coral package from @reallygoodwork/coral-core',
+      type: 'LoadedPackage',
+      required: true,
+    },
+    options: {
+      description: 'Optional configuration for package generation',
+      type: 'Options',
+      required: false,
+    },
+  }}
+/>
+
+**Returns:** `Promise<PackageGenerationResult>` - Object containing component files, CSS files, and index file
+
+#### Package Generation Example
+
+```typescript
+import { loadPackage } from '@reallygoodwork/coral-core';
+import { generatePackage } from '@reallygoodwork/coral-to-react';
+import * as fs from 'fs/promises';
+
+// Load your Coral package
+const pkg = await loadPackage('./coral.config.json', {
+  readFile: (path) => fs.readFile(path, 'utf-8'),
+});
+
+// Generate entire component library
+const result = await generatePackage(pkg, {
+  componentFormat: 'arrow',
+  styleFormat: 'className',
+  includeTypes: true,
+  variantStrategy: 'cva',
+});
+
+// Write all component files
+for (const file of result.components) {
+  await fs.writeFile(`./dist/${file.path}`, file.content);
+}
+
+// Write CSS files
+for (const file of result.styles) {
+  await fs.writeFile(`./dist/${file.path}`, file.content);
+}
+
+// Write index file
+if (result.index) {
+  await fs.writeFile(`./dist/${result.index.path}`, result.index.content);
+}
+```
+
+The generated package will include:
+- All components in dependency order (dependencies generated first)
+- Proper import statements between components
+- CSS files (if using className format)
+- Index file with all exports
+- TypeScript type exports (if includeTypes is true)
+
+---
+
+## Options
+
+Configuration options for React generation.
+
+<TypeTable
+  type={{
+    componentFormat: {
+      description: 'Component declaration style: function declaration or arrow function',
+      type: "'function' | 'arrow'",
+      default: "'function'",
+      required: false,
+    },
+    styleFormat: {
+      description: 'How to output styles: inline styles or CSS classes',
+      type: "'inline' | 'className'",
+      default: "'inline'",
+      required: false,
+    },
+    includeTypes: {
+      description: 'Generate TypeScript types for props',
+      type: 'boolean',
+      default: 'true',
+      required: false,
+    },
+    indentSize: {
+      description: 'Indentation size in spaces',
+      type: 'number',
+      default: '2',
+      required: false,
+    },
+    prettier: {
+      description: 'Format output with Prettier',
+      type: 'boolean',
+      default: 'false',
+      required: false,
+    },
+    flattenComposition: {
+      description: 'Whether to flatten component composition (inline instances). When false, component instances are rendered as JSX components with imports.',
+      type: 'boolean',
+      default: 'false',
+      required: false,
+    },
+    variantStrategy: {
+      description: 'How to handle component variants: CVA (Class Variance Authority) for Tailwind, inline styles, or custom handling',
+      type: "'cva' | 'inline' | 'custom'",
+      default: "'inline'",
+      required: false,
+    },
+  }}
+/>
+
+### Component Format
+
+Choose between function declaration or arrow function style:
+
+**Function Declaration (default):**
+```typescript
+export function Button(props: ButtonProps) {
+  return <button>Click me</button>
+}
+```
+
+**Arrow Function:**
+```typescript
+export const Button = (props: ButtonProps) => {
+  return <button>Click me</button>
+}
+```
+
+### Style Format
+
+**Inline Styles (default):**
+```typescript
+<button style={{ padding: '10px', backgroundColor: '#007bff' }}>
+  Click me
+</button>
+```
+
+**CSS Classes:**
+```typescript
+// Component
+<button className="coral-root-button">Click me</button>
+
+// Separate CSS file
+.coral-root-button {
+  padding: 10px;
+  background-color: #007bff;
+}
+```
+
+When using `className` format with variants, the generator automatically uses CVA if `variantStrategy` is set to `'cva'` or if variants are detected.
+
+### Variant Strategy
+
+The `variantStrategy` option controls how component variants are handled:
+
+> **Learn more:** For comprehensive information about Coral's variant system, see the [Component Variants guide](/docs/guides/variants) and [Component Variants API](/docs/packages/core/variants).
+
+**`'inline'` (default):** Variants are applied as inline styles or CSS classes directly in the JSX.
+
+**`'cva'`:** Uses [Class Variance Authority](https://cva.style) for variant management. Requires `styleFormat: 'className'` and Tailwind CSS. Automatically generates CVA configuration from Coral variant definitions.
+
+**`'custom'`:** Allows custom variant handling (for advanced use cases).
+
+#### CVA Example
+
+When using `variantStrategy: 'cva'` with variants:
+
+```typescript
+// Coral spec with variants
+const buttonSpec = {
+  componentVariants: {
+    axes: [
+      { name: 'intent', values: ['primary', 'secondary'], default: 'primary' },
+      { name: 'size', values: ['sm', 'md', 'lg'], default: 'md' }
+    ]
+  },
+  variantStyles: {
+    intent: {
+      primary: { backgroundColor: '#007bff', color: '#fff' },
+      secondary: { backgroundColor: '#6c757d', color: '#fff' }
+    },
+    size: {
+      sm: { padding: '4px 8px', fontSize: '12px' },
+      md: { padding: '8px 16px', fontSize: '14px' },
+      lg: { padding: '12px 24px', fontSize: '16px' }
+    }
+  }
+};
+
+// Generated React code
+import { cva } from 'class-variance-authority';
+import { cn } from '@/lib/utils';
+
+const buttonVariants = cva('rounded font-medium', {
+  variants: {
+    intent: {
+      primary: 'bg-blue-500 text-white',
+      secondary: 'bg-gray-500 text-white'
+    },
+    size: {
+      sm: 'px-2 py-1 text-xs',
+      md: 'px-4 py-2 text-sm',
+      lg: 'px-6 py-3 text-base'
+    }
+  },
+  defaultVariants: {
+    intent: 'primary',
+    size: 'md'
+  }
+});
+
+export const Button = (props: ButtonProps) => {
+  const className = buttonVariants({ intent: props.intent, size: props.size });
+  return <button className={className}>{props.label}</button>;
+};
+```
+
+> **Note:** CVA generation requires the `@reallygoodwork/style-to-tailwind` package to convert Coral styles to Tailwind classes. See the [Style to Tailwind documentation](/docs/packages/style-to-tailwind) for details.
+
+---
+
+## Component Composition
+
+**NEW** - Components can now embed other components using `COMPONENT_INSTANCE` type. This enables building complex UIs by composing smaller components together.
+
+> **Learn more:** For comprehensive information about component composition, prop bindings, slot bindings, and event bindings, see the [Component Composition guide](/docs/guides/composition) and [Component Composition API](/docs/packages/core/composition).
+
+### Basic Component Instance
+
+```typescript
+const cardSpec: CoralRootNode = {
+  name: 'Card',
+  elementType: 'div',
+  props: {
+    title: { type: 'string', required: true },
+    onSave: { type: 'function' }
+  },
+  children: [
+    {
+      id: 'save-button',
+      name: 'SaveButton',
+      type: 'COMPONENT_INSTANCE',
+      elementType: 'button',
+      $component: {
+        ref: './button.coral.json'
+      },
+      propBindings: {
+        label: 'Save',
+        intent: 'primary'
+      },
+      eventBindings: {
+        onClick: { $event: 'onSave' }
+      }
+    }
+  ]
+};
+
+const { reactCode } = await coralToReact(cardSpec);
+```
+
+**Generated Output:**
+```typescript
+import { Button } from './Button';
+
+export function Card(props: CardProps) {
+  return (
+    <div>
+      <Button label="Save" intent="primary" onClick={props.onSave} />
+    </div>
+  );
+}
+```
+
+### Prop Bindings
+
+Prop bindings can be static values or dynamic references to parent props:
+
+**Static Values:**
+```json
+{
+  "propBindings": {
+    "label": "Click me",
+    "intent": "primary",
+    "disabled": false
+  }
+}
+```
+
+**Dynamic Prop References:**
+```json
+{
+  "propBindings": {
+    "label": { "$prop": "buttonLabel" },
+    "disabled": { "$prop": "isDisabled" }
+  }
+}
+```
+
+This generates:
+```typescript
+<Button label={props.buttonLabel} disabled={props.isDisabled} />
+```
+
+### Event Bindings
+
+Event bindings forward events from child components to parent handlers:
+
+```json
+{
+  "eventBindings": {
+    "onClick": { "$event": "onSave" },
+    "onChange": { "$event": "handleChange" }
+  }
+}
+```
+
+This generates:
+```typescript
+<Button onClick={props.onSave} onChange={props.handleChange} />
+```
+
+### Slot Bindings
+
+Slot bindings pass content to component slots:
+
+```json
+{
+  "slotBindings": {
+    "default": { "$prop": "children" },
+    "header": [
+      {
+        "elementType": "h2",
+        "textContent": "Card Title"
+      }
+    ]
+  }
+}
+```
+
+### Variant Overrides
+
+Override variant values for component instances:
+
+```json
+{
+  "variantOverrides": {
+    "intent": "destructive",
+    "size": "lg"
+  }
+}
+```
+
+This locks the component instance to specific variant values, regardless of parent props.
+
+### Flattening Composition
+
+By default, component instances are rendered as separate React components with imports. If you want to flatten them (resolve instances to their actual node structures), use the `flattenComposition` option:
+
+```typescript
+import { loadPackage } from '@reallygoodwork/coral-core';
+import { coralToReact } from '@reallygoodwork/coral-to-react';
+
+const pkg = await loadPackage('./coral.config.json', options);
+
+const { reactCode } = await coralToReact(cardSpec, {
+  flattenComposition: true,
+  package: pkg  // Required for flattening
+});
+```
+
+When `flattenComposition: true`, component instances are resolved and inlined into the parent component's JSX structure.
+
+> **Note:** For more details on component composition, see the [Composition guide](/docs/packages/core/composition).
+
+---
+
+## Props Interface Generation
+
+The `generatePropsInterface` function supports both the legacy `componentProperties` format and the new `props` definition system.
+
+> **Learn more:** For comprehensive information about defining props and events, see the [Props & Events guide](/docs/guides/props-events) and [Props & Events API](/docs/packages/core/props-events).
+
+### Legacy Props System
+
+```typescript
+const spec = {
+  componentProperties: {
+    label: { type: 'string' },
+    count: { type: 'number', optional: true }
+  }
+};
+
+const interface = generatePropsInterface(spec.componentProperties, 'Button');
+// interface ButtonProps {
+//   label: string
+//   count?: number
+// }
+```
+
+### New Props System
+
+```typescript
+const spec = {
+  props: {
+    label: {
+      type: 'string',
+      required: true,
+      description: 'Button text'
+    },
+    intent: {
+      type: { enum: ['primary', 'secondary'] },
+      default: 'primary'
+    },
+    disabled: {
+      type: 'boolean',
+      default: false
+    }
+  }
+};
+
+const interface = generatePropsInterface(spec, 'Button');
+// interface ButtonProps {
+//   label: string
+//   intent?: 'primary' | 'secondary'
+//   disabled?: boolean
+// }
+```
+
+The function automatically detects which props system is being used and generates the appropriate TypeScript interface.
+
+> **Note:** For details on the new props system, see the [Props & Events documentation](/docs/packages/core/props-events).
+
+---
+
+## Helper Functions
+
+### `generateComponent`
+
+Lower-level function for generating a single component. Used internally by `coralToReact` and `generatePackage`.
+
+```typescript
+import { generateComponent } from '@reallygoodwork/coral-to-react';
+
+const { reactCode, cssCode } = await generateComponent(spec, options);
+```
+
+### `generateJSXElement`
+
+Generate JSX for a single Coral node.
+
+```typescript
+import { generateJSXElement } from '@reallygoodwork/coral-to-react';
+
+const jsx = generateJSXElement(node, indent, idMapping);
+// '<div style={{ padding: "20px" }}>...</div>'
+```
+
+### `generatePropsInterface`
+
+Generate TypeScript props interface. Supports both legacy and new props systems.
+
+```typescript
+import { generatePropsInterface } from '@reallygoodwork/coral-to-react';
+
+// Legacy format
+const interface = generatePropsInterface(
+  { title: { type: 'string' } },
+  'Card'
+);
+
+// New format (pass entire spec)
+const interface = generatePropsInterface(spec, 'Card');
+```
+
+### `generateStateHooks`
+
+Generate React useState hooks from Coral state specifications.
+
+```typescript
+import { generateStateHooks } from '@reallygoodwork/coral-to-react';
+
+const hooks = generateStateHooks([
+  { name: 'count', setter: 'setCount', initialValue: 0 }
+]);
+// 'const [count, setCount] = useState(0)'
+```
+
+### `generateMethods`
+
+Generate method/function code from Coral method specifications.
+
+```typescript
+import { generateMethods } from '@reallygoodwork/coral-to-react';
+
+const methods = generateMethods([
+  { name: 'handleClick', parameters: [], body: 'console.log("clicked")' }
+]);
+// 'const handleClick = () => {\n  console.log("clicked")\n}'
+```
+
+### `generateCSS`
+
+Generate CSS code from Coral styles (used when `styleFormat: 'className'`).
+
+```typescript
+import { generateCSS } from '@reallygoodwork/coral-to-react';
+
+const css = generateCSS(spec, idMapping);
+// '.component-root { padding: 20px; }'
+```
+
+### `generateImports`
+
+Generate import statements from Coral import specifications.
+
+```typescript
+import { generateImports } from '@reallygoodwork/coral-to-react';
+
+const imports = generateImports([
+  { source: 'react', specifiers: [{ name: 'useState' }] }
+]);
+// "import { useState } from 'react'"
+```
+
+### `stylesToInlineStyle`
+
+Convert Coral style objects to React inline style objects.
+
+```typescript
+import { stylesToInlineStyle } from '@reallygoodwork/coral-to-react';
+
+const inlineStyle = stylesToInlineStyle({ padding: '20px', margin: '10px' });
+// 'style={{ padding: "20px", margin: "10px" }}'
+```
+
+---
+
+## Complete Examples
+
+### Button with Variants and CVA
+
+```typescript
+import { coralToReact } from '@reallygoodwork/coral-to-react';
+
+const buttonSpec = {
+  name: 'Button',
+  componentName: 'Button',
+  elementType: 'button',
+  componentVariants: {
+    axes: [
+      { name: 'intent', values: ['primary', 'secondary'], default: 'primary' },
+      { name: 'size', values: ['sm', 'md', 'lg'], default: 'md' }
+    ]
+  },
+  props: {
+    label: { type: 'string', required: true },
+    disabled: { type: 'boolean', default: false }
+  },
+  events: {
+    onClick: { description: 'Button click handler' }
+  },
+  styles: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    borderRadius: '6px',
+    fontWeight: '500',
+    border: 'none',
+    cursor: 'pointer'
+  },
+  variantStyles: {
+    intent: {
+      primary: { backgroundColor: '#007bff', color: '#ffffff' },
+      secondary: { backgroundColor: '#6c757d', color: '#ffffff' }
+    },
+    size: {
+      sm: { padding: '4px 8px', fontSize: '12px' },
+      md: { padding: '8px 16px', fontSize: '14px' },
+      lg: { padding: '12px 24px', fontSize: '16px' }
+    }
+  },
+  textContent: { $prop: 'label' },
+  elementAttributes: {
+    disabled: { $prop: 'disabled' }
+  },
+  eventHandlers: {
+    onClick: { $event: 'onClick' }
+  }
+};
+
+const { reactCode, cssCode } = await coralToReact(buttonSpec, {
+  componentFormat: 'arrow',
+  styleFormat: 'className',
+  variantStrategy: 'cva',
+  includeTypes: true
+});
+```
+
+### Card with Component Composition
+
+```typescript
+const cardSpec = {
+  name: 'Card',
+  componentName: 'Card',
+  elementType: 'div',
+  props: {
+    title: { type: 'string', required: true },
+    description: { type: 'string' },
+    onAction: { type: 'function' }
+  },
+  styles: {
+    padding: '24px',
+    borderRadius: '12px',
+    backgroundColor: '#ffffff',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+  },
+  children: [
+    {
+      elementType: 'h3',
+      textContent: { $prop: 'title' },
+      styles: { fontSize: '20px', fontWeight: 'bold', marginBottom: '8px' }
+    },
+    {
+      elementType: 'p',
+      textContent: { $prop: 'description' },
+      styles: { color: '#666', lineHeight: '1.5' }
+    },
+    {
+      id: 'action-button',
+      type: 'COMPONENT_INSTANCE',
+      $component: { ref: './button.coral.json' },
+      propBindings: {
+        label: 'Learn More',
+        intent: 'primary'
+      },
+      eventBindings: {
+        onClick: { $event: 'onAction' }
+      }
+    }
+  ]
+};
+
+const { reactCode } = await coralToReact(cardSpec, {
+  componentFormat: 'arrow',
+  includeTypes: true
+});
+```
+
+### Component with State and Methods
+
+```typescript
+const counterSpec = {
+  name: 'Counter',
+  componentName: 'Counter',
+  elementType: 'div',
+  stateHooks: [
+    {
+      name: 'count',
+      setter: 'setCount',
+      initialValue: 0,
+      tsType: 'number',
+      hookType: 'useState'
+    }
+  ],
+  methods: [
+    {
+      name: 'increment',
+      body: 'setCount(count + 1)',
+      parameters: []
+    },
+    {
+      name: 'decrement',
+      body: 'setCount(count - 1)',
+      parameters: []
+    }
+  ],
+  children: [
+    {
+      elementType: 'button',
+      elementAttributes: { onClick: '{increment}' },
+      textContent: '+'
+    },
+    {
+      elementType: 'span',
+      textContent: '{count}'
+    },
+    {
+      elementType: 'button',
+      elementAttributes: { onClick: '{decrement}' },
+      textContent: '-'
+    }
+  ]
+};
+
+const { reactCode } = await coralToReact(counterSpec);
+```
+
+---
+
+## Type Exports
+
+### `Options`
+
+Configuration options for React generation.
+
+<TypeTable
+  type={{
+    componentFormat: {
+      description: 'Component declaration style',
+      type: "'function' | 'arrow'",
+      default: "'function'",
+    },
+    styleFormat: {
+      description: 'How to output styles',
+      type: "'inline' | 'className'",
+      default: "'inline'",
+    },
+    includeTypes: {
+      description: 'Generate TypeScript types',
+      type: 'boolean',
+      default: 'true',
+    },
+    indentSize: {
+      description: 'Indentation size in spaces',
+      type: 'number',
+      default: '2',
+    },
+    prettier: {
+      description: 'Format with Prettier',
+      type: 'boolean',
+      default: 'false',
+    },
+    flattenComposition: {
+      description: 'Flatten component composition',
+      type: 'boolean',
+      default: 'false',
+    },
+    variantStrategy: {
+      description: 'Variant handling strategy',
+      type: "'cva' | 'inline' | 'custom'",
+      default: "'inline'",
+    },
+  }}
+/>
+
+### `GeneratedFile`
+
+Represents a generated file in package generation.
+
+<TypeTable
+  type={{
+    path: {
+      description: 'File path relative to output directory',
+      type: 'string',
+      required: true,
+    },
+    content: {
+      description: 'File content',
+      type: 'string',
+      required: true,
+    },
+  }}
+/>
+
+### `PackageGenerationResult`
+
+Result of package generation.
+
+<TypeTable
+  type={{
+    components: {
+      description: 'Generated component files',
+      type: 'GeneratedFile[]',
+      required: true,
+    },
+    styles: {
+      description: 'Generated CSS files',
+      type: 'GeneratedFile[]',
+      required: true,
+    },
+    index: {
+      description: 'Index file with exports',
+      type: 'GeneratedFile',
+      required: false,
+    },
+  }}
+/>
+
+---
+
+## Style Conversion
+
+The package automatically converts Coral style objects to React-compatible formats:
+
+### Dimension Objects
+
+```typescript
+// Coral
+{ padding: { value: 20, unit: 'px' } }
+
+// React (inline)
+{ padding: '20px' }
+
+// React (CSS)
+padding: 20px;
+```
+
+### Color Objects
+
+```typescript
+// Coral
+{ backgroundColor: { hex: '#007bff', rgb: {...}, hsl: {...} } }
+
+// React (inline)
+{ backgroundColor: '#007bff' }
+
+// React (CSS)
+background-color: #007bff;
+```
+
+### Numeric Values
+
+Numeric values are automatically converted:
+- Most properties get `px` units added
+- Unitless properties (like `fontWeight`, `lineHeight`, `zIndex`) remain as numbers
+
+---
+
+## Related Packages
+
+- [@reallygoodwork/coral-core](/docs/packages/core) - Core utilities, types, CLI, and composition helpers
+- [@reallygoodwork/react-to-coral](/docs/packages/react-to-coral) - Convert React components to Coral specs (reverse operation)
+- [@reallygoodwork/coral-to-html](/docs/packages/coral-to-html) - Convert Coral specs to HTML
+- [@reallygoodwork/style-to-tailwind](/docs/packages/style-to-tailwind) - Convert CSS styles to Tailwind classes (used for CVA generation)
+- [@reallygoodwork/coral-tw2css](/docs/packages/tw2css) - Convert Tailwind classes to CSS
+
+## Additional Resources
+
+- [Getting Started Guide](/docs/guides/getting-started) - Learn how to use Coral in your projects
+- [Component Variants Guide](/docs/guides/variants) - Understanding Coral's variant system
+- [Component Composition Guide](/docs/guides/composition) - Deep dive into component composition
+- [Props & Events Guide](/docs/guides/props-events) - Understanding the props system
+- [Package System Guide](/docs/guides/packages) - Working with Coral packages
+
+---
+
+## Additional Resources
+
+- [Component Variants Guide](/docs/packages/core/variants) - Learn about Coral's variant system
+- [Component Composition Guide](/docs/packages/core/composition) - Deep dive into component composition
+- [Props & Events Guide](/docs/packages/core/props-events) - Understanding the props system
+- [Package System Guide](/docs/packages/core/packages) - Working with Coral packages

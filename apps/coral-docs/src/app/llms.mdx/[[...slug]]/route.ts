@@ -9,7 +9,9 @@ export async function GET(
   { params }: RouteContext<'/llms.mdx/[[...slug]]'>,
 ) {
   const { slug } = await params;
-  const page = source.getPage(slug);
+  // Remove 'docs' prefix if present (for backward compatibility)
+  const cleanSlug = slug?.[0] === 'docs' ? slug.slice(1) : slug;
+  const page = source.getPage(cleanSlug);
   if (!page) notFound();
 
   return new Response(await getLLMText(page), {

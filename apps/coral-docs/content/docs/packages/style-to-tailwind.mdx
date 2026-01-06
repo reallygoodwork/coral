@@ -1,0 +1,876 @@
+---
+title: "@reallygoodwork/style-to-tailwind"
+description: Convert CSS style objects to Tailwind CSS classes.
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+[![npm](https://img.shields.io/npm/v/@reallygoodwork/style-to-tailwind)](https://www.npmjs.com/package/@reallygoodwork/style-to-tailwind)
+
+Convert CSS style objects to Tailwind CSS classes. This utility package transforms CSS-in-JS style objects, Coral style objects, or inline styles into Tailwind utility classes, making it easy to migrate from CSS-in-JS to Tailwind or convert style objects programmatically.
+
+## Features
+
+- **CSS to Tailwind Conversion** - Convert CSS property-value pairs to Tailwind utility classes
+- **Color Object Support** - Handle color objects with hex, RGB, and HSL values
+- **Spacing Scale Conversion** - Automatically convert pixel values to Tailwind spacing scale
+- **Font Size Mapping** - Convert font sizes to Tailwind text size classes
+- **Color Matching** - Match colors to Tailwind color palette or use arbitrary values
+- **Arbitrary Values** - Fallback to Tailwind arbitrary value syntax for custom values
+- **Reverse Mappings** - Uses reverse mappings from `@reallygoodwork/coral-tw2css` for accurate conversions
+- **TypeScript Support** - Fully typed for TypeScript projects
+
+## Installation
+
+```bash
+npm install @reallygoodwork/style-to-tailwind
+```
+
+```bash
+pnpm add @reallygoodwork/style-to-tailwind
+```
+
+```bash
+yarn add @reallygoodwork/style-to-tailwind
+```
+
+---
+
+## API Reference
+
+### `styleToTailwind`
+
+Converts a CSS style object to an array of Tailwind CSS class names. This is the primary function for converting styles to Tailwind classes.
+
+<TypeTable
+  type={{
+    styles: {
+      description: 'CSS style object with camelCase property names (CoralStyleType or StyleObject)',
+      type: 'CoralStyleType | StyleObject',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `string[]` - Array of Tailwind CSS class names
+
+#### Basic Example
+
+```typescript
+import { styleToTailwind } from '@reallygoodwork/style-to-tailwind';
+
+const classes = styleToTailwind({
+  padding: 16,
+  margin: 8,
+  fontSize: 14,
+});
+// Returns: ['p-4', 'm-2', 'text-sm']
+```
+
+#### With Color Objects
+
+```typescript
+import { styleToTailwind } from '@reallygoodwork/style-to-tailwind';
+
+const classes = styleToTailwind({
+  backgroundColor: {
+    hex: '#3b82f6',
+    rgb: { r: 59, g: 130, b: 246, a: 1 },
+    hsl: { h: 217, s: 91, l: 60, a: 1 },
+  },
+  color: {
+    hex: '#ffffff',
+    rgb: { r: 255, g: 255, b: 255, a: 1 },
+    hsl: { h: 0, s: 0, l: 100, a: 1 },
+  },
+});
+// Returns: ['bg-blue-500', 'text-white']
+```
+
+#### With String Values
+
+```typescript
+const classes = styleToTailwind({
+  padding: '16px',      // Converts to p-4
+  padding: '1rem',      // Converts to p-4 (1rem = 16px)
+  fontSize: '14px',     // Converts to text-sm
+  backgroundColor: '#3b82f6', // Converts to bg-blue-500
+});
+```
+
+#### With Hex Colors
+
+```typescript
+const classes = styleToTailwind({
+  backgroundColor: '#3b82f6', // Matches Tailwind blue-500
+  color: '#ef4444',            // Matches Tailwind red-500
+  borderColor: '#22c55e',      // Matches Tailwind green-500
+});
+// Returns: ['bg-blue-500', 'text-red-500', 'border-green-500']
+```
+
+#### Complex Styles
+
+```typescript
+const classes = styleToTailwind({
+  padding: 16,
+  paddingTop: 8,
+  paddingBottom: 8,
+  backgroundColor: { hex: '#3b82f6' },
+  color: { hex: '#ffffff' },
+  borderRadius: 8,
+  fontSize: 14,
+  fontWeight: 600,
+  gap: 16,
+});
+// Returns: ['p-4', 'pt-2', 'pb-2', 'bg-blue-500', 'text-white', 'rounded-lg', 'text-sm', 'font-semibold', 'gap-4']
+```
+
+#### Sizing Properties
+
+```typescript
+const classes = styleToTailwind({
+  width: 64,        // w-16
+  height: 32,        // h-8
+  minWidth: 16,     // min-w-4
+  maxWidth: 96,     // max-w-24
+  minHeight: 100,   // min-h-[100px] (arbitrary)
+  maxHeight: 200,   // max-h-[200px] (arbitrary)
+});
+```
+
+#### Nested Objects
+
+Nested style objects (for responsive breakpoints or state styles) are skipped during conversion:
+
+```typescript
+const classes = styleToTailwind({
+  padding: 16,
+  sm: {
+    padding: 24,
+  },
+  hover: {
+    backgroundColor: { hex: '#2563eb' },
+  },
+});
+// Returns: ['p-4']
+// Note: Responsive and state styles are skipped - convert them separately
+```
+
+---
+
+### `styleToTailwindString`
+
+Converts a CSS style object to a space-separated string of Tailwind CSS classes. This is a convenience function that calls `styleToTailwind` and joins the results.
+
+<TypeTable
+  type={{
+    styles: {
+      description: 'CSS style object with camelCase property names',
+      type: 'CoralStyleType | StyleObject',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `string` - Space-separated Tailwind CSS class string
+
+#### Example
+
+```typescript
+import { styleToTailwindString } from '@reallygoodwork/style-to-tailwind';
+
+const className = styleToTailwindString({
+  padding: 16,
+  margin: 8,
+  fontSize: 14,
+});
+// Returns: 'p-4 m-2 text-sm'
+
+// Use in JSX
+<div className={className}>Content</div>
+```
+
+---
+
+## Utility Functions
+
+### `colorToTailwind`
+
+Converts a color object to a Tailwind color class for a specific property.
+
+<TypeTable
+  type={{
+    property: {
+      description: 'CSS property name (backgroundColor, color, borderColor, etc.)',
+      type: 'string',
+      required: true,
+    },
+    color: {
+      description: 'Color object with hex, rgb, or hsl values',
+      type: 'ColorObject',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `string | null` - Tailwind color class or null if no match found
+
+#### Example
+
+```typescript
+import { colorToTailwind } from '@reallygoodwork/style-to-tailwind';
+
+const bgClass = colorToTailwind('backgroundColor', {
+  hex: '#3b82f6',
+  rgb: { r: 59, g: 130, b: 246, a: 1 },
+  hsl: { h: 217, s: 91, l: 60, a: 1 },
+});
+// Returns: 'bg-blue-500'
+
+const textClass = colorToTailwind('color', {
+  hex: '#ef4444',
+});
+// Returns: 'text-red-500'
+```
+
+---
+
+### `hexToTailwindColor`
+
+Converts a hex color string to the closest Tailwind color name and shade.
+
+<TypeTable
+  type={{
+    hex: {
+      description: 'Hex color string (e.g., "#3b82f6")',
+      type: 'string',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `string | null` - Tailwind color name and shade (e.g., 'blue-500') or null if no close match
+
+#### Example
+
+```typescript
+import { hexToTailwindColor } from '@reallygoodwork/style-to-tailwind';
+
+hexToTailwindColor('#3b82f6');  // Returns: 'blue-500'
+hexToTailwindColor('#ef4444');  // Returns: 'red-500'
+hexToTailwindColor('#22c55e');  // Returns: 'green-500'
+hexToTailwindColor('#123456');  // Returns: null (no close match)
+```
+
+---
+
+### `convertToTailwindScale`
+
+Converts a numeric value (in pixels) to a Tailwind scale value.
+
+<TypeTable
+  type={{
+    property: {
+      description: 'CSS property name',
+      type: 'string',
+      required: true,
+    },
+    value: {
+      description: 'Numeric value in pixels or string with unit',
+      type: 'number | string',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `string | null` - Tailwind scale value or null if no match
+
+#### Example
+
+```typescript
+import { convertToTailwindScale } from '@reallygoodwork/style-to-tailwind';
+
+convertToTailwindScale('padding', 16);      // Returns: '4'
+convertToTailwindScale('fontSize', 14);     // Returns: 'sm'
+convertToTailwindScale('margin', 32);       // Returns: '8'
+convertToTailwindScale('padding', '1rem');  // Returns: '4' (1rem = 16px)
+```
+
+---
+
+### `buildScaleClass`
+
+Builds a Tailwind class from a property and scale value.
+
+<TypeTable
+  type={{
+    property: {
+      description: 'CSS property name',
+      type: 'string',
+      required: true,
+    },
+    scale: {
+      description: 'Tailwind scale value',
+      type: 'string',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `string | null` - Tailwind class or null if property has no prefix
+
+#### Example
+
+```typescript
+import { buildScaleClass } from '@reallygoodwork/style-to-tailwind';
+
+buildScaleClass('padding', '4');        // Returns: 'p-4'
+buildScaleClass('fontSize', 'sm');      // Returns: 'text-sm'
+buildScaleClass('borderRadius', '8');   // Returns: 'rounded-lg'
+buildScaleClass('gap', '16');           // Returns: 'gap-4'
+```
+
+---
+
+### `reverseMappings`
+
+Exports the reverse mappings used for converting CSS property-value pairs to Tailwind classes. This is generated from `@reallygoodwork/coral-tw2css` mappings.
+
+```typescript
+import { reverseMappings } from '@reallygoodwork/style-to-tailwind';
+
+// Access mappings for a property
+console.log(reverseMappings['padding']?.['16']);
+// Returns: 'p-4'
+
+console.log(reverseMappings['fontSize']?.['14']);
+// Returns: 'text-sm'
+```
+
+---
+
+## Type Definitions
+
+### `StyleObject`
+
+Represents a CSS style object that can be converted to Tailwind classes.
+
+<TypeTable
+  type={{
+    '[key: string]': {
+      description: 'CSS property name (camelCase) mapped to a value',
+      type: 'string | number | ColorObject | StyleObject',
+      required: false,
+    },
+  }}
+/>
+
+**Example:**
+```typescript
+const styles: StyleObject = {
+  padding: 16,
+  backgroundColor: { hex: '#3b82f6' },
+  fontSize: 14,
+  sm: {
+    padding: 24,
+  },
+};
+```
+
+---
+
+### `ColorObject`
+
+Represents a color with multiple format representations.
+
+<TypeTable
+  type={{
+    hex: {
+      description: 'Hexadecimal color representation',
+      type: 'string',
+      required: false,
+    },
+    rgb: {
+      description: 'RGB color representation with alpha channel',
+      type: '{ r: number; g: number; b: number; a: number }',
+      required: false,
+    },
+    hsl: {
+      description: 'HSL color representation with alpha channel',
+      type: '{ h: number; s: number; l: number; a: number }',
+      required: false,
+    },
+  }}
+/>
+
+**Example:**
+```typescript
+const color: ColorObject = {
+  hex: '#3b82f6',
+  rgb: { r: 59, g: 130, b: 246, a: 1 },
+  hsl: { h: 217, s: 91, l: 60, a: 1 },
+};
+```
+
+---
+
+## Supported Properties
+
+### Spacing Properties
+
+The following properties use Tailwind's spacing scale (multiplied by 4px):
+
+- `padding`, `paddingTop`, `paddingRight`, `paddingBottom`, `paddingLeft`
+- `paddingInlineStart`, `paddingInlineEnd`, `paddingBlockStart`, `paddingBlockEnd`
+- `margin`, `marginTop`, `marginRight`, `marginBottom`, `marginLeft`
+- `marginInlineStart`, `marginInlineEnd`, `marginBlockStart`, `marginBlockEnd`
+- `gap`, `rowGap`, `columnGap`
+- `top`, `right`, `bottom`, `left`, `inset`
+- `width`, `height`, `minWidth`, `minHeight`, `maxWidth`, `maxHeight`
+
+**Spacing Scale Examples:**
+- `0` → `0px`
+- `0.5` → `2px`
+- `1` → `4px`
+- `4` → `16px` (1rem)
+- `8` → `32px` (2rem)
+- `16` → `64px` (4rem)
+- `24` → `96px` (6rem)
+
+### Typography Properties
+
+- `fontSize` - Converts to Tailwind text size classes:
+  - `12px` → `text-xs`
+  - `14px` → `text-sm`
+  - `16px` → `text-base`
+  - `18px` → `text-lg`
+  - `20px` → `text-xl`
+  - `24px` → `text-2xl`
+  - And more...
+
+- `fontWeight` - Converts to Tailwind font weight classes:
+  - `400` → `font-normal`
+  - `500` → `font-medium`
+  - `600` → `font-semibold`
+  - `700` → `font-bold`
+  - And more...
+
+### Color Properties
+
+The following properties support color objects and hex strings:
+
+- `color` → `text-{color}`
+- `backgroundColor` → `bg-{color}`
+- `borderColor` → `border-{color}`
+- `outlineColor` → `outline-{color}`
+- `ringColor` → `ring-{color}`
+- `fill` → `fill-{color}`
+- `stroke` → `stroke-{color}`
+
+**Supported Tailwind Colors:**
+- Base: `black`, `white`
+- Grays: `slate`, `gray`, `zinc`
+- Colors: `red`, `blue`, `green`, `yellow`, and more
+- Each color includes shades from `50` to `950`
+
+### Border Properties
+
+- `borderRadius` - Converts to Tailwind rounded classes:
+  - `0` → `rounded-none`
+  - `2px` → `rounded-sm`
+  - `4px` → `rounded`
+  - `6px` → `rounded-md`
+  - `8px` → `rounded-lg`
+  - `12px` → `rounded-xl`
+  - `16px` → `rounded-2xl`
+  - `24px` → `rounded-3xl`
+  - `9999px` → `rounded-full`
+
+- `borderWidth` - Converts to Tailwind border width classes
+
+### Other Properties
+
+Many other CSS properties are supported through reverse mappings from `@reallygoodwork/coral-tw2css`. If a property-value pair doesn't have an exact match, the function will fall back to Tailwind's arbitrary value syntax.
+
+---
+
+## Conversion Strategy
+
+The package uses a multi-step conversion strategy:
+
+1. **Exact Reverse Mapping** - Checks if the property-value pair has an exact match in reverse mappings
+2. **Color Object Matching** - For color properties, matches hex values to Tailwind color palette
+3. **Scale Conversion** - Converts numeric values to Tailwind spacing or font size scale
+4. **Arbitrary Values** - Falls back to Tailwind arbitrary value syntax (`[value]`) for unmatched values
+
+### Example Conversion Flow
+
+```typescript
+// Input: { padding: 16 }
+// Step 1: Check reverse mappings → Found: 'p-4'
+// Result: 'p-4'
+
+// Input: { backgroundColor: { hex: '#3b82f6' } }
+// Step 1: Check reverse mappings → No match
+// Step 2: Match color → Found: 'blue-500'
+// Step 3: Build class → 'bg-blue-500'
+// Result: 'bg-blue-500'
+
+// Input: { padding: 13 }
+// Step 1: Check reverse mappings → No match
+// Step 2: Scale conversion → Closest: 12px (scale 3) or 16px (scale 4)
+// Step 3: If close enough (within 2px), use closest match
+// Step 4: Otherwise, use arbitrary → 'p-[13px]'
+// Result: 'p-3' or 'p-[13px]' (depending on threshold)
+```
+
+---
+
+## Usage Examples
+
+### Basic Button Styles
+
+```typescript
+import { styleToTailwindString } from '@reallygoodwork/style-to-tailwind';
+
+const buttonStyles = {
+  padding: 12,
+  fontSize: 14,
+  fontWeight: 600,
+  backgroundColor: { hex: '#3b82f6' },
+  color: { hex: '#ffffff' },
+  borderRadius: 6,
+};
+
+const className = styleToTailwindString(buttonStyles);
+// Returns: 'p-3 text-sm font-semibold bg-blue-500 text-white rounded-md'
+
+<button className={className}>Click me</button>
+```
+
+### Card Component Styles
+
+```typescript
+const cardStyles = {
+  padding: 24,
+  backgroundColor: { hex: '#ffffff' },
+  borderRadius: 12,
+  boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+};
+
+const className = styleToTailwindString(cardStyles);
+// Returns: 'p-6 bg-white rounded-xl [box-shadow:0_4px_6px_rgba(0,0,0,0.1)]'
+```
+
+### Layout Styles
+
+```typescript
+const layoutStyles = {
+  display: 'flex',
+  gap: 16,
+  padding: 32,
+  alignItems: 'center',
+  justifyContent: 'space-between',
+};
+
+const className = styleToTailwindString(layoutStyles);
+// Returns: 'flex gap-4 p-8 items-center justify-between'
+```
+
+### Converting from Inline Styles
+
+```typescript
+// Convert React inline styles to Tailwind
+const inlineStyles = {
+  padding: '16px',
+  backgroundColor: '#3b82f6',
+  color: '#ffffff',
+  borderRadius: '8px',
+};
+
+const className = styleToTailwindString(inlineStyles);
+// Returns: 'p-4 bg-blue-500 text-white rounded-lg'
+```
+
+### Converting Coral Styles
+
+```typescript
+import { styleToTailwind } from '@reallygoodwork/style-to-tailwind';
+import type { CoralStyleType } from '@reallygoodwork/coral-core';
+
+const coralStyles: CoralStyleType = {
+  paddingInlineStart: 16,
+  paddingInlineEnd: 16,
+  paddingBlockStart: 16,
+  paddingBlockEnd: 16,
+  backgroundColor: {
+    hex: '#3b82f6',
+    rgb: { r: 59, g: 130, b: 246, a: 1 },
+    hsl: { h: 217, s: 91, l: 60, a: 1 },
+  },
+};
+
+const classes = styleToTailwind(coralStyles);
+// Returns: ['p-4', 'bg-blue-500']
+```
+
+### Handling Custom Colors
+
+```typescript
+const customColorStyles = {
+  backgroundColor: { hex: '#123456' }, // Custom color not in Tailwind palette
+};
+
+const className = styleToTailwindString(customColorStyles);
+// Returns: 'bg-[#123456]' (arbitrary value)
+```
+
+### Converting Responsive Styles
+
+```typescript
+// Convert base styles
+const baseClasses = styleToTailwindString({
+  padding: 16,
+  fontSize: 14,
+});
+
+// Convert responsive styles separately
+const smClasses = styleToTailwindString({
+  padding: 24,
+  fontSize: 16,
+});
+
+// Combine with Tailwind responsive prefixes
+const className = `${baseClasses} sm:${smClasses.split(' ').join(' sm:')}`;
+```
+
+---
+
+## Integration Examples
+
+### With React Components
+
+```typescript
+import { styleToTailwindString } from '@reallygoodwork/style-to-tailwind';
+
+function Button({ variant = 'primary' }) {
+  const baseStyles = {
+    padding: 12,
+    fontSize: 14,
+    fontWeight: 600,
+    borderRadius: 6,
+  };
+
+  const variantStyles = {
+    primary: {
+      backgroundColor: { hex: '#3b82f6' },
+      color: { hex: '#ffffff' },
+    },
+    secondary: {
+      backgroundColor: { hex: '#6b7280' },
+      color: { hex: '#ffffff' },
+    },
+  };
+
+  const className = styleToTailwindString({
+    ...baseStyles,
+    ...variantStyles[variant],
+  });
+
+  return <button className={className}>Click me</button>;
+}
+```
+
+### Converting from CSS-in-JS Libraries
+
+```typescript
+import { styleToTailwindString } from '@reallygoodwork/style-to-tailwind';
+
+// Convert styled-components styles
+const styledButtonStyles = {
+  padding: '12px 24px',
+  backgroundColor: '#3b82f6',
+  color: '#ffffff',
+  borderRadius: '6px',
+  fontSize: '14px',
+  fontWeight: 600,
+};
+
+const tailwindClasses = styleToTailwindString(styledButtonStyles);
+// Use with Tailwind instead of styled-components
+```
+
+### Migrating from Inline Styles
+
+```typescript
+import { styleToTailwindString } from '@reallygoodwork/style-to-tailwind';
+
+// Before: Inline styles
+function OldComponent() {
+  return (
+    <div style={{
+      padding: '16px',
+      backgroundColor: '#f3f4f6',
+      borderRadius: '8px',
+    }}>
+      Content
+    </div>
+  );
+}
+
+// After: Tailwind classes
+function NewComponent() {
+  const className = styleToTailwindString({
+    padding: 16,
+    backgroundColor: '#f3f4f6',
+    borderRadius: 8,
+  });
+
+  return <div className={className}>Content</div>;
+}
+```
+
+### Converting Coral Components to Tailwind
+
+```typescript
+import { styleToTailwindString } from '@reallygoodwork/style-to-tailwind';
+import type { CoralRootNode } from '@reallygoodwork/coral-core';
+
+function convertCoralToTailwind(spec: CoralRootNode) {
+  if (!spec.styles) return '';
+
+  return styleToTailwindString(spec.styles);
+}
+
+// Use in component generation
+const coralSpec: CoralRootNode = {
+  name: 'Button',
+  elementType: 'button',
+  styles: {
+    padding: 16,
+    backgroundColor: { hex: '#3b82f6' },
+    color: { hex: '#ffffff' },
+    borderRadius: 8,
+  },
+};
+
+const className = convertCoralToTailwind(coralSpec);
+// Returns: 'p-4 bg-blue-500 text-white rounded-lg'
+```
+
+### Batch Conversion
+
+```typescript
+import { styleToTailwind } from '@reallygoodwork/style-to-tailwind';
+
+const styleObjects = [
+  { padding: 16, backgroundColor: { hex: '#3b82f6' } },
+  { padding: 24, backgroundColor: { hex: '#ef4444' } },
+  { padding: 32, backgroundColor: { hex: '#22c55e' } },
+];
+
+const classArrays = styleObjects.map(styleToTailwind);
+// [
+//   ['p-4', 'bg-blue-500'],
+//   ['p-6', 'bg-red-500'],
+//   ['p-8', 'bg-green-500'],
+// ]
+```
+
+---
+
+## Color Matching Algorithm
+
+The package uses a color matching algorithm to find the closest Tailwind color:
+
+1. **Exact Match** - First checks for exact hex matches in Tailwind color palette
+2. **Closest Match** - Calculates Euclidean distance in RGB space to find closest color
+3. **Threshold** - Only returns a match if distance is less than 50 (prevents poor matches)
+4. **Fallback** - Uses arbitrary value syntax if no close match found
+
+### Color Distance Calculation
+
+```typescript
+// Euclidean distance in RGB space
+const distance = Math.sqrt(
+  Math.pow(r1 - r2, 2) +
+  Math.pow(g1 - g2, 2) +
+  Math.pow(b1 - b2, 2)
+);
+```
+
+---
+
+## Limitations
+
+### Not Fully Supported
+
+- **Responsive Styles** - Nested responsive breakpoint objects are skipped (convert separately)
+- **State Styles** - Nested pseudo-class objects (hover, focus, etc.) are skipped
+- **Complex Values** - Some complex CSS values may not convert perfectly
+- **Custom Tailwind Config** - Uses default Tailwind configuration
+- **Dynamic Values** - Values calculated at runtime may not convert correctly
+
+### Best Results With
+
+- Standard CSS properties with standard values
+- Tailwind spacing scale values (multiples of 4px)
+- Tailwind color palette colors
+- Standard font sizes
+- Numeric values or simple string values with units
+
+### Arbitrary Values
+
+When a property-value pair cannot be matched to a Tailwind class, the package falls back to Tailwind's arbitrary value syntax:
+
+```typescript
+// Custom padding
+{ padding: 13 } → 'p-[13px]'
+
+// Custom color
+{ backgroundColor: { hex: '#123456' } } → 'bg-[#123456]'
+
+// Custom property
+{ customProperty: 'value' } → '[custom-property:value]'
+```
+
+---
+
+## Performance Considerations
+
+**Optimization Tips:**
+
+```typescript
+// Cache converted classes for repeated use
+const buttonClasses = styleToTailwindString(buttonStyles);
+// Reuse buttonClasses instead of converting multiple times
+
+// Convert in batches
+const classArrays = styleObjects.map(styleToTailwind);
+
+// Use utility functions directly for specific conversions
+const colorClass = colorToTailwind('backgroundColor', colorObject);
+```
+
+---
+
+## Related Packages
+
+- [@reallygoodwork/coral-core](/docs/packages/core) - Core utilities and types for Coral specifications
+- [@reallygoodwork/coral-tw2css](/docs/packages/tw2css) - Convert Tailwind classes to CSS (reverse operation)
+- [@reallygoodwork/coral-to-react](/docs/packages/coral-to-react) - Convert Coral specs to React components
+- [@reallygoodwork/react-to-coral](/docs/packages/react-to-coral) - Convert React components to Coral specs
+
+---
+
+## Additional Resources
+
+### External Documentation
+- [Tailwind CSS Documentation](https://tailwindcss.com/docs) - Official Tailwind CSS documentation
+- [Tailwind Arbitrary Values](https://tailwindcss.com/docs/adding-custom-styles#using-arbitrary-values) - Learn about arbitrary value syntax
+
+### Coral Documentation
+- [Getting Started Guide](/docs/guides/getting-started) - Learn how to use Coral in your projects
+- [Component Variants Guide](/docs/guides/variants) - Understanding variant systems (used with CVA generation)
+- [Coral to React Documentation](/docs/packages/coral-to-react) - Uses this package for CVA variant generation

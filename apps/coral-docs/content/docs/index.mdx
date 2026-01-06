@@ -1,13 +1,176 @@
 ---
-title: Hello World
-description: Your first document
+title: What is Coral UI?
+description: Framework-agnostic UI specification format for design systems
 ---
 
-Welcome to the docs! You can start writing documents in `/content/docs`.
+# Welcome to Coral
 
-## What is Next?
+Coral is a specification format for describing UI components in a framework-agnostic way. Define your component structure, styling, variants, interactivity, and responsive behavior in a portable JSON format that can be transformed into various output formats.
+
+## Why Coral?
+
+- **Framework Agnostic** - Define once, generate for React, Vue, HTML, or any framework
+- **Design System Ready** - Built-in support for variants, tokens, and composition
+- **Type Safe** - Full TypeScript support with Zod validation
+- **Tool Friendly** - JSON format works with any tool or language
+
+## Key Features
+
+### Component Variants
+
+CVA-style variant definitions with per-node style responses:
+
+```json
+{
+  "componentVariants": {
+    "axes": [
+      { "name": "intent", "values": ["primary", "secondary"], "default": "primary" },
+      { "name": "size", "values": ["sm", "md", "lg"], "default": "md" }
+    ]
+  },
+  "variantStyles": {
+    "intent": {
+      "primary": { "backgroundColor": "#007bff" },
+      "secondary": { "backgroundColor": "#6c757d" }
+    }
+  }
+}
+```
+
+### Package System
+
+Organize your design system with `coral.config.json`:
+
+```bash
+coral init my-design-system
+coral add component Button
+coral validate
+coral build --target types
+```
+
+### Component Composition
+
+Embed components within components:
+
+```json
+{
+  "type": "COMPONENT_INSTANCE",
+  "$component": { "ref": "./button/button.coral.json" },
+  "propBindings": { "intent": "primary" }
+}
+```
+
+### Typed Props & Events
+
+Full type definitions for component APIs:
+
+```json
+{
+  "props": {
+    "label": { "type": "string", "required": true },
+    "disabled": { "type": "boolean", "default": false }
+  },
+  "events": {
+    "onClick": { "parameters": [{ "name": "event", "type": "React.MouseEvent" }] }
+  }
+}
+```
+
+## Quick Start
 
 <Cards>
-  <Card title="Learn more about Next.js" href="https://nextjs.org/docs" />
-  <Card title="Learn more about Fumadocs" href="https://fumadocs.dev" />
+  <Card title="Getting Started" href="/guides/getting-started" description="Learn how to use Coral Libraries in your project" />
+  <Card title="Component Variants" href="/guides/variants" description="Create flexible, multi-variant components" />
+  <Card title="Component Composition" href="/guides/composition" description="Embed components within components" />
+  <Card title="Package System" href="/guides/packages" description="Organize and distribute design systems" />
 </Cards>
+
+## Packages
+
+| Package | Description | Documentation |
+|---------|-------------|---------------|
+| [@reallygoodwork/coral-core](/packages/core) | Core types, schemas, CLI, and utilities | [Core Package Docs](/packages/core) |
+| [@reallygoodwork/coral-to-react](/packages/coral-to-react) | Generate React components from Coral specs | [Coral to React Docs](/packages/coral-to-react) |
+| [@reallygoodwork/coral-to-html](/packages/coral-to-html) | Generate HTML from Coral specs | [Coral to HTML Docs](/packages/coral-to-html) |
+| [@reallygoodwork/react-to-coral](/packages/react-to-coral) | Parse React components to Coral specs | [React to Coral Docs](/packages/react-to-coral) |
+| [@reallygoodwork/coral-tw2css](/packages/tw2css) | Convert Tailwind classes to CSS | [Tailwind to CSS Docs](/packages/tw2css) |
+| [@reallygoodwork/style-to-tailwind](/packages/style-to-tailwind) | Convert CSS styles to Tailwind classes | [Style to Tailwind Docs](/packages/style-to-tailwind) |
+
+## Example
+
+Here's a complete button component with variants, props, and events:
+
+```json
+{
+  "$schema": "https://coral.design/schema.json",
+  "name": "Button",
+  "elementType": "button",
+
+  "$meta": {
+    "name": "Button",
+    "version": "1.0.0",
+    "status": "stable"
+  },
+
+  "componentVariants": {
+    "axes": [
+      { "name": "intent", "values": ["primary", "secondary", "destructive"], "default": "primary" },
+      { "name": "size", "values": ["sm", "md", "lg"], "default": "md" }
+    ]
+  },
+
+  "props": {
+    "label": { "type": "string", "required": true }
+  },
+
+  "events": {
+    "onClick": { "description": "Button click handler" }
+  },
+
+  "styles": {
+    "display": "inline-flex",
+    "borderRadius": "6px",
+    "fontWeight": "500"
+  },
+
+  "variantStyles": {
+    "intent": {
+      "primary": { "backgroundColor": "#007bff", "color": "#fff" },
+      "secondary": { "backgroundColor": "#6c757d", "color": "#fff" },
+      "destructive": { "backgroundColor": "#dc3545", "color": "#fff" }
+    },
+    "size": {
+      "sm": { "padding": "4px 8px", "fontSize": "12px" },
+      "md": { "padding": "8px 16px", "fontSize": "14px" },
+      "lg": { "padding": "12px 24px", "fontSize": "16px" }
+    }
+  },
+
+  "textContent": { "$prop": "label" }
+}
+```
+
+## Documentation Structure
+
+Coral documentation is organized into two main sections:
+
+### Concept Guides (`/docs/guides/`)
+In-depth explanations of core concepts with examples:
+- **[Getting Started](/guides/getting-started)** - Installation, quick examples, and workflow
+- **[Component Variants](/guides/variants)** - Creating flexible, multi-variant components
+- **[Component Composition](/guides/composition)** - Embedding components within components
+- **[Props & Events](/guides/props-events)** - Defining typed component APIs
+- **[Package System](/guides/packages)** - Organizing and distributing design systems
+- **[LLM Usage](/guides/llm-usage)** - Using Coral with AI assistants and LLMs
+
+### API Documentation (`/docs/packages/`)
+Reference documentation for packages and APIs:
+- **[Core Package](/docs/packages/core)** - Core utilities, schemas, CLI, and APIs
+- **[Transform Packages](/docs/packages/)** - Packages for converting between formats
+
+> **Tip:** Start with the [Getting Started guide](/guides/getting-started) to learn concepts, then refer to API documentation for specific implementation details.
+
+## Community
+
+- [GitHub Repository](https://github.com/reallygoodwork/coral)
+- [npm Organization](https://www.npmjs.com/org/reallygoodwork)

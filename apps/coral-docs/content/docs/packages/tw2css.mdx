@@ -1,0 +1,1228 @@
+---
+title: "@reallygoodwork/coral-tw2css"
+description: Convert Tailwind CSS classes to CSS-in-JS style objects.
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+[![npm](https://img.shields.io/npm/v/@reallygoodwork/coral-tw2css)](https://www.npmjs.com/package/@reallygoodwork/coral-tw2css)
+
+Convert Tailwind CSS classes to CSS-in-JS style objects. This utility package transforms Tailwind utility classes into JavaScript objects with CSS properties, making it easy to work with Tailwind styles in programmatic contexts, CSS-in-JS libraries, or when converting Tailwind-based components to other formats.
+
+## Features
+
+- **Complete Tailwind Support** - Convert Tailwind utility classes to CSS property objects
+- **Responsive Breakpoints** - Full support for Tailwind's responsive modifiers (sm, md, lg, xl, 2xl)
+- **Pseudo-class Support** - Handle hover, focus, active, disabled, and other state modifiers
+- **Color System** - Full Tailwind color palette with hex, RGB, and HSL values
+- **Scale Conversion** - Automatically convert Tailwind's spacing scale to pixels
+- **Arbitrary Values** - Support for Tailwind's arbitrary value syntax `[value]`
+- **Logical Properties** - Uses CSS logical properties (paddingInlineStart, paddingBlockStart, etc.)
+- **TypeScript Support** - Fully typed for TypeScript projects
+- **Comprehensive Mappings** - Extensive mapping of Tailwind utilities to CSS properties
+
+## Installation
+
+```bash
+npm install @reallygoodwork/coral-tw2css
+```
+
+```bash
+pnpm add @reallygoodwork/coral-tw2css
+```
+
+```bash
+yarn add @reallygoodwork/coral-tw2css
+```
+
+---
+
+## API Reference
+
+### `tailwindToCSS`
+
+Converts a string of Tailwind CSS classes into a CSS-in-JS style object. Supports responsive modifiers, pseudo-classes, nested styles, and arbitrary values.
+
+<TypeTable
+  type={{
+    tailwind: {
+      description: 'A space-separated string of Tailwind CSS classes',
+      type: 'string',
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `StylesWithModifiers` - An object containing CSS properties and values, with support for nested responsive and pseudo-class styles
+
+#### Basic Example
+
+```typescript
+import { tailwindToCSS } from '@reallygoodwork/coral-tw2css';
+
+const styles = tailwindToCSS('p-4 bg-blue-500 text-white rounded-lg');
+```
+
+**Output:**
+```typescript
+{
+  paddingInlineStart: '1rem',
+  paddingInlineEnd: '1rem',
+  paddingBlockStart: '1rem',
+  paddingBlockEnd: '1rem',
+  backgroundColor: {
+    hex: '#3b82f6',
+    rgb: { r: 59, g: 130, b: 246, a: 1 },
+    hsl: { h: 217, s: 91, l: 60, a: 1 }
+  },
+  color: {
+    hex: '#ffffff',
+    rgb: { r: 255, g: 255, b: 255, a: 1 },
+    hsl: { h: 0, s: 0, l: 100, a: 1 }
+  },
+  borderRadius: '0.5rem'
+}
+```
+
+#### Responsive Breakpoints
+
+The function supports Tailwind's responsive modifiers, which are converted to media query keys:
+
+```typescript
+const styles = tailwindToCSS('p-4 md:p-8 lg:p-12');
+```
+
+**Output:**
+```typescript
+{
+  paddingInlineStart: '1rem',
+  paddingInlineEnd: '1rem',
+  paddingBlockStart: '1rem',
+  paddingBlockEnd: '1rem',
+  '(min-width: 768px)': {
+    paddingInlineStart: '2rem',
+    paddingInlineEnd: '2rem',
+    paddingBlockStart: '2rem',
+    paddingBlockEnd: '2rem'
+  },
+  '(min-width: 1024px)': {
+    paddingInlineStart: '3rem',
+    paddingInlineEnd: '3rem',
+    paddingBlockStart: '3rem',
+    paddingBlockEnd: '3rem'
+  }
+}
+```
+
+**Supported Breakpoints:**
+- `sm:` → `(min-width: 640px)`
+- `md:` → `(min-width: 768px)`
+- `lg:` → `(min-width: 1024px)`
+- `xl:` → `(min-width: 1280px)`
+- `2xl:` → `(min-width: 1536px)`
+
+#### Pseudo-class Modifiers
+
+Pseudo-class modifiers are converted to nested objects:
+
+```typescript
+const styles = tailwindToCSS('bg-blue-500 hover:bg-blue-600 focus:bg-blue-700 active:bg-blue-800');
+```
+
+**Output:**
+```typescript
+{
+  backgroundColor: {
+    hex: '#3b82f6',
+    rgb: { r: 59, g: 130, b: 246, a: 1 },
+    hsl: { h: 217, s: 91, l: 60, a: 1 }
+  },
+  ':hover': {
+    backgroundColor: {
+      hex: '#2563eb',
+      rgb: { r: 37, g: 99, b: 235, a: 1 },
+      hsl: { h: 217, s: 91, l: 53, a: 1 }
+    }
+  },
+  ':focus': {
+    backgroundColor: {
+      hex: '#1d4ed8',
+      rgb: { r: 29, g: 78, b: 216, a: 1 },
+      hsl: { h: 217, s: 91, l: 48, a: 1 }
+    }
+  },
+  ':active': {
+    backgroundColor: {
+      hex: '#1e40af',
+      rgb: { r: 30, g: 64, b: 175, a: 1 },
+      hsl: { h: 217, s: 91, l: 40, a: 1 }
+    }
+  }
+}
+```
+
+**Supported Pseudo-classes:**
+- `hover:` → `:hover`
+- `focus:` → `:focus`
+- `active:` → `:active`
+- `disabled:` → `:disabled`
+- `visited:` → `:visited`
+- `first:` → `:first-child`
+- `last:` → `:last-child`
+- And more...
+
+#### Combined Modifiers
+
+You can combine responsive and pseudo-class modifiers:
+
+```typescript
+const styles = tailwindToCSS('text-sm md:text-base lg:hover:text-lg');
+```
+
+**Output:**
+```typescript
+{
+  fontSize: '0.875rem',
+  lineHeight: '1.25rem',
+  '(min-width: 768px)': {
+    fontSize: '1rem',
+    lineHeight: '1.5rem'
+  },
+  '(min-width: 1024px)': {
+    ':hover': {
+      fontSize: '1.125rem',
+      lineHeight: '1.75rem'
+    }
+  }
+}
+```
+
+#### Arbitrary Values
+
+Tailwind's arbitrary value syntax is supported:
+
+```typescript
+const styles = tailwindToCSS('p-[20px] text-[#ff0000] w-[calc(100%-2rem)]');
+```
+
+**Output:**
+```typescript
+{
+  paddingInlineStart: '20px',
+  paddingInlineEnd: '20px',
+  paddingBlockStart: '20px',
+  paddingBlockEnd: '20px',
+  color: {
+    hex: '#ff0000',
+    rgb: { r: 255, g: 0, b: 0, a: 1 },
+    hsl: { h: 0, s: 100, l: 50, a: 1 }
+  },
+  width: 'calc(100% - 2rem)'
+}
+```
+
+**Arbitrary Value Syntax:**
+- `[value]` - Single value: `p-[20px]` → `padding: 20px`
+- `[value1_value2]` - Multiple values: `p-[10px_20px]` → `padding: 10px 20px`
+- `[#hex]` - Hex colors: `text-[#ff0000]` → `color: #ff0000`
+- `[calc(...)]` - CSS calc: `w-[calc(100%-2rem)]` → `width: calc(100% - 2rem)`
+
+---
+
+### `convertTailwindScaletoPixels`
+
+Converts Tailwind CSS scale values to pixel values, percentages, or CSS keywords. Handles spacing scale, color values, and special Tailwind keywords.
+
+<TypeTable
+  type={{
+    scale: {
+      description: 'A Tailwind scale value (e.g., "4", "full", "auto", "blue-500", "[10px]")',
+      type: 'string',
+      required: false,
+    },
+  }}
+/>
+
+**Returns:** `string | number | ColorObject | undefined` - The converted value in the appropriate format
+
+#### Spacing Scale
+
+Tailwind's spacing scale multiplies values by 4px:
+
+```typescript
+import { convertTailwindScaletoPixels } from '@reallygoodwork/coral-tw2css';
+
+convertTailwindScaletoPixels('0');    // 0
+convertTailwindScaletoPixels('0.5');  // 2
+convertTailwindScaletoPixels('1');    // 4
+convertTailwindScaletoPixels('4');    // 16
+convertTailwindScaletoPixels('8');    // 32
+convertTailwindScaletoPixels('16');   // 64
+```
+
+#### Special Keywords
+
+```typescript
+convertTailwindScaletoPixels('auto');   // 'auto'
+convertTailwindScaletoPixels('full');   // '100%'
+convertTailwindScaletoPixels('min');    // 'min-content'
+convertTailwindScaletoPixels('px');     // 1
+```
+
+#### Color Values
+
+Color values return a `ColorObject` with hex, RGB, and HSL representations:
+
+```typescript
+convertTailwindScaletoPixels('blue-500');
+// Returns:
+// {
+//   hex: '#3b82f6',
+//   rgb: { r: 59, g: 130, b: 246, a: 1 },
+//   hsl: { h: 217, s: 91, l: 60, a: 1 }
+// }
+
+convertTailwindScaletoPixels('red-600');
+// Returns:
+// {
+//   hex: '#dc2626',
+//   rgb: { r: 220, g: 38, b: 38, a: 1 },
+//   hsl: { h: 0, s: 83, l: 51, a: 1 }
+// }
+
+convertTailwindScaletoPixels('white');
+// Returns:
+// {
+//   hex: '#ffffff',
+//   rgb: { r: 255, g: 255, b: 255, a: 1 },
+//   hsl: { h: 0, s: 0, l: 100, a: 1 }
+// }
+```
+
+#### Arbitrary Values
+
+```typescript
+convertTailwindScaletoPixels('[10px_20px]');  // '10px 20px'
+convertTailwindScaletoPixels('[50%]');        // '50%'
+convertTailwindScaletoPixels('[calc(100%-2rem)]'); // 'calc(100% - 2rem)'
+```
+
+#### Percentages
+
+Percentages are preserved as-is:
+
+```typescript
+convertTailwindScaletoPixels('50%');   // '50%'
+convertTailwindScaletoPixels('100%');  // '100%'
+```
+
+---
+
+### `mappings`
+
+Exports the complete mapping of Tailwind utility classes to CSS properties. This can be useful for custom transformations or understanding how classes are converted.
+
+```typescript
+import { mappings } from '@reallygoodwork/coral-tw2css';
+
+// Access specific mappings
+console.log(mappings['flex']);        // { property: 'display', value: 'flex' }
+console.log(mappings['p-']);          // ['paddingInlineStart', 'paddingInlineEnd', 'paddingBlockStart', 'paddingBlockEnd']
+console.log(mappings['text-xs']);     // Array of property/value objects
+```
+
+**Mapping Structure:**
+- **Simple mappings**: `{ property: string, value: string | number }`
+- **Array mappings**: Array of property/value objects (for classes that set multiple properties)
+- **Prefix mappings**: Arrays of property names (for classes like `p-`, `m-`, etc. that need a value)
+
+---
+
+## Type Definitions
+
+### `ColorObject`
+
+Represents a color with multiple format representations.
+
+<TypeTable
+  type={{
+    hex: {
+      description: 'Hexadecimal color representation',
+      type: 'string',
+      required: true,
+    },
+    rgb: {
+      description: 'RGB color representation with alpha channel',
+      type: '{ r: number; g: number; b: number; a: number }',
+      required: true,
+    },
+    hsl: {
+      description: 'HSL color representation with alpha channel',
+      type: '{ h: number; s: number; l: number; a: number }',
+      required: true,
+    },
+  }}
+/>
+
+### `Styles`
+
+Base CSS properties supported by the converter.
+
+<TypeTable
+  type={{
+    paddingInlineStart: {
+      description: 'Logical inline start padding',
+      type: 'string',
+      required: false,
+    },
+    paddingInlineEnd: {
+      description: 'Logical inline end padding',
+      type: 'string',
+      required: false,
+    },
+    paddingBlockStart: {
+      description: 'Logical block start padding',
+      type: 'string',
+      required: false,
+    },
+    paddingBlockEnd: {
+      description: 'Logical block end padding',
+      type: 'string',
+      required: false,
+    },
+    padding: {
+      description: 'Shorthand padding',
+      type: 'string',
+      required: false,
+    },
+    marginInlineStart: {
+      description: 'Logical inline start margin',
+      type: 'string',
+      required: false,
+    },
+    marginInlineEnd: {
+      description: 'Logical inline end margin',
+      type: 'string',
+      required: false,
+    },
+    marginBlockStart: {
+      description: 'Logical block start margin',
+      type: 'string',
+      required: false,
+    },
+    marginBlockEnd: {
+      description: 'Logical block end margin',
+      type: 'string',
+      required: false,
+    },
+    margin: {
+      description: 'Shorthand margin',
+      type: 'string',
+      required: false,
+    },
+    display: {
+      description: 'Display property',
+      type: 'string',
+      required: false,
+    },
+    flexDirection: {
+      description: 'Flex direction',
+      type: 'string',
+      required: false,
+    },
+    justifyContent: {
+      description: 'Justify content',
+      type: 'string',
+      required: false,
+    },
+    alignItems: {
+      description: 'Align items',
+      type: 'string',
+      required: false,
+    },
+    backgroundColor: {
+      description: 'Background color (can be ColorObject or string)',
+      type: 'string | ColorObject',
+      required: false,
+    },
+    color: {
+      description: 'Text color (can be ColorObject or string)',
+      type: 'string | ColorObject',
+      required: false,
+    },
+    fontSize: {
+      description: 'Font size',
+      type: 'string',
+      required: false,
+    },
+    fontWeight: {
+      description: 'Font weight',
+      type: 'string | number',
+      required: false,
+    },
+    borderRadius: {
+      description: 'Border radius',
+      type: 'string',
+      required: false,
+    },
+    boxShadow: {
+      description: 'Box shadow',
+      type: 'string',
+      required: false,
+    },
+    // ... and many more CSS properties
+  }}
+/>
+
+### `StylesWithModifiers`
+
+Extended styles object that includes nested responsive and pseudo-class styles.
+
+<TypeTable
+  type={{
+    // All properties from Styles
+    // Plus dynamic keys for media queries and pseudo-classes
+    '[key: string]': {
+      description: 'Media query keys (e.g., "(min-width: 768px)") or pseudo-class keys (e.g., ":hover") containing nested Styles objects',
+      type: 'Styles | StylesWithModifiers',
+      required: false,
+    },
+  }}
+/>
+
+---
+
+## Supported Tailwind Classes
+
+The package supports a comprehensive set of Tailwind utility classes organized by category:
+
+### Layout & Display
+
+**Display:**
+- `block`, `inline-block`, `inline`, `flex`, `inline-flex`, `grid`, `inline-grid`, `hidden`
+- `table`, `inline-table`, `table-row`, `table-cell`, `table-column`, `table-column-group`
+- `contents`, `list-item`
+
+**Position:**
+- `static`, `fixed`, `absolute`, `relative`, `sticky`
+- `top-*`, `right-*`, `bottom-*`, `left-*`, `inset-*`
+
+**Visibility:**
+- `visible`, `invisible`, `collapse`
+
+**Z-Index:**
+- `z-0`, `z-10`, `z-20`, `z-30`, `z-40`, `z-50`, `z-auto`
+
+**Overflow:**
+- `overflow-auto`, `overflow-hidden`, `overflow-clip`, `overflow-visible`, `overflow-scroll`
+- `overflow-x-*`, `overflow-y-*`
+- `overscroll-*`
+
+### Flexbox
+
+**Flex Direction:**
+- `flex-row`, `flex-row-reverse`, `flex-col`, `flex-col-reverse`
+
+**Flex Wrap:**
+- `flex-wrap`, `flex-wrap-reverse`, `flex-nowrap`
+
+**Flex:**
+- `flex-1`, `flex-auto`, `flex-initial`, `flex-none`
+- `flex-grow-*`, `flex-shrink-*`, `flex-basis-*`
+
+**Justify Content:**
+- `justify-start`, `justify-end`, `justify-center`, `justify-between`, `justify-around`, `justify-evenly`
+
+**Align Items:**
+- `items-start`, `items-end`, `items-center`, `items-baseline`, `items-stretch`
+
+**Align Self:**
+- `self-auto`, `self-start`, `self-end`, `self-center`, `self-stretch`, `self-baseline`
+
+**Gap:**
+- `gap-*`, `gap-x-*`, `gap-y-*`
+
+### Grid
+
+**Grid Template Columns:**
+- `grid-cols-1` through `grid-cols-12`
+- `grid-cols-none`, `grid-cols-subgrid`
+
+**Grid Template Rows:**
+- `grid-rows-1` through `grid-rows-6`
+- `grid-rows-none`, `grid-rows-subgrid`
+
+**Grid Column:**
+- `col-auto`, `col-span-*`, `col-start-*`, `col-end-*`
+
+**Grid Row:**
+- `row-auto`, `row-span-*`, `row-start-*`, `row-end-*`
+
+**Grid Auto Flow:**
+- `grid-flow-row`, `grid-flow-col`, `grid-flow-dense`, `grid-flow-row-dense`, `grid-flow-col-dense`
+
+**Grid Auto Columns/Rows:**
+- `auto-cols-*`, `auto-rows-*`
+
+**Place Items/Content/Self:**
+- `place-items-*`, `place-content-*`, `place-self-*`
+
+### Spacing
+
+**Padding:**
+- `p-*` (all sides)
+- `px-*` (horizontal), `py-*` (vertical)
+- `pt-*` (top), `pr-*` (right), `pb-*` (bottom), `pl-*` (left)
+
+**Margin:**
+- `m-*` (all sides)
+- `mx-*` (horizontal), `my-*` (vertical)
+- `mt-*` (top), `mr-*` (right), `mb-*` (bottom), `ml-*` (left)
+- `m-auto` (auto margin)
+
+**Space Between:**
+- `space-x-*`, `space-y-*` (for spacing between child elements)
+
+### Sizing
+
+**Width:**
+- `w-*` (width values)
+- `w-auto`, `w-full`, `w-screen`, `w-min`, `w-max`, `w-fit`
+
+**Height:**
+- `h-*` (height values)
+- `h-auto`, `h-full`, `h-screen`, `h-min`, `h-max`, `h-fit`
+
+**Min/Max Width:**
+- `min-w-*`, `max-w-*` (including `max-w-screen-*`, `max-w-full`, etc.)
+
+**Min/Max Height:**
+- `min-h-*`, `max-h-*` (including `max-h-screen`, `max-h-full`, etc.)
+
+**Size:**
+- `size-*` (sets both width and height)
+
+### Typography
+
+**Font Family:**
+- `font-sans`, `font-serif`, `font-mono`
+
+**Font Size:**
+- `text-xs`, `text-sm`, `text-base`, `text-lg`, `text-xl`, `text-2xl`, `text-3xl`, `text-4xl`, `text-5xl`, `text-6xl`, `text-7xl`, `text-8xl`, `text-9xl`
+- `text-[size]` (arbitrary values)
+
+**Font Size with Line Height:**
+- `text-*/[line-height]` (e.g., `text-lg/8`)
+
+**Font Weight:**
+- `font-thin`, `font-extralight`, `font-light`, `font-normal`, `font-medium`, `font-semibold`, `font-bold`, `font-extrabold`, `font-black`
+
+**Font Style:**
+- `italic`, `not-italic`
+
+**Letter Spacing:**
+- `tracking-tighter`, `tracking-tight`, `tracking-normal`, `tracking-wide`, `tracking-wider`, `tracking-widest`
+- `tracking-*` (arbitrary values)
+
+**Line Height:**
+- `leading-none`, `leading-tight`, `leading-snug`, `leading-normal`, `leading-relaxed`, `leading-loose`
+- `leading-*` (numeric values)
+
+**Text Align:**
+- `text-left`, `text-center`, `text-right`, `text-justify`, `text-start`, `text-end`
+
+**Text Color:**
+- `text-{color}-{shade}` (e.g., `text-blue-500`, `text-gray-900`)
+- `text-[color]` (arbitrary colors)
+
+**Text Decoration:**
+- `underline`, `overline`, `line-through`, `no-underline`
+- `decoration-solid`, `decoration-double`, `decoration-dotted`, `decoration-dashed`, `decoration-wavy`
+- `decoration-*` (thickness)
+- `underline-offset-*`
+
+**Text Transform:**
+- `uppercase`, `lowercase`, `capitalize`, `normal-case`
+
+**Text Overflow:**
+- `truncate`, `text-ellipsis`, `text-clip`
+- `line-clamp-*`
+
+**Text Indent:**
+- `indent-*`
+
+**Vertical Align:**
+- `align-baseline`, `align-top`, `align-middle`, `align-bottom`, `align-text-top`, `align-text-bottom`, `align-sub`, `align-super`
+
+**Whitespace:**
+- `whitespace-normal`, `whitespace-nowrap`, `whitespace-pre`, `whitespace-pre-line`, `whitespace-pre-wrap`, `whitespace-break-spaces`
+
+**Word Break:**
+- `break-normal`, `break-words`, `break-all`, `break-keep`
+
+**Hyphens:**
+- `hyphens-none`, `hyphens-manual`, `hyphens-auto`
+
+### Colors
+
+**Background Colors:**
+- `bg-{color}-{shade}` (e.g., `bg-blue-500`, `bg-red-600`)
+- `bg-[color]` (arbitrary colors)
+- `bg-transparent`, `bg-current`
+
+**Text Colors:**
+- `text-{color}-{shade}` (e.g., `text-gray-900`, `text-indigo-500`)
+- `text-[color]` (arbitrary colors)
+- `text-transparent`, `text-current`
+
+**Border Colors:**
+- `border-{color}-{shade}` (e.g., `border-blue-500`)
+- `border-[color]` (arbitrary colors)
+- `border-transparent`, `border-current`
+
+**Outline Colors:**
+- `outline-{color}-{shade}` (e.g., `outline-indigo-600`)
+
+**Color Palette:**
+The package includes the full Tailwind CSS default color palette:
+- **Grays:** `slate`, `gray`, `zinc`, `neutral`, `stone`
+- **Colors:** `red`, `orange`, `amber`, `yellow`, `lime`, `green`, `emerald`, `teal`, `cyan`, `sky`, `blue`, `indigo`, `violet`, `purple`, `fuchsia`, `pink`, `rose`
+- **Base:** `black`, `white`
+- Each color includes shades from `50` (lightest) to `900` (darkest)
+
+### Borders
+
+**Border Width:**
+- `border`, `border-0`, `border-2`, `border-4`, `border-8`
+- `border-x-*`, `border-y-*`, `border-t-*`, `border-r-*`, `border-b-*`, `border-l-*`
+
+**Border Style:**
+- `border-solid`, `border-dashed`, `border-dotted`, `border-double`, `border-none`, `border-hidden`
+
+**Border Radius:**
+- `rounded-none`, `rounded-sm`, `rounded`, `rounded-md`, `rounded-lg`, `rounded-xl`, `rounded-2xl`, `rounded-3xl`, `rounded-full`
+- `rounded-t-*`, `rounded-r-*`, `rounded-b-*`, `rounded-l-*`
+- `rounded-tl-*`, `rounded-tr-*`, `rounded-br-*`, `rounded-bl-*`
+- `rounded-[value]` (arbitrary values)
+
+**Border Color:**
+- `border-{color}-{shade}` (see Colors section)
+
+### Effects
+
+**Opacity:**
+- `opacity-0` through `opacity-100`
+
+**Box Shadow:**
+- `shadow-sm`, `shadow`, `shadow-md`, `shadow-lg`, `shadow-xl`, `shadow-2xl`, `shadow-inner`, `shadow-none`
+- `shadow-[value]` (arbitrary values)
+
+**Mix Blend Mode:**
+- `mix-blend-normal`, `mix-blend-multiply`, `mix-blend-screen`, `mix-blend-overlay`, `mix-blend-darken`, `mix-blend-lighten`, `mix-blend-color-dodge`, `mix-blend-color-burn`, `mix-blend-hard-light`, `mix-blend-soft-light`, `mix-blend-difference`, `mix-blend-exclusion`, `mix-blend-hue`, `mix-blend-saturation`, `mix-blend-color`, `mix-blend-luminosity`, `mix-blend-plus-lighter`
+
+**Background Blend Mode:**
+- `bg-blend-*` (same values as mix-blend)
+
+### Filters
+
+**Blur:**
+- `blur-none`, `blur-sm`, `blur`, `blur-md`, `blur-lg`, `blur-xl`, `blur-2xl`, `blur-3xl`
+- `blur-[value]` (arbitrary values)
+
+**Brightness:**
+- `brightness-0`, `brightness-50`, `brightness-75`, `brightness-90`, `brightness-95`, `brightness-100`, `brightness-105`, `brightness-110`, `brightness-125`, `brightness-150`, `brightness-200`
+- `brightness-[value]` (arbitrary values)
+
+**Contrast:**
+- `contrast-0`, `contrast-50`, `contrast-75`, `contrast-100`, `contrast-125`, `contrast-150`, `contrast-200`
+- `contrast-[value]` (arbitrary values)
+
+**Grayscale:**
+- `grayscale-0`, `grayscale`
+
+**Hue Rotate:**
+- `hue-rotate-0`, `hue-rotate-15`, `hue-rotate-30`, `hue-rotate-60`, `hue-rotate-90`, `hue-rotate-180`
+- `hue-rotate-[value]` (arbitrary values)
+
+**Invert:**
+- `invert-0`, `invert`
+
+**Saturate:**
+- `saturate-0`, `saturate-50`, `saturate-100`, `saturate-150`, `saturate-200`
+- `saturate-[value]` (arbitrary values)
+
+**Sepia:**
+- `sepia-0`, `sepia`
+
+**Drop Shadow:**
+- `drop-shadow-sm`, `drop-shadow`, `drop-shadow-md`, `drop-shadow-lg`, `drop-shadow-xl`, `drop-shadow-2xl`, `drop-shadow-none`
+- `drop-shadow-[value]` (arbitrary values)
+
+**Backdrop Filters:**
+- `backdrop-blur-*`, `backdrop-brightness-*`, `backdrop-contrast-*`, `backdrop-grayscale`, `backdrop-hue-rotate-*`, `backdrop-invert`, `backdrop-opacity-*`, `backdrop-saturate-*`, `backdrop-sepia`
+
+### Transitions & Animation
+
+**Transition Property:**
+- `transition-none`, `transition-all`, `transition`, `transition-colors`, `transition-opacity`, `transition-shadow`, `transition-transform`
+
+**Transition Duration:**
+- `duration-75`, `duration-100`, `duration-150`, `duration-200`, `duration-300`, `duration-500`, `duration-700`, `duration-1000`
+- `duration-[value]` (arbitrary values)
+
+**Transition Timing Function:**
+- `ease-linear`, `ease-in`, `ease-out`, `ease-in-out`
+
+**Transition Delay:**
+- `delay-75`, `delay-100`, `delay-150`, `delay-200`, `delay-300`, `delay-500`, `delay-700`, `delay-1000`
+- `delay-[value]` (arbitrary values)
+
+**Animation:**
+- `animate-none`, `animate-spin`, `animate-ping`, `animate-pulse`, `animate-bounce`
+- `animate-[value]` (arbitrary values)
+
+### Transforms
+
+**Scale:**
+- `scale-0`, `scale-50`, `scale-75`, `scale-90`, `scale-95`, `scale-100`, `scale-105`, `scale-110`, `scale-125`, `scale-150`
+- `scale-x-*`, `scale-y-*`
+- `scale-[value]` (arbitrary values)
+
+**Rotate:**
+- `rotate-0`, `rotate-1`, `rotate-2`, `rotate-3`, `rotate-6`, `rotate-12`, `rotate-45`, `rotate-90`, `rotate-180`
+- `rotate-[value]` (arbitrary values)
+
+**Translate:**
+- `translate-x-*`, `translate-y-*`
+- `translate-[value]` (arbitrary values)
+
+**Skew:**
+- `skew-x-*`, `skew-y-*`
+- `skew-[value]` (arbitrary values)
+
+**Transform Origin:**
+- `origin-center`, `origin-top`, `origin-top-right`, `origin-right`, `origin-bottom-right`, `origin-bottom`, `origin-bottom-left`, `origin-left`, `origin-top-left`
+- `origin-[value]` (arbitrary values)
+
+### Interactivity
+
+**Cursor:**
+- `cursor-auto`, `cursor-default`, `cursor-pointer`, `cursor-wait`, `cursor-text`, `cursor-move`, `cursor-help`, `cursor-not-allowed`, `cursor-none`, `cursor-context-menu`, `cursor-progress`, `cursor-cell`, `cursor-crosshair`, `cursor-vertical-text`, `cursor-alias`, `cursor-copy`, `cursor-no-drop`, `cursor-grab`, `cursor-grabbing`, `cursor-all-scroll`, `cursor-col-resize`, `cursor-row-resize`, `cursor-n-resize`, `cursor-e-resize`, `cursor-s-resize`, `cursor-w-resize`, `cursor-ne-resize`, `cursor-nw-resize`, `cursor-se-resize`, `cursor-sw-resize`, `cursor-ew-resize`, `cursor-ns-resize`, `cursor-nesw-resize`, `cursor-nwse-resize`, `cursor-zoom-in`, `cursor-zoom-out`
+
+**Pointer Events:**
+- `pointer-events-none`, `pointer-events-auto`
+
+**Resize:**
+- `resize-none`, `resize-y`, `resize-x`, `resize`
+
+**User Select:**
+- `select-none`, `select-text`, `select-all`, `select-auto`
+
+**Scroll Behavior:**
+- `scroll-auto`, `scroll-smooth`
+
+**Scroll Snap:**
+- `snap-none`, `snap-x`, `snap-y`, `snap-both`
+- `snap-start`, `snap-end`, `snap-center`, `snap-align-none`
+- `snap-normal`, `snap-always`
+- `snap-mandatory`, `snap-proximity`
+
+**Touch Action:**
+- `touch-auto`, `touch-none`, `touch-pan-x`, `touch-pan-left`, `touch-pan-right`, `touch-pan-y`, `touch-pan-up`, `touch-pan-down`, `touch-pinch-zoom`, `touch-manipulation`
+
+**Will Change:**
+- `will-change-auto`, `will-change-scroll`, `will-change-contents`, `will-change-transform`
+
+### Accessibility
+
+**Screen Reader Only:**
+- `sr-only` - Visually hides content but keeps it accessible to screen readers
+- `not-sr-only` - Undoes `sr-only`
+
+---
+
+## Usage Examples
+
+### Basic Styling
+
+```typescript
+import { tailwindToCSS } from '@reallygoodwork/coral-tw2css';
+
+const buttonStyles = tailwindToCSS('px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600');
+
+// Use in React
+<div style={buttonStyles}>Click me</div>
+
+// Or with styled-components
+const StyledButton = styled.button(buttonStyles);
+```
+
+### Responsive Design
+
+```typescript
+const cardStyles = tailwindToCSS(`
+  p-4 bg-white rounded-lg shadow-md
+  sm:p-6 sm:shadow-lg
+  md:p-8 md:shadow-xl
+  lg:p-10
+  xl:p-12
+`);
+
+// Results in nested media query objects:
+// {
+//   paddingInlineStart: '1rem',
+//   paddingInlineEnd: '1rem',
+//   paddingBlockStart: '1rem',
+//   paddingBlockEnd: '1rem',
+//   backgroundColor: { hex: '#ffffff', ... },
+//   borderRadius: '0.5rem',
+//   boxShadow: '...',
+//   '(min-width: 640px)': {
+//     paddingInlineStart: '1.5rem',
+//     paddingInlineEnd: '1.5rem',
+//     paddingBlockStart: '1.5rem',
+//     paddingBlockEnd: '1.5rem',
+//     boxShadow: '...'
+//   },
+//   '(min-width: 768px)': { ... },
+//   '(min-width: 1024px)': { ... },
+//   '(min-width: 1280px)': { ... }
+// }
+```
+
+### Interactive States
+
+```typescript
+const linkStyles = tailwindToCSS(`
+  text-blue-600 underline
+  hover:text-blue-800 hover:no-underline
+  focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+  active:text-blue-900
+  disabled:opacity-50 disabled:cursor-not-allowed
+`);
+
+// Results in nested pseudo-class objects:
+// {
+//   color: { hex: '#2563eb', ... },
+//   textDecoration: 'underline',
+//   ':hover': {
+//     color: { hex: '#1e40af', ... },
+//     textDecoration: 'none'
+//   },
+//   ':focus': {
+//     outline: 'none',
+//     // ... ring styles
+//   },
+//   ':active': {
+//     color: { hex: '#1e3a8a', ... }
+//   },
+//   ':disabled': {
+//     opacity: '0.5',
+//     cursor: 'not-allowed'
+//   }
+// }
+```
+
+### Complex Layouts
+
+```typescript
+const gridStyles = tailwindToCSS(`
+  grid grid-cols-1 gap-4
+  md:grid-cols-2 md:gap-6
+  lg:grid-cols-3 lg:gap-8
+  xl:grid-cols-4
+`);
+
+// Results in:
+// {
+//   display: 'grid',
+//   gridTemplateColumns: 'repeat(1, minmax(0, 1fr))',
+//   gap: '1rem',
+//   '(min-width: 768px)': {
+//     gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+//     gap: '1.5rem'
+//   },
+//   '(min-width: 1024px)': {
+//     gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+//     gap: '2rem'
+//   },
+//   '(min-width: 1280px)': {
+//     gridTemplateColumns: 'repeat(4, minmax(0, 1fr))'
+//   }
+// }
+```
+
+### Font Size with Line Height
+
+```typescript
+const textStyles = tailwindToCSS('text-lg/8');
+
+// Results in:
+// {
+//   fontSize: '1.125rem',
+//   lineHeight: '2rem'
+// }
+```
+
+### Arbitrary Values
+
+```typescript
+const customStyles = tailwindToCSS(`
+  w-[calc(100%-2rem)]
+  p-[1.5rem_2rem]
+  text-[#1a1a1a]
+  bg-[linear-gradient(to_right,#3b82f6,#8b5cf6)]
+`);
+
+// Results in:
+// {
+//   width: 'calc(100% - 2rem)',
+//   paddingInlineStart: '1.5rem',
+//   paddingInlineEnd: '2rem',
+//   paddingBlockStart: '1.5rem',
+//   paddingBlockEnd: '2rem',
+//   color: { hex: '#1a1a1a', ... },
+//   backgroundImage: 'linear-gradient(to right, #3b82f6, #8b5cf6)'
+// }
+```
+
+### Converting Individual Scale Values
+
+```typescript
+import { convertTailwindScaletoPixels } from '@reallygoodwork/coral-tw2css';
+
+// In custom logic or calculations
+const spacing = convertTailwindScaletoPixels('8');        // 32
+const halfSpacing = convertTailwindScaletoPixels('0.5');  // 2
+const fullWidth = convertTailwindScaletoPixels('full');   // '100%'
+const autoWidth = convertTailwindScaletoPixels('auto');   // 'auto'
+
+// Color conversion
+const primaryColor = convertTailwindScaletoPixels('indigo-600');
+// {
+//   hex: '#4f46e5',
+//   rgb: { r: 79, g: 70, b: 229, a: 1 },
+//   hsl: { h: 252, s: 73, l: 59, a: 1 }
+// }
+```
+
+### Screen Reader Only Utilities
+
+```typescript
+const srOnlyStyles = tailwindToCSS('sr-only');
+
+// Results in:
+// {
+//   position: 'absolute',
+//   width: 1,
+//   height: 1,
+//   padding: 0,
+//   margin: -1,
+//   overflow: 'hidden',
+//   clip: 'rect(0, 0, 0, 0)',
+//   whiteSpace: 'nowrap',
+//   border: 0
+// }
+```
+
+---
+
+## Integration Examples
+
+### With React
+
+```typescript
+import { tailwindToCSS } from '@reallygoodwork/coral-tw2css';
+
+function Button({ variant = 'primary', children }) {
+  const baseStyles = 'px-4 py-2 rounded-lg font-medium transition-colors';
+  const variantStyles = {
+    primary: 'bg-blue-500 text-white hover:bg-blue-600',
+    secondary: 'bg-gray-200 text-gray-900 hover:bg-gray-300',
+    danger: 'bg-red-500 text-white hover:bg-red-600',
+  };
+
+  const styles = tailwindToCSS(`${baseStyles} ${variantStyles[variant]}`);
+
+  return <button style={styles}>{children}</button>;
+}
+```
+
+### With Styled Components
+
+```typescript
+import styled from 'styled-components';
+import { tailwindToCSS } from '@reallygoodwork/coral-tw2css';
+
+const Card = styled.div(tailwindToCSS(`
+  bg-white rounded-xl shadow-lg p-6
+  hover:shadow-xl transition-shadow
+  md:p-8
+`));
+```
+
+### With Emotion
+
+```typescript
+import { css } from '@emotion/react';
+import { tailwindToCSS } from '@reallygoodwork/coral-tw2css';
+
+const buttonCss = css(tailwindToCSS('px-6 py-3 bg-green-500 text-white rounded-md'));
+```
+
+### Converting Tailwind Classes in Coral Components
+
+```typescript
+import { tailwindToCSS } from '@reallygoodwork/coral-tw2css';
+import { coralToReact } from '@reallygoodwork/coral-to-react';
+
+// Coral spec with Tailwind classes
+const buttonSpec = {
+  name: 'Button',
+  elementType: 'button',
+  styles: tailwindToCSS('px-4 py-2 bg-blue-500 text-white rounded-lg'),
+  // ... rest of spec
+};
+
+const { reactCode } = await coralToReact(buttonSpec);
+```
+
+### Processing Multiple Classes Dynamically
+
+```typescript
+import { tailwindToCSS } from '@reallygoodwork/coral-tw2css';
+
+function combineTailwindClasses(...classLists: string[]) {
+  const combinedClasses = classLists.join(' ');
+  return tailwindToCSS(combinedClasses);
+}
+
+const styles = combineTailwindClasses(
+  'p-4 bg-white',
+  'md:p-8',
+  'hover:shadow-lg',
+  'rounded-lg'
+);
+```
+
+### Custom Style Processing
+
+```typescript
+import { tailwindToCSS, convertTailwindScaletoPixels } from '@reallygoodwork/coral-tw2css';
+
+function processStylesWithCustomLogic(classes: string) {
+  const styles = tailwindToCSS(classes);
+
+  // Custom processing
+  if (styles.backgroundColor && typeof styles.backgroundColor === 'object') {
+    // Use hex value for compatibility
+    styles.backgroundColor = styles.backgroundColor.hex;
+  }
+
+  // Convert responsive styles to media queries
+  const mediaQueries: Record<string, Record<string, string>> = {};
+  for (const [key, value] of Object.entries(styles)) {
+    if (key.startsWith('(min-width:')) {
+      mediaQueries[key] = value as Record<string, string>;
+      delete styles[key];
+    }
+  }
+
+  return { base: styles, mediaQueries };
+}
+```
+
+---
+
+## Logical Properties
+
+The package uses CSS logical properties for better internationalization support:
+
+**Padding:**
+- `p-*` → `paddingInlineStart`, `paddingInlineEnd`, `paddingBlockStart`, `paddingBlockEnd`
+- `px-*` → `paddingInlineStart`, `paddingInlineEnd` (horizontal)
+- `py-*` → `paddingBlockStart`, `paddingBlockEnd` (vertical)
+
+**Margin:**
+- `m-*` → `marginInlineStart`, `marginInlineEnd`, `marginBlockStart`, `marginBlockEnd`
+- `mx-*` → `marginInlineStart`, `marginInlineEnd` (horizontal)
+- `my-*` → `marginBlockStart`, `marginBlockEnd` (vertical)
+
+This ensures styles work correctly in both left-to-right (LTR) and right-to-left (RTL) layouts.
+
+---
+
+## Color Object Format
+
+When colors are converted, they return a `ColorObject` with multiple representations:
+
+```typescript
+const color = convertTailwindScaletoPixels('blue-500');
+
+// color.hex → '#3b82f6' (for CSS use)
+// color.rgb → { r: 59, g: 130, b: 246, a: 1 } (for programmatic use)
+// color.hsl → { h: 217, s: 91, l: 60, a: 1 } (for color manipulation)
+```
+
+This allows you to:
+- Use `hex` for CSS properties
+- Use `rgb` or `hsl` for color calculations or transformations
+- Maintain color information in multiple formats
+
+---
+
+## Performance Considerations
+
+**Optimization Tips:**
+
+```typescript
+// Cache converted styles for repeated use
+const buttonStyles = tailwindToCSS('px-4 py-2 bg-blue-500');
+// Reuse buttonStyles instead of converting multiple times
+
+// Process classes in batches
+const classLists = ['p-4 bg-white', 'md:p-8', 'hover:shadow-lg'];
+const styles = classLists.map(tailwindToCSS);
+
+// Use convertTailwindScaletoPixels for individual values
+const spacing = convertTailwindScaletoPixels('8'); // Faster than parsing full class string
+```
+
+---
+
+## Limitations
+
+### Not Fully Supported
+
+- **Custom Tailwind Config** - Uses default Tailwind configuration. Custom theme values may not match.
+- **JIT Mode Specific Classes** - Some JIT-only classes may not be recognized.
+- **Plugin Classes** - Third-party Tailwind plugin classes are not supported unless they match standard patterns.
+- **Complex Arbitrary Values** - Very complex arbitrary values may not parse correctly.
+- **Dynamic Class Names** - Classes generated dynamically at runtime may not be recognized.
+
+### Best Results With
+
+- Standard Tailwind utility classes
+- Default Tailwind color palette
+- Standard spacing scale (0-96)
+- Standard breakpoints (sm, md, lg, xl, 2xl)
+- Standard pseudo-classes (hover, focus, active, etc.)
+- Arbitrary values with simple syntax
+
+---
+
+## Related Packages
+
+- [@reallygoodwork/coral-core](/docs/packages/core) - Core utilities and types for Coral specifications
+- [@reallygoodwork/style-to-tailwind](/docs/packages/style-to-tailwind) - Convert CSS styles to Tailwind classes (reverse operation)
+- [@reallygoodwork/coral-to-react](/docs/packages/coral-to-react) - Convert Coral specs to React components (uses this package internally)
+- [@reallygoodwork/react-to-coral](/docs/packages/react-to-coral) - Convert React components to Coral specs (uses this package internally)
+- [@reallygoodwork/coral-to-html](/docs/packages/coral-to-html) - Convert Coral specs to HTML
+
+---
+
+## Additional Resources
+
+- [Tailwind CSS Documentation](https://tailwindcss.com/docs) - Official Tailwind CSS documentation
+- [CSS Logical Properties](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Logical_Properties) - Learn about logical properties
+- [Getting Started Guide](/docs/guides/getting-started) - Learn how to use Coral in your projects

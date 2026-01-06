@@ -1,0 +1,16 @@
+{
+  "title": "@reallygoodwork/coral-core",
+  "pages": [
+    "index",
+    "cli",
+    "variants",
+    "packages",
+    "props-events",
+    "composition",
+    "conditionals",
+    "references",
+    "types",
+    "functions",
+    "tutorial"
+  ]
+}

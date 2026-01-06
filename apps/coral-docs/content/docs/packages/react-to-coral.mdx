@@ -1,0 +1,1086 @@
+---
+title: "@reallygoodwork/react-to-coral"
+description: Transform React component source code into Coral specifications.
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+[![npm](https://img.shields.io/npm/v/@reallygoodwork/react-to-coral)](https://www.npmjs.com/package/@reallygoodwork/react-to-coral)
+
+Transform React component source code into Coral specifications. This package uses static analysis powered by Babel's AST parser to parse React components and extract their structure, props, state, methods, styling, and imports into a portable Coral format that can be transformed into various output formats.
+
+## Features
+
+- **Static Analysis** - Parse React components using Babel's AST parser for accurate extraction
+- **Props Extraction** - Automatically extract component props with full TypeScript type support
+- **State Detection** - Identify and extract React hooks (useState, useEffect, useReducer, useContext, useMemo, useCallback)
+- **Method Extraction** - Extract event handlers and custom methods with state interaction tracking
+- **Style Processing** - Convert inline styles and Tailwind CSS classes to Coral style objects
+- **Import Tracking** - Capture all component imports with source and specifier information
+- **TypeScript Support** - Full support for TypeScript components with type annotations, interfaces, and type aliases
+- **Validation** - Built-in validation for component structure and syntax before transformation
+- **JSX Parsing** - Transform JSX elements, fragments, and expressions into Coral node structure
+- **Responsive Styles** - Extract responsive styles from Tailwind classes and media queries
+
+## Installation
+
+```bash
+npm install @reallygoodwork/react-to-coral
+```
+
+```bash
+pnpm add @reallygoodwork/react-to-coral
+```
+
+```bash
+yarn add @reallygoodwork/react-to-coral
+```
+
+---
+
+## API Reference
+
+### `transformReactComponentToSpec`
+
+Main function to transform React component source code into a Coral specification. This function performs static analysis on the component code, extracting all relevant information including props, state, methods, styles, and JSX structure.
+
+<TypeTable
+  type={{
+    component: {
+      description: 'The React component source code as a string',
+      type: 'string',
+      required: true,
+    },
+    options: {
+      description: 'Optional configuration for transformation',
+      type: '{ skipValidation?: boolean }',
+      required: false,
+    },
+  }}
+/>
+
+**Returns:** `CoralRootNode` - Complete Coral specification representing the React component
+
+**Throws:**
+- `Error` if component validation fails (when `skipValidation` is false)
+- `Error` if parsing fails (invalid syntax)
+- `Error` if transformation fails (missing component or JSX)
+
+#### Basic Example
+
+```typescript
+import { transformReactComponentToSpec } from '@reallygoodwork/react-to-coral';
+
+const componentCode = `
+import React, { useState } from 'react';
+
+interface ButtonProps {
+  label: string;
+  variant?: 'primary' | 'secondary';
+  onClick?: () => void;
+}
+
+export default function Button({ label, variant = 'primary', onClick }: ButtonProps) {
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handleClick = () => {
+    if (onClick) onClick();
+  };
+
+  return (
+    <button
+      className="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600"
+      onClick={handleClick}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {label}
+    </button>
+  );
+}
+`;
+
+const coralSpec = transformReactComponentToSpec(componentCode);
+```
+
+**Generated Coral Specification:**
+```json
+{
+  "$schema": "https://coral.design/schema.json",
+  "name": "Button",
+  "componentName": "Button",
+  "elementType": "button",
+  "type": "COMPONENT",
+  "componentProperties": {
+    "label": {
+      "type": "string",
+      "value": "label",
+      "optional": false
+    },
+    "variant": {
+      "type": "'primary' | 'secondary'",
+      "value": "variant",
+      "optional": true,
+      "defaultValue": "'primary'"
+    },
+    "onClick": {
+      "type": "() => void",
+      "value": "onClick",
+      "optional": true
+    }
+  },
+  "stateHooks": [
+    {
+      "name": "isHovered",
+      "setterName": "setIsHovered",
+      "initialValue": false,
+      "tsType": "boolean",
+      "hookType": "useState"
+    }
+  ],
+  "methods": [
+    {
+      "name": "handleClick",
+      "parameters": [],
+      "body": "if (onClick) onClick();"
+    }
+  ],
+  "styles": {
+    "paddingInlineStart": "1rem",
+    "paddingInlineEnd": "1rem",
+    "paddingBlockStart": "0.5rem",
+    "paddingBlockEnd": "0.5rem",
+    "borderRadius": "0.5rem",
+    "backgroundColor": "#3b82f6",
+    "color": "#ffffff"
+  },
+  "imports": [
+    {
+      "source": "react",
+      "version": "latest",
+      "specifiers": [
+        { "name": "React", "isDefault": true },
+        { "name": "useState" }
+      ]
+    }
+  ],
+  "children": []
+}
+```
+
+#### Options
+
+<TypeTable
+  type={{
+    skipValidation: {
+      description: 'Skip component validation before transformation. Use this for trusted input to improve performance.',
+      type: 'boolean',
+      default: 'false',
+      required: false,
+    },
+  }}
+/>
+
+**Skip Validation Example:**
+```typescript
+// For trusted, pre-validated code
+const spec = transformReactComponentToSpec(componentCode, {
+  skipValidation: true
+});
+```
+
+---
+
+## What Gets Extracted
+
+### Component Information
+
+**Component Name:**
+- Extracted from function declarations: `function Button() { ... }`
+- Extracted from arrow functions: `const Button = () => { ... }`
+- Extracted from export statements: `export default function Button() { ... }`
+- Extracted from variable declarations: `export const Button = () => { ... }`
+
+**Component Type:**
+- Detected as either `'ArrowFunction'` or `'Function'`
+- Stored in the Coral spec as `type: 'COMPONENT'` (for arrow functions) or `type: 'INSTANCE'` (for function declarations)
+
+### Props Extraction
+
+The package extracts props from multiple patterns and sources:
+
+**1. Destructured Props:**
+```typescript
+function Button({ label, onClick }) { ... }
+```
+
+**2. TypeScript Inline Types:**
+```typescript
+function Button({ label, onClick }: { label: string; onClick: () => void }) { ... }
+```
+
+**3. TypeScript Interface/Type:**
+```typescript
+interface ButtonProps {
+  label: string;
+  onClick?: () => void;
+}
+function Button({ label, onClick }: ButtonProps) { ... }
+```
+
+**4. React.FC Pattern:**
+```typescript
+const Button: React.FC<ButtonProps> = ({ label, onClick }) => { ... }
+```
+
+**5. Type Alias:**
+```typescript
+type ButtonProps = {
+  label: string;
+  onClick?: () => void;
+}
+function Button({ label, onClick }: ButtonProps) { ... }
+```
+
+**Extracted Prop Information:**
+- **Name** - Prop name from destructuring or type definition
+- **Type** - TypeScript type (string, number, boolean, array, object, function, union types, etc.)
+- **Optional** - Whether the prop is optional (`?` in TypeScript)
+- **Default Value** - Default value if provided in function parameters
+- **Description** - Auto-generated descriptions for complex types (unions, functions)
+
+**Prop Type Mapping:**
+- TypeScript primitives (`string`, `number`, `boolean`) → Coral types
+- Union types (`'primary' | 'secondary'`) → Preserved as string
+- Function types (`() => void`, `(event: MouseEvent) => void`) → Preserved as string
+- Array types (`string[]`, `Array<number>`) → `'array'`
+- Object types (`{ key: string }`) → `'object'`
+- Complex types → Preserved as string representation
+
+### State Hooks
+
+The package extracts information from React hooks:
+
+#### `useState`
+
+```typescript
+const [count, setCount] = useState(0);
+const [user, setUser] = useState<User | null>(null);
+const [items, setItems] = useState<string[]>([]);
+```
+
+**Extracted Information:**
+- State variable name (`count`)
+- Setter function name (`setCount`)
+- Initial value (`0`, `null`, `[]`)
+- TypeScript type (inferred from initial value or type annotation)
+- Hook type (`'useState'`)
+
+#### `useEffect`
+
+```typescript
+useEffect(() => {
+  // side effect code
+}, [dependencies]);
+```
+
+**Extracted Information:**
+- Hook name (`'useEffect'`)
+- Effect callback (as code string)
+- Dependencies array (as code string)
+- Hook type (`'useEffect'`)
+
+#### `useReducer`
+
+```typescript
+const [state, dispatch] = useReducer(reducer, initialState);
+```
+
+**Extracted Information:**
+- State variable name (`state`)
+- Dispatch function name (`dispatch`)
+- Reducer function (as code string)
+- Initial state (as code string)
+- Hook type (`'useReducer'`)
+
+#### `useContext`
+
+```typescript
+const contextValue = useContext(MyContext);
+```
+
+**Extracted Information:**
+- Context variable name (`contextValue`)
+- Context argument (as code string)
+- Hook type (`'useContext'`)
+
+#### `useMemo`
+
+```typescript
+const memoizedValue = useMemo(() => computeExpensiveValue(a, b), [a, b]);
+```
+
+**Extracted Information:**
+- Memoized variable name (`memoizedValue`)
+- Memo callback (as code string)
+- Dependencies array (as code string)
+- Hook type (`'useMemo'`)
+
+#### `useCallback`
+
+```typescript
+const memoizedCallback = useCallback(() => {
+  doSomething(a, b);
+}, [a, b]);
+```
+
+**Extracted Information:**
+- Callback variable name (`memoizedCallback`)
+- Callback function (as code string)
+- Dependencies array (as code string)
+- Hook type (`'useCallback'`)
+
+### Methods
+
+The package extracts methods and event handlers defined within components:
+
+**Extracted Information:**
+- Method name
+- Parameters (names and types if available)
+- Method body (as code string)
+- State interactions (which state variables are read/written)
+
+**Example:**
+```typescript
+const handleClick = () => {
+  setCount(count + 1);
+  if (onClick) onClick();
+};
+```
+
+**Extracted:**
+```json
+{
+  "name": "handleClick",
+  "parameters": [],
+  "body": "setCount(count + 1);\nif (onClick) onClick();",
+  "stateInteractions": {
+    "reads": ["count"],
+    "writes": ["setCount"]
+  }
+}
+```
+
+### Imports
+
+All import statements are captured:
+
+**Extracted Information:**
+- Source package/module (`'react'`, `'./Button'`, etc.)
+- Import specifiers:
+  - Default imports (`import React from 'react'`)
+  - Named imports (`import { useState } from 'react'`)
+  - Aliased imports (`import { Button as Btn } from './Button'`)
+- Version (defaults to `'latest'`)
+
+**Example:**
+```typescript
+import React, { useState, useEffect } from 'react';
+import { Button } from './Button';
+import { Card as CardComponent } from './Card';
+```
+
+**Extracted:**
+```json
+{
+  "imports": [
+    {
+      "source": "react",
+      "version": "latest",
+      "specifiers": [
+        { "name": "React", "isDefault": true },
+        { "name": "useState" },
+        { "name": "useEffect" }
+      ]
+    },
+    {
+      "source": "./Button",
+      "version": "latest",
+      "specifiers": [
+        { "name": "Button" }
+      ]
+    },
+    {
+      "source": "./Card",
+      "version": "latest",
+      "specifiers": [
+        { "name": "CardComponent", "as": "Card" }
+      ]
+    }
+  ]
+}
+```
+
+### JSX Elements
+
+The package transforms JSX into Coral node structure:
+
+**Element Parsing:**
+- HTML elements (`<div>`, `<button>`, etc.) → `elementType: 'div'`, `elementType: 'button'`
+- React components (`<Button>`, `<Card>`) → `elementType: 'Button'`, `isComponent: true`
+- JSX Fragments (`<>...</>`) → `elementType: 'React.Fragment'`
+- Text content → `textContent` property
+- Nested children → `children` array
+
+**Attribute Extraction:**
+- String attributes → Direct values
+- Expression attributes → Parsed as prop/state references or code strings
+- Spread attributes (`{...props}`) → Captured as spread properties
+- Event handlers → Extracted as method references
+
+**Style Processing:**
+- **Inline styles** (`style={{ padding: '20px' }}`) → Converted to Coral style objects
+- **Tailwind classes** (`className="px-4 py-2"`) → Converted to CSS properties using [`@reallygoodwork/coral-tw2css`](/docs/packages/tw2css)
+- **Responsive styles** (`md:p-8`, `lg:text-xl`) → Extracted as responsive styles
+- **Combined styles** → Merged inline styles and Tailwind classes
+
+---
+
+## Usage Examples
+
+### Simple Component
+
+```typescript
+import { transformReactComponentToSpec } from '@reallygoodwork/react-to-coral';
+
+const simpleComponent = `
+import React from 'react';
+
+export default function Greeting({ name }) {
+  return <h1>Hello, {name}!</h1>;
+}
+`;
+
+const spec = transformReactComponentToSpec(simpleComponent);
+console.log(spec.componentName); // "Greeting"
+console.log(spec.componentProperties); // { name: { type: 'any', value: 'name' } }
+```
+
+### Component with State
+
+```typescript
+const statefulComponent = `
+import React, { useState } from 'react';
+
+export default function Counter() {
+  const [count, setCount] = useState(0);
+  const [items, setItems] = useState<string[]>([]);
+
+  return (
+    <div>
+      <p>Count: {count}</p>
+      <button onClick={() => setCount(count + 1)}>Increment</button>
+      <ul>
+        {items.map(item => <li key={item}>{item}</li>)}
+      </ul>
+    </div>
+  );
+}
+`;
+
+const spec = transformReactComponentToSpec(statefulComponent);
+console.log(spec.stateHooks);
+// [
+//   {
+//     name: "count",
+//     setterName: "setCount",
+//     initialValue: 0,
+//     tsType: "number",
+//     hookType: "useState"
+//   },
+//   {
+//     name: "items",
+//     setterName: "setItems",
+//     initialValue: "[]",
+//     tsType: "array",
+//     hookType: "useState"
+//   }
+// ]
+```
+
+### TypeScript Component with Complex Props
+
+```typescript
+const typescriptComponent = `
+import React, { useState, useEffect } from 'react';
+
+interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+interface UserCardProps {
+  userId: number;
+  onUserLoad?: (user: User) => void;
+  variant?: 'default' | 'compact' | 'detailed';
+}
+
+export default function UserCard({ userId, onUserLoad, variant = 'default' }: UserCardProps) {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(\`/api/users/\${userId}\`)
+      .then(res => res.json())
+      .then(data => {
+        setUser(data);
+        setLoading(false);
+        if (onUserLoad) onUserLoad(data);
+      });
+  }, [userId, onUserLoad]);
+
+  if (loading) return <div>Loading...</div>;
+  if (!user) return <div>User not found</div>;
+
+  return (
+    <div className="p-4 border rounded-lg">
+      <h2 className="text-xl font-bold">{user.name}</h2>
+      <p className="text-gray-600">{user.email}</p>
+    </div>
+  );
+}
+`;
+
+const spec = transformReactComponentToSpec(typescriptComponent);
+// Extracts:
+// - Props with full TypeScript types
+// - useState hooks with type annotations
+// - useEffect hook with dependencies
+// - Tailwind classes converted to CSS
+```
+
+### Component with Tailwind CSS
+
+```typescript
+const tailwindComponent = `
+import React from 'react';
+
+export default function Card({ title, description }) {
+  return (
+    <div className="p-6 bg-white rounded-xl shadow-lg hover:shadow-xl md:p-8 lg:p-10">
+      <h3 className="text-2xl font-bold text-gray-900 mb-2">{title}</h3>
+      <p className="text-gray-600 leading-relaxed">{description}</p>
+    </div>
+  );
+}
+`;
+
+const spec = transformReactComponentToSpec(tailwindComponent);
+// Tailwind classes are automatically converted to CSS properties:
+// - "p-6" → padding: 1.5rem
+// - "bg-white" → backgroundColor: #ffffff
+// - "rounded-xl" → borderRadius: 0.75rem
+// - "hover:shadow-xl" → Extracted as state style
+// - "md:p-8" → Extracted as responsive style
+```
+
+### Component with Inline Styles
+
+```typescript
+const inlineStyleComponent = `
+import React from 'react';
+
+export default function StyledButton({ label, onClick }) {
+  return (
+    <button
+      style={{
+        padding: '12px 24px',
+        backgroundColor: '#007bff',
+        color: '#ffffff',
+        border: 'none',
+        borderRadius: '6px',
+        cursor: 'pointer'
+      }}
+      onClick={onClick}
+    >
+      {label}
+    </button>
+  );
+}
+`;
+
+const spec = transformReactComponentToSpec(inlineStyleComponent);
+// Inline styles are converted to Coral style objects:
+// {
+//   padding: "12px 24px",
+//   backgroundColor: "#007bff",
+//   color: "#ffffff",
+//   border: "none",
+//   borderRadius: "6px",
+//   cursor: "pointer"
+// }
+```
+
+### Component with Methods and Event Handlers
+
+```typescript
+const methodComponent = `
+import React, { useState } from 'react';
+
+export default function Form({ onSubmit }) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSubmit({ email, password });
+    setEmail('');
+    setPassword('');
+  };
+
+  const handleEmailChange = (e) => {
+    setEmail(e.target.value);
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input
+        type="email"
+        value={email}
+        onChange={handleEmailChange}
+        placeholder="Email"
+      />
+      <input
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        placeholder="Password"
+      />
+      <button type="submit">Submit</button>
+    </form>
+  );
+}
+`;
+
+const spec = transformReactComponentToSpec(methodComponent);
+// Extracts methods with state interactions:
+// {
+//   methods: [
+//     {
+//       name: "handleSubmit",
+//       parameters: ["e"],
+//       body: "e.preventDefault();\nonSubmit({ email, password });\nsetEmail('');\nsetPassword('');",
+//       stateInteractions: {
+//         reads: ["email", "password"],
+//         writes: ["setEmail", "setPassword"]
+//       }
+//     },
+//     {
+//       name: "handleEmailChange",
+//       parameters: ["e"],
+//       body: "setEmail(e.target.value);",
+//       stateInteractions: {
+//         writes: ["setEmail"]
+//       }
+//     }
+//   ]
+// }
+```
+
+### React.FC Pattern
+
+```typescript
+const reactFCComponent = `
+import React from 'react';
+
+interface ButtonProps {
+  label: string;
+  disabled?: boolean;
+  onClick?: () => void;
+}
+
+const Button: React.FC<ButtonProps> = ({ label, disabled = false, onClick }) => {
+  return (
+    <button
+      disabled={disabled}
+      onClick={onClick}
+      className="px-4 py-2 rounded"
+    >
+      {label}
+    </button>
+  );
+};
+
+export default Button;
+`;
+
+const spec = transformReactComponentToSpec(reactFCComponent);
+// Props are extracted from React.FC type annotation
+```
+
+### Batch Processing
+
+```typescript
+import { transformReactComponentToSpec } from '@reallygoodwork/react-to-coral';
+import fs from 'fs';
+import path from 'path';
+
+const componentsDir = './src/components';
+const outputDir = './coral-specs';
+
+// Read all component files
+const componentFiles = fs.readdirSync(componentsDir)
+  .filter(file => file.endsWith('.tsx') || file.endsWith('.jsx'));
+
+// Process each component
+componentFiles.forEach(file => {
+  const filePath = path.join(componentsDir, file);
+  const code = fs.readFileSync(filePath, 'utf-8');
+
+  try {
+    const spec = transformReactComponentToSpec(code);
+    const outputPath = path.join(outputDir, file.replace(/\.(tsx|jsx)$/, '.coral.json'));
+
+    fs.writeFileSync(outputPath, JSON.stringify(spec, null, 2));
+    console.log(`✓ Converted ${file} → ${path.basename(outputPath)}`);
+  } catch (error) {
+    console.error(`✗ Failed to convert ${file}:`, error.message);
+  }
+});
+```
+
+---
+
+## Validation
+
+The package includes built-in validation to ensure component code is valid before transformation. Validation can be skipped for trusted input using the `skipValidation` option.
+
+### Validation Checks
+
+**Syntax Validation:**
+- Non-empty string input
+- Balanced braces `{}`
+- Balanced parentheses `()`
+- Balanced brackets `[]`
+
+**Structure Validation:**
+- Presence of React import (warning if missing)
+- Valid React component pattern (function declaration or arrow function)
+- JSX elements present (warning if missing)
+
+**Compatibility Warnings:**
+- Class components detected (warning - not supported)
+- Complex React patterns (React.createElement, React.cloneElement, etc.)
+- Dynamic imports (may not be fully resolved)
+- Advanced React features (Suspense, lazy, useTransition, etc.)
+
+### Using Validation
+
+Validation runs automatically unless `skipValidation: true` is passed:
+
+```typescript
+import { transformReactComponentToSpec } from '@reallygoodwork/react-to-coral';
+
+// Validation runs automatically
+const spec = transformReactComponentToSpec(componentCode);
+
+// Skip validation for trusted code
+const spec = transformReactComponentToSpec(componentCode, {
+  skipValidation: true
+});
+```
+
+### Validation Errors
+
+If validation fails, an error is thrown with details:
+
+```typescript
+try {
+  const spec = transformReactComponentToSpec(invalidCode);
+} catch (error) {
+  console.error('Validation failed:', error.message);
+  // Error message includes details about what failed
+}
+```
+
+---
+
+## Type Definitions
+
+### `UIElement`
+
+Represents a UI element in the component tree during parsing (internal type).
+
+<TypeTable
+  type={{
+    elementType: {
+      description: 'The element type (HTML tag name or component name)',
+      type: 'string',
+      required: true,
+    },
+    isComponent: {
+      description: 'Whether this is a React component (not an HTML element)',
+      type: 'boolean',
+      required: true,
+    },
+    importSource: {
+      description: 'Import source for component elements',
+      type: 'string',
+      required: false,
+    },
+    componentProperties: {
+      description: 'Properties/attributes for this element',
+      type: 'CoralComponentPropertyType',
+      required: false,
+    },
+    children: {
+      description: 'Child elements',
+      type: 'UIElement[]',
+      required: true,
+    },
+    textContent: {
+      description: 'Text content if this is a text node',
+      type: 'string',
+      required: false,
+    },
+  }}
+/>
+
+### `PropReference`
+
+Represents a reference to a prop, state variable, or method (internal type).
+
+<TypeTable
+  type={{
+    type: {
+      description: 'The type of reference',
+      type: "'method' | 'state' | 'prop'",
+      required: true,
+    },
+    value: {
+      description: 'The name of the referenced item',
+      type: 'string',
+      required: true,
+    },
+  }}
+/>
+
+### `ValidationError`
+
+Represents a validation error or warning.
+
+<TypeTable
+  type={{
+    type: {
+      description: 'The type of validation issue',
+      type: "'syntax' | 'structure' | 'compatibility'",
+      required: true,
+    },
+    message: {
+      description: 'Error or warning message',
+      type: 'string',
+      required: true,
+    },
+    suggestion: {
+      description: 'Optional suggestion for fixing the issue',
+      type: 'string',
+      required: false,
+    },
+  }}
+/>
+
+### `ValidationResult`
+
+Result of component validation.
+
+<TypeTable
+  type={{
+    isValid: {
+      description: 'Whether the component passed validation',
+      type: 'boolean',
+      required: true,
+    },
+    errors: {
+      description: 'Array of validation errors',
+      type: 'ValidationError[]',
+      required: true,
+    },
+    warnings: {
+      description: 'Array of validation warnings',
+      type: 'ValidationError[]',
+      required: true,
+    },
+  }}
+/>
+
+---
+
+## Limitations
+
+### Not Supported
+
+- **Class Components** - Only functional components are supported. Class components will generate a warning but may not parse correctly.
+- **Complex Expressions** - Some complex JavaScript expressions in JSX may not be fully parsed or may be simplified.
+- **Dynamic Imports** - Only static imports are tracked. Dynamic imports (`import()`) are not resolved.
+- **Higher-Order Components (HOCs)** - HOC patterns may not be fully captured in the transformation.
+- **Render Props** - Render prop patterns are not fully supported.
+- **Context Providers** - Context providers and consumers may not be fully analyzed.
+- **Refs** - `useRef` hooks and ref attributes are not currently extracted.
+
+### Best Results With
+
+- **Functional Components** - Arrow functions or function declarations
+- **TypeScript** - Components with explicit type annotations provide better prop extraction
+- **Destructured Props** - Props passed via destructuring are most accurately extracted
+- **React Hooks** - Standard hooks (useState, useEffect, etc.) are fully supported
+- **Standard HTML Elements** - HTML elements and imported components work best
+- **Tailwind CSS** - Tailwind classes are automatically converted to CSS properties
+- **Inline Styles** - Inline style objects are converted to Coral style objects
+- **Simple to Moderate Complexity** - Components with straightforward logic parse most accurately
+
+### Performance Considerations
+
+**Optimization Tips:**
+
+```typescript
+// Skip validation for known-good code (faster)
+const spec = transformReactComponentToSpec(code, {
+  skipValidation: true
+});
+
+// Process multiple components in parallel
+const specs = await Promise.all(
+  components.map(code =>
+    Promise.resolve(transformReactComponentToSpec(code, { skipValidation: true }))
+  )
+);
+```
+
+**Processing Large Codebases:**
+
+```typescript
+import { transformReactComponentToSpec } from '@reallygoodwork/react-to-coral';
+import { glob } from 'glob';
+
+// Process all components in a directory
+const files = glob.sync('src/components/**/*.{tsx,jsx}');
+
+const results = files.map(file => {
+  try {
+    const code = fs.readFileSync(file, 'utf-8');
+    const spec = transformReactComponentToSpec(code, { skipValidation: true });
+    return { file, spec, success: true };
+  } catch (error) {
+    return { file, error: error.message, success: false };
+  }
+});
+
+// Filter successful conversions
+const successful = results.filter(r => r.success);
+const failed = results.filter(r => !r.success);
+
+console.log(`✓ Converted ${successful.length} components`);
+if (failed.length > 0) {
+  console.error(`✗ Failed to convert ${failed.length} components`);
+}
+```
+
+---
+
+## Integration Examples
+
+### Converting React Component Library to Coral
+
+```typescript
+import { transformReactComponentToSpec } from '@reallygoodwork/react-to-coral';
+import { writeFile } from 'fs/promises';
+import { glob } from 'glob';
+
+async function convertComponentLibrary() {
+  const components = await glob('src/components/**/*.tsx');
+
+  for (const file of components) {
+    const code = await readFile(file, 'utf-8');
+    const spec = transformReactComponentToSpec(code);
+
+    const outputPath = file.replace(/\.tsx$/, '.coral.json');
+    await writeFile(outputPath, JSON.stringify(spec, null, 2));
+  }
+}
+```
+
+### React → Coral → React Round Trip
+
+```typescript
+import { transformReactComponentToSpec } from '@reallygoodwork/react-to-coral';
+import { coralToReact } from '@reallygoodwork/coral-to-react';
+
+// 1. Convert React to Coral
+const originalCode = `
+export default function Button({ label }) {
+  return <button className="px-4 py-2">{label}</button>;
+}
+`;
+
+const spec = transformReactComponentToSpec(originalCode);
+
+// 2. Modify the specification
+spec.styles.backgroundColor = '#007bff';
+spec.styles.color = '#ffffff';
+
+// 3. Convert back to React
+const { reactCode } = await coralToReact(spec);
+```
+
+### Building a Design System from React Components
+
+```typescript
+import { transformReactComponentToSpec } from '@reallygoodwork/react-to-coral';
+import { writeFile } from 'fs/promises';
+
+async function buildDesignSystem() {
+  const components = {
+    Button: await readFile('./src/components/Button.tsx', 'utf-8'),
+    Card: await readFile('./src/components/Card.tsx', 'utf-8'),
+    Input: await readFile('./src/components/Input.tsx', 'utf-8'),
+  };
+
+  const specs = {};
+
+  for (const [name, code] of Object.entries(components)) {
+    specs[name] = transformReactComponentToSpec(code);
+  }
+
+  // Save all specs
+  await writeFile(
+    './design-system/components.json',
+    JSON.stringify(specs, null, 2)
+  );
+}
+```
+
+---
+
+## Related Packages
+
+- [@reallygoodwork/coral-core](/docs/packages/core) - Core utilities, types, and validation for Coral specifications
+- [@reallygoodwork/coral-to-react](/docs/packages/coral-to-react) - Convert Coral specs to React components (reverse operation)
+- [@reallygoodwork/coral-to-html](/docs/packages/coral-to-html) - Convert Coral specs to HTML
+- [@reallygoodwork/coral-tw2css](/docs/packages/tw2css) - Convert Tailwind CSS classes to CSS style objects (used internally)
+- [@reallygoodwork/style-to-tailwind](/docs/packages/style-to-tailwind) - Convert CSS styles to Tailwind classes
+
+---
+
+## Additional Resources
+
+### Guides
+- [Getting Started Guide](/docs/guides/getting-started) - Learn how to use Coral in your projects
+- [Component Variants Guide](/docs/guides/variants) - Understanding variant systems
+- [Props & Events Guide](/docs/guides/props-events) - Typed component APIs
+- [Component Composition Guide](/docs/guides/composition) - Component composition concepts
+
+### API Documentation
+- [Core Package Documentation](/docs/packages/core) - Understanding Coral specifications
+- [Coral to React Documentation](/docs/packages/coral-to-react) - Converting Coral back to React
+- [Coral to HTML Documentation](/docs/packages/coral-to-html) - Converting Coral to HTML

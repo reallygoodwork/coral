@@ -1,0 +1,87 @@
+---
+title: "@reallygoodwork/coral-core"
+description: Core utilities, schemas, and CLI for the Coral specification format.
+---
+
+[![npm](https://img.shields.io/npm/v/@reallygoodwork/coral-core)](https://www.npmjs.com/package/@reallygoodwork/coral-core)
+
+Core utilities, schemas, and CLI for the Coral specification format. This package provides the foundational types, Zod schemas, utility functions, and CLI tools for working with Coral UI specifications.
+
+## What is Coral?
+
+Coral is a specification format for describing UI components in a framework-agnostic way. It enables you to define component structure, styling, variants, interactivity, and responsive behavior in a portable JSON format that can be transformed into various output formats (HTML, React, Vue, etc.).
+
+## Features
+
+- **[Component Variants System](/docs/packages/core/variants)** - CVA-style variant definitions with per-node responses
+- **[Package System](/docs/packages/core/packages)** - `coral.config.json` manifest for organizing design systems
+- **[Component Composition](/docs/packages/core/composition)** - Embed components within components with prop/slot bindings
+- **[Typed Props & Events](/docs/packages/core/props-events)** - Full type definitions for component APIs
+- **[Conditional Rendering](/docs/packages/core/conditionals)** - Expression-based conditional logic
+- **[Reference Types](/docs/packages/core/references)** - Token, prop, asset, and component references
+- **[CLI Tools](/docs/packages/core/cli)** - Initialize, validate, and build packages
+- **[TypeScript Generation](/docs/packages/core/types)** - Generate TypeScript interfaces from components
+- **Type-safe schemas** using Zod for runtime validation
+
+## Installation
+
+```bash
+npm install @reallygoodwork/coral-core
+```
+
+```bash
+pnpm add @reallygoodwork/coral-core
+```
+
+```bash
+yarn add @reallygoodwork/coral-core
+```
+
+## Quick Start
+
+```typescript
+import { parseUISpec, transformHTMLToSpec } from '@reallygoodwork/coral-core'
+
+// Parse and validate a specification
+const spec = await parseUISpec({
+  name: 'Button',
+  elementType: 'button',
+  styles: { padding: '10px', backgroundColor: '#007bff' },
+})
+
+// Or transform HTML to Coral spec
+const htmlSpec = transformHTMLToSpec('<button class="btn">Click me</button>')
+```
+
+## Documentation
+
+### API Reference
+
+<Cards>
+  <Card title="CLI Commands" href="/packages/core/cli" />
+  <Card title="Component Variants" href="/packages/core/variants" />
+  <Card title="Package System" href="/packages/core/packages" />
+  <Card title="Props & Events" href="/packages/core/props-events" />
+  <Card title="Composition" href="/packages/core/composition" />
+  <Card title="Conditionals" href="/packages/core/conditionals" />
+  <Card title="References" href="/packages/core/references" />
+  <Card title="Types & Guards" href="/packages/core/types" />
+  <Card title="Utility Functions" href="/packages/core/functions" />
+  <Card title="Tutorial" href="/packages/core/tutorial" />
+</Cards>
+
+### Concept Guides
+
+For in-depth explanations of core concepts, see:
+- [Getting Started](/docs/guides/getting-started) - Learn how to use Coral Libraries
+- [Component Variants Guide](/docs/guides/variants) - Understanding variant systems
+- [Component Composition Guide](/docs/guides/composition) - Embedding components
+- [Props & Events Guide](/docs/guides/props-events) - Typed component APIs
+- [Package System Guide](/docs/guides/packages) - Organizing design systems
+
+## Related Packages
+
+- [@reallygoodwork/coral-to-html](/docs/packages/coral-to-html) - Convert Coral specs to HTML
+- [@reallygoodwork/coral-to-react](/docs/packages/coral-to-react) - Convert Coral specs to React components
+- [@reallygoodwork/react-to-coral](/docs/packages/react-to-coral) - Convert React components to Coral specs
+- [@reallygoodwork/coral-tw2css](/docs/packages/tw2css) - Convert Tailwind classes to CSS

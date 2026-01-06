@@ -8,6 +8,7 @@ export function baseOptions(): BaseLayoutProps {
 
     ],
     nav: {
+      enabled: true,
       title: 'Coral UI',
     },
   };
