@@ -20,8 +20,6 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
 
   const MDX = page.data.body
   const components = getMDXComponents({
-    // this allows you to link to other pages with relative file paths
-    // @ts-expect-error - React type mismatch between fumadocs and MDX
     a: createRelativeLink(source, page),
   })
 
