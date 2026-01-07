@@ -31,4 +31,38 @@ export interface Options {
    * @default false
    */
   prettier?: boolean
+
+  /**
+   * Whether to flatten component composition (inline instances)
+   * @default false
+   */
+  flattenComposition?: boolean
+
+  /**
+   * How to handle variants
+   * @default 'inline'
+   */
+  variantStrategy?: 'cva' | 'inline' | 'custom'
+}
+
+/**
+ * Output file for package generation
+ */
+export interface GeneratedFile {
+  /** File path relative to output directory */
+  path: string
+  /** File content */
+  content: string
+}
+
+/**
+ * Result of package generation
+ */
+export interface PackageGenerationResult {
+  /** Generated component files */
+  components: GeneratedFile[]
+  /** Generated CSS files */
+  styles: GeneratedFile[]
+  /** Index file */
+  index?: GeneratedFile
 }

@@ -5,6 +5,10 @@ module.exports = {
   testMatch: ["**/__tests__/**/*.test.ts"],
   collectCoverageFrom: ["src/**/*.ts", "!src/**/*.test.ts"],
   passWithNoTests: true,
+  moduleNameMapper: {
+    "^@reallygoodwork/coral-tw2css$": "<rootDir>/../tw2css/src/index.ts",
+    "^@reallygoodwork/coral-core$": "<rootDir>/../core/src/index.ts",
+  },
   transform: {
     "^.+\\.ts$": [
       "ts-jest",

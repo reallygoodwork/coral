@@ -4,7 +4,9 @@ import type {
 	CoralRootNode,
 	CoralStyleType,
 	Dimension,
+	LoadedPackage,
 } from "@reallygoodwork/coral-core";
+import { flattenComponentTree } from "@reallygoodwork/coral-core";
 import * as parserHtml from "prettier/parser-html";
 import * as prettier from "prettier/standalone";
 
@@ -154,10 +156,36 @@ const nodeToHTML = (node: CoralNode): string => {
 	return `<${node.elementType}${attributesStr}>${children}</${node.elementType}>`;
 };
 
+/**
+ * Options for HTML generation
+ */
+export interface CoralToHTMLOptions {
+	/**
+	 * Whether to flatten component composition
+	 * @default true
+	 */
+	flattenComposition?: boolean;
+
+	/**
+	 * Loaded package (required if flattenComposition is true and spec contains instances)
+	 */
+	package?: LoadedPackage;
+}
+
 export const coralToHTML = async (
 	coralSpec: CoralRootNode,
+	options: CoralToHTMLOptions = {},
 ): Promise<string> => {
-	const node = nodeToHTML(coralSpec);
+	const { flattenComposition = true, package: pkg } = options;
+
+	let nodeToRender = coralSpec as CoralNode;
+
+	// Flatten component instances if requested
+	if (flattenComposition && pkg) {
+		nodeToRender = flattenComponentTree(coralSpec, {}, {}, pkg);
+	}
+
+	const node = nodeToHTML(nodeToRender);
 
 	return prettier.format(node, {
 		parser: "html",

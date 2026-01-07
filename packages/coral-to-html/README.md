@@ -18,11 +18,13 @@ yarn add @reallygoodwork/coral-to-html
 
 This package generates formatted HTML from a Coral UI specification. It produces clean, properly indented HTML with inline styles.
 
+**NEW**: Now supports component composition with automatic flattening of component instances.
+
 ## API Reference
 
 ### Functions
 
-#### `coralToHTML(spec)`
+#### `coralToHTML(spec, options?)`
 
 Converts a Coral specification to formatted HTML.
 
@@ -69,9 +71,56 @@ const html = await coralToHTML(spec)
 
 **Parameters:**
 - `spec: CoralRootNode` - Coral specification
+- `options?: CoralToHTMLOptions` - Generation options
+
+**Options:**
+```typescript
+interface CoralToHTMLOptions {
+  // Whether to flatten component composition (default: true)
+  flattenComposition?: boolean
+
+  // Loaded package (required if spec contains component instances)
+  package?: LoadedPackage
+}
+```
 
 **Returns:**
 - `Promise<string>` - Formatted HTML string
+
+**Component Composition Example:**
+```typescript
+import { loadPackage } from '@reallygoodwork/coral-core'
+import { coralToHTML } from '@reallygoodwork/coral-to-html'
+
+// Load package with components
+const pkg = await loadPackage('./coral.config.json', {
+  readFile: (path) => fs.readFile(path, 'utf-8'),
+})
+
+// Spec with component instance
+const cardSpec: CoralRootNode = {
+  name: 'Card',
+  elementType: 'div',
+  children: [
+    {
+      id: 'btn-1',
+      name: 'SaveButton',
+      type: 'COMPONENT_INSTANCE',
+      elementType: 'button',
+      $component: {
+        ref: './button.coral.json'
+      },
+      propBindings: {
+        label: 'Save'
+      }
+    }
+  ]
+}
+
+// Generate HTML with flattened composition
+const html = await coralToHTML(cardSpec, { package: pkg })
+// Component instances are automatically resolved and flattened to HTML
+```
 
 ---
 

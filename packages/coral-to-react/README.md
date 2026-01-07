@@ -19,10 +19,12 @@ yarn add @reallygoodwork/coral-to-react
 This package generates React component code from a Coral UI specification. It produces:
 
 - React component with proper structure
-- TypeScript props interface
+- TypeScript props interface (with support for new typed props system)
 - State hooks
 - Event handler methods
 - Styled JSX (inline or CSS classes)
+- **Component composition** - Renders component instances with prop/slot bindings
+- **Package generation** - Generate entire component libraries from Coral packages
 
 ## API Reference
 
@@ -102,8 +104,58 @@ interface Options {
 
   // Format with Prettier (default: false)
   prettier?: boolean
+
+  // Whether to flatten component composition (default: false)
+  flattenComposition?: boolean
+
+  // How to handle variants: 'cva' | 'inline' | 'custom' (default: 'inline')
+  variantStrategy?: 'cva' | 'inline' | 'custom'
 }
 ```
+
+---
+
+#### `generatePackage(package, options?)`
+
+**NEW** - Generate an entire component library from a Coral package.
+
+```typescript
+import { loadPackage } from '@reallygoodwork/coral-core'
+import { generatePackage } from '@reallygoodwork/coral-to-react'
+import * as fs from 'fs/promises'
+
+const pkg = await loadPackage('./coral.config.json', {
+  readFile: (path) => fs.readFile(path, 'utf-8'),
+})
+
+const result = await generatePackage(pkg, {
+  componentFormat: 'arrow',
+  styleFormat: 'className',
+  includeTypes: true,
+})
+
+// Write all component files
+for (const file of result.components) {
+  await fs.writeFile(`./dist/${file.path}`, file.content)
+}
+
+// Write CSS files
+for (const file of result.styles) {
+  await fs.writeFile(`./dist/${file.path}`, file.content)
+}
+
+// Write index file
+if (result.index) {
+  await fs.writeFile(`./dist/${result.index.path}`, result.index.content)
+}
+```
+
+**Parameters:**
+- `package: LoadedPackage` - Loaded Coral package from `@reallygoodwork/coral-core`
+- `options?: Options` - Generation options
+
+**Returns:**
+- `Promise<PackageGenerationResult>` - Object with component files, styles, and index
 
 ---
 
@@ -267,6 +319,46 @@ const { reactCode } = await coralToReact(spec, {
   prettier: true
 })
 // Formatted with Prettier
+```
+
+### Component Composition
+
+**NEW** - Components can now embed other components using `COMPONENT_INSTANCE` type:
+
+```typescript
+const cardSpec: CoralRootNode = {
+  name: 'Card',
+  elementType: 'div',
+  props: {
+    title: { type: 'string', required: true },
+    onSave: { type: 'function' }
+  },
+  children: [
+    {
+      id: 'save-button',
+      name: 'SaveButton',
+      type: 'COMPONENT_INSTANCE',
+      elementType: 'button',
+      $component: {
+        ref: './button.coral.json'
+      },
+      propBindings: {
+        label: 'Save',
+        intent: 'primary'
+      },
+      eventBindings: {
+        onClick: { $event: 'onSave' }
+      }
+    }
+  ]
+}
+
+const { reactCode } = await coralToReact(cardSpec)
+
+// Output includes:
+// import { Button } from './Button'
+// ...
+// <Button label="Save" intent="primary" onClick={props.onSave} />
 ```
 
 ---

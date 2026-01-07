@@ -1,6 +1,6 @@
 # @reallygoodwork/coral-core
 
-Core types, schemas, and utilities for the Coral UI specification format.
+Core types, schemas, utilities, and CLI for the Coral UI specification format.
 
 [![npm](https://img.shields.io/npm/v/@reallygoodwork/coral-core)](https://www.npmjs.com/package/@reallygoodwork/coral-core)
 
@@ -16,11 +16,157 @@ yarn add @reallygoodwork/coral-core
 
 ## Overview
 
-This package provides the foundational types, Zod schemas, and utility functions for working with the Coral UI specification format. It's required by all other Coral packages.
+This package provides the foundational types, Zod schemas, utility functions, and CLI tools for working with the Coral UI specification format. It's the core of the Coral ecosystem, enabling:
+
+- **Component Variants System** - CVA-style variant definitions at the component level
+- **Package System** - `coral.config.json` manifest for organizing design systems
+- **Component Composition** - Embed components within components with prop/slot bindings
+- **Typed Props & Events** - Full type definitions for component APIs
+- **Conditional Rendering** - Expression-based conditional logic
+- **Reference Resolution** - Token, prop, asset, and component references
+
+## CLI Commands
+
+The package includes a CLI for managing Coral packages:
+
+```bash
+# Initialize a new package
+coral init my-design-system
+
+# Validate a package
+coral validate ./path/to/package
+
+# Build outputs (types, json)
+coral build --target types
+
+# Add a new component
+coral add component Button --category Actions
+```
+
+## Quick Start
+
+### Creating a Component with Variants
+
+```typescript
+import type { CoralRootNode } from '@reallygoodwork/coral-core'
+
+const button: CoralRootNode = {
+  name: 'Button',
+  elementType: 'button',
+
+  // Component metadata
+  $meta: {
+    name: 'Button',
+    version: '1.0.0',
+    status: 'stable',
+    category: 'Actions',
+  },
+
+  // Define variant axes
+  componentVariants: {
+    axes: [
+      {
+        name: 'intent',
+        values: ['primary', 'secondary', 'destructive'],
+        default: 'primary',
+        description: 'Visual style of the button',
+      },
+      {
+        name: 'size',
+        values: ['sm', 'md', 'lg'],
+        default: 'md',
+      },
+    ],
+  },
+
+  // Base styles
+  styles: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: '6px',
+    fontWeight: '500',
+  },
+
+  // Per-node variant responses
+  variantStyles: {
+    intent: {
+      primary: { backgroundColor: '#007bff', color: '#ffffff' },
+      secondary: { backgroundColor: '#6c757d', color: '#ffffff' },
+      destructive: { backgroundColor: '#dc3545', color: '#ffffff' },
+    },
+    size: {
+      sm: { padding: '4px 8px', fontSize: '12px' },
+      md: { padding: '8px 16px', fontSize: '14px' },
+      lg: { padding: '12px 24px', fontSize: '16px' },
+    },
+  },
+
+  // State styles
+  stateStyles: {
+    hover: {
+      intent: {
+        primary: { backgroundColor: '#0056b3' },
+        secondary: { backgroundColor: '#5a6268' },
+        destructive: { backgroundColor: '#c82333' },
+      },
+    },
+    disabled: { opacity: '0.5', cursor: 'not-allowed' },
+  },
+
+  // Typed props
+  props: {
+    label: {
+      type: 'string',
+      required: true,
+      description: 'Button text',
+    },
+    disabled: {
+      type: 'boolean',
+      default: false,
+    },
+  },
+
+  // Events
+  events: {
+    onClick: {
+      description: 'Fired when button is clicked',
+      parameters: [
+        { name: 'event', type: 'React.MouseEvent<HTMLButtonElement>' },
+      ],
+    },
+  },
+
+  textContent: { $prop: 'label' },
+}
+```
+
+### Package Manifest
+
+Create a `coral.config.json` to organize your design system:
+
+```json
+{
+  "$schema": "https://coral.design/config.schema.json",
+  "name": "@acme/design-system",
+  "version": "1.0.0",
+  "description": "ACME Design System",
+  "coral": { "specVersion": "1.0.0" },
+  "tokens": { "entry": "./tokens/index.json" },
+  "components": { "entry": "./components/index.json" },
+  "exports": {
+    "react": {
+      "outDir": "./dist/react",
+      "typescript": true,
+      "styling": "tailwind"
+    }
+  }
+}
+```
 
 ## API Reference
 
-### Functions
+### Core Functions
 
 #### `parseUISpec(spec)`
 
@@ -29,27 +175,12 @@ Parses and validates a UI specification object against the Coral schema.
 ```typescript
 import { parseUISpec } from '@reallygoodwork/coral-core'
 
-const spec = {
+const validatedSpec = await parseUISpec({
+  name: 'Card',
   elementType: 'div',
   styles: { padding: '20px' },
-  children: [
-    { elementType: 'p', textContent: 'Hello World' }
-  ]
-}
-
-const validatedSpec = await parseUISpec(spec)
+})
 ```
-
-**Parameters:**
-- `spec: Record<string, unknown>` - The UI specification object to parse
-
-**Returns:**
-- `Promise<CoralRootNode>` - The validated Coral specification
-
-**Throws:**
-- `Error` if the specification fails validation
-
----
 
 #### `transformHTMLToSpec(html)`
 
@@ -58,264 +189,198 @@ Transforms an HTML string into a Coral specification.
 ```typescript
 import { transformHTMLToSpec } from '@reallygoodwork/coral-core'
 
-const html = `
-<div class="container">
-  <h1 style="color: blue;">Hello World</h1>
-  <p>Welcome to Coral</p>
-</div>
-`
-
-const spec = transformHTMLToSpec(html)
+const spec = transformHTMLToSpec('<div class="card"><h1>Hello</h1></div>')
 ```
 
-**Parameters:**
-- `html: string` - HTML string to transform
+### Package System
 
-**Returns:**
-- `CoralRootNode` - The Coral specification
+#### `loadPackage(configPath, options)`
 
-**Features:**
-- Extracts inline styles
-- Parses CSS from `<style>` tags
-- Handles responsive media queries
-- Preserves element attributes
-
----
-
-#### `dimensionToCSS(dimension)`
-
-Converts a Coral dimension object to a CSS string.
+Load a Coral package from disk.
 
 ```typescript
-import { dimensionToCSS } from '@reallygoodwork/coral-core'
+import { loadPackage } from '@reallygoodwork/coral-core'
+import * as fs from 'fs/promises'
 
-dimensionToCSS({ value: 16, unit: 'px' })  // "16px"
-dimensionToCSS({ value: 2, unit: 'rem' })  // "2rem"
-dimensionToCSS({ value: 50, unit: '%' })   // "50%"
+const pkg = await loadPackage('./coral.config.json', {
+  readFile: (path) => fs.readFile(path, 'utf-8'),
+})
+
+console.log(`Loaded ${pkg.components.size} components`)
 ```
 
-**Parameters:**
-- `dimension: Dimension` - Object with `value` (number) and `unit` (string)
+#### `validatePackage(pkg)`
 
-**Returns:**
-- `string` - CSS dimension string
-
----
-
-#### `normalizeDimension(value)`
-
-Normalizes various dimension inputs to a standard Dimension object.
+Validate all references in a package.
 
 ```typescript
-import { normalizeDimension } from '@reallygoodwork/coral-core'
+import { validatePackage } from '@reallygoodwork/coral-core'
 
-normalizeDimension('16px')  // { value: 16, unit: 'px' }
-normalizeDimension(16)      // { value: 16, unit: 'px' }
-normalizeDimension('2rem')  // { value: 2, unit: 'rem' }
-```
-
-**Parameters:**
-- `value: string | number` - The dimension value to normalize
-
-**Returns:**
-- `Dimension` - Normalized dimension object
-
----
-
-#### `pascalCaseString(str)`
-
-Converts a string to PascalCase.
-
-```typescript
-import { pascalCaseString } from '@reallygoodwork/coral-core'
-
-pascalCaseString('hello-world')  // "HelloWorld"
-pascalCaseString('my_component') // "MyComponent"
-```
-
----
-
-### Media Query Functions
-
-#### `parseMediaQuery(mediaQueryString)`
-
-Parses a CSS media query string and extracts breakpoint information.
-
-```typescript
-import { parseMediaQuery } from '@reallygoodwork/coral-core'
-
-// Simple breakpoint
-parseMediaQuery('@media (min-width: 768px)')
-// { type: 'min-width', value: '768px' }
-
-// Range breakpoint
-parseMediaQuery('@media (min-width: 768px) and (max-width: 1024px)')
-// { min: { type: 'min-width', value: '768px' }, max: { type: 'max-width', value: '1024px' } }
-```
-
----
-
-#### `extractMediaQueriesFromCSS(cssString, selector?)`
-
-Extracts media queries and their associated styles from a CSS string.
-
-```typescript
-import { extractMediaQueriesFromCSS } from '@reallygoodwork/coral-core'
-
-const css = `
-  @media (min-width: 768px) {
-    .container { padding: 20px; }
-  }
-`
-
-const mediaQueries = extractMediaQueriesFromCSS(css)
-// [{ mediaQuery: '@media (min-width: 768px) [.container]', styles: { padding: '20px' } }]
-```
-
----
-
-#### `mediaQueriesToResponsiveStyles(mediaQueries)`
-
-Converts parsed media queries to Coral ResponsiveStyle format.
-
-```typescript
-import { mediaQueriesToResponsiveStyles } from '@reallygoodwork/coral-core'
-
-const mediaQueries = [
-  { mediaQuery: '@media (min-width: 768px)', styles: { padding: '20px' } }
-]
-
-const responsiveStyles = mediaQueriesToResponsiveStyles(mediaQueries)
-// [{ breakpoint: { type: 'min-width', value: '768px' }, styles: { padding: '20px' } }]
-```
-
----
-
-#### `extractResponsiveStylesFromObject(stylesObject)`
-
-Extracts responsive styles from an object with media query keys.
-
-```typescript
-import { extractResponsiveStylesFromObject } from '@reallygoodwork/coral-core'
-
-const styles = {
-  padding: '10px',
-  '(min-width: 768px)': { padding: '20px' },
-  '(min-width: 1024px)': { padding: '40px' }
-}
-
-const { baseStyles, responsiveStyles } = extractResponsiveStylesFromObject(styles)
-// baseStyles: { padding: '10px' }
-// responsiveStyles: [{ breakpoint: {...}, styles: { padding: '20px' } }, ...]
-```
-
----
-
-## Types
-
-### Core Types
-
-```typescript
-// Main specification types
-type CoralRootNode = CoralNode & {
-  $schema?: string
-  componentName?: string
-  imports?: CoralImportType[]
-  // ... additional root-level properties
-}
-
-type CoralNode = {
-  type?: 'COMPONENT' | 'INSTANCE' | 'COMPONENT_SET' | 'NODE'
-  name?: string
-  elementType: CoralElementType
-  textContent?: string
-  children?: CoralNode[]
-  styles?: CoralStyleType
-  elementAttributes?: Record<string, string | number | boolean | string[]>
-  componentProperties?: CoralComponentPropertyType
-  responsiveStyles?: ResponsiveStyle[]
-  variants?: CoralNode[]
-  // ... additional properties
-}
-
-// Element types
-type CoralElementType =
-  | 'div' | 'span' | 'p' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
-  | 'a' | 'button' | 'input' | 'form' | 'img' | 'ul' | 'li' | 'ol'
-  | 'nav' | 'header' | 'footer' | 'section' | 'article' | 'aside'
-  | 'table' | 'tr' | 'td' | 'th' | 'thead' | 'tbody'
-  | 'svg' | 'path' | 'circle' | 'rect' | 'g'
-  // ... and more
-
-// Dimension type
-type Dimension = {
-  value: number
-  unit: DimensionUnit
-}
-
-type DimensionUnit = 'px' | 'rem' | 'em' | '%' | 'vw' | 'vh' | 'vmin' | 'vmax' | 'ch' | 'ex' | 'cm' | 'mm' | 'in' | 'pt' | 'pc'
-
-// Responsive styles
-type ResponsiveStyle = {
-  breakpoint: SimpleBreakpoint | RangeBreakpoint
-  styles: Record<string, any>
-}
-
-type SimpleBreakpoint = {
-  type: 'min-width' | 'max-width' | 'min-height' | 'max-height'
-  value: string
-}
-
-type RangeBreakpoint = {
-  min?: SimpleBreakpoint
-  max?: SimpleBreakpoint
+const result = validatePackage(pkg)
+if (!result.valid) {
+  console.error('Errors:', result.errors)
 }
 ```
 
-### Additional Types
+### Variant Resolution
+
+#### `resolveNodeStyles(node, activeVariants)`
+
+Resolve styles for a node with active variants.
 
 ```typescript
-// Component properties
-type CoralComponentPropertyType = Record<string, {
-  type: CoralTSTypes | string
-  value: any
-  optional?: boolean
+import { resolveNodeStyles } from '@reallygoodwork/coral-core'
+
+const styles = resolveNodeStyles(buttonNode, {
+  intent: 'primary',
+  size: 'lg',
+})
+// Merges base styles with variant-specific overrides
+```
+
+#### `evaluateCondition(expression, props)`
+
+Evaluate a conditional expression.
+
+```typescript
+import { evaluateCondition } from '@reallygoodwork/coral-core'
+
+const isVisible = evaluateCondition(
+  { $and: [{ $prop: 'enabled' }, { $not: { $prop: 'loading' } }] },
+  { enabled: true, loading: false }
+)
+// true
+```
+
+### Type Generation
+
+#### `generatePropsInterface(component)`
+
+Generate TypeScript interface from component definition.
+
+```typescript
+import { generatePropsInterface } from '@reallygoodwork/coral-core'
+
+const typeCode = generatePropsInterface(buttonComponent)
+// export interface ButtonProps {
+//   intent?: "primary" | "secondary" | "destructive";
+//   ...
+// }
+```
+
+## Type Guards
+
+```typescript
+import {
+  isTokenReference,
+  isPropReference,
+  isComponentReference,
+  isConditionalExpression,
+  isComponentInstance,
+} from '@reallygoodwork/coral-core'
+
+// Check if a value is a token reference
+if (isTokenReference(value)) {
+  // value.$token is available
+}
+
+// Check if a node is a component instance
+if (isComponentInstance(node)) {
+  // node.$component is available
+}
+```
+
+## New Types
+
+### References
+
+```typescript
+type TokenReference = { $token: string; $fallback?: unknown }
+type PropReference = { $prop: string }
+type ComponentReference = {
+  $component: { ref: string; version?: string }
+  propBindings?: Record<string, unknown>
+  slotBindings?: Record<string, unknown>
+}
+```
+
+### Variants
+
+```typescript
+type VariantAxis = {
+  name: string
+  values: string[]
+  default: string
   description?: string
-}>
-
-// State hooks
-type CoralStateType = {
-  name: string
-  setter: string
-  initialValue: any
-  type?: string
 }
 
-// Methods
-type CoralMethodType = {
-  name: string
-  parameters: string[]
-  body?: string
-  returnType?: string
+type ComponentVariants = {
+  axes: VariantAxis[]
+  compounds: CompoundVariantCondition[]
+}
+```
+
+### Props & Events
+
+```typescript
+type ComponentPropDefinition = {
+  type: PropType
+  default?: unknown
+  required?: boolean
+  description?: string
+  editorControl?: 'text' | 'select' | 'boolean' | 'color' | 'slider'
+  constraints?: { min?: number; max?: number; pattern?: string }
 }
 
-// Imports
-type CoralImportType = {
-  source: string
-  specifiers: Array<{
-    name: string
-    isDefault?: boolean
-    as?: string
-  }>
-  version?: string
+type ComponentEventDefinition = {
+  description?: string
+  parameters: EventParameter[]
+  deprecated?: boolean | string
 }
+```
 
-// Colors
-type CoralColorType = {
-  hex: string
-  rgb: { r: number; g: number; b: number; a: number }
-  hsl: { h: number; s: number; l: number; a: number }
-}
+### Conditional Expressions
+
+```typescript
+type ConditionalExpression =
+  | { $prop: string }
+  | { $not: ConditionalExpression }
+  | { $and: ConditionalExpression[] }
+  | { $or: ConditionalExpression[] }
+  | { $eq: [ConditionalExpression, unknown] }
+  | { $ne: [ConditionalExpression, unknown] }
+```
+
+## Extended CoralNode Fields
+
+The `CoralNode` type now includes:
+
+```typescript
+// Variant styles
+variantStyles?: NodeVariantStyles
+compoundVariantStyles?: CompoundVariantStyle[]
+stateStyles?: StateStyles
+
+// Conditional rendering
+conditional?: ConditionalExpression
+conditionalBehavior?: 'hide' | 'dim' | 'outline'
+conditionalStyles?: ConditionalStyle[]
+
+// Slots
+slotTarget?: string
+slotFallback?: CoralNode[]
+
+// Component instances
+$component?: ComponentInstanceRef
+propBindings?: Record<string, PropBinding>
+eventBindings?: Record<string, EventBinding>
+slotBindings?: Record<string, SlotBinding>
+variantOverrides?: Record<string, string>
+
+// Element bindings
+eventHandlers?: Record<string, EventBinding>
+ariaAttributes?: Record<string, BindableValue>
+dataAttributes?: Record<string, BindableValue>
 ```
 
 ## Related Packages

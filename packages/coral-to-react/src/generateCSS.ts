@@ -162,7 +162,7 @@ function breakpointToMediaQuery(breakpoint: ResponsiveStyle['breakpoint']): stri
  * Generate unique ID for a node based on its path in the tree
  */
 function generateNodeId(node: CoralNode, parentPath: string = '', index: number = 0): string {
-  const nodeName = node.name || node.elementType
+  const nodeName = (node.name || node.elementType).toLowerCase()
   const currentPath = parentPath ? `${parentPath}-${index}` : 'root'
   return `coral-${currentPath}-${nodeName}`
 }

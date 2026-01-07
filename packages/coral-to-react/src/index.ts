@@ -18,9 +18,16 @@ export async function coralToReact(
 export { stylesToInlineStyle } from './convertStyles'
 export { generateComponent } from './generateComponent'
 export { generateCSS } from './generateCSS'
+export { generateCVA, generateCNHelper } from './generateCVA'
 export { generateImports } from './generateImports'
 export { generateJSXElement } from './generateJSX'
 export { generateMethod, generateMethods } from './generateMethod'
+export { generatePackage } from './generatePackage'
 export { generatePropsInterface } from './generatePropsInterface'
 export { generateStateHook, generateStateHooks } from './generateStateHooks'
-export type { Options } from './types'
+export type {
+  GeneratedFile,
+  Options,
+  PackageGenerationResult,
+} from './types'
+export type { CVAConfig, CVAGenerationResult, GenerateCVAOptions } from './generateCVA'
