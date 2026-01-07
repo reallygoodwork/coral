@@ -7,9 +7,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
   return {
     ...defaultMdxComponents,
     pre: ({ ref: _ref, ...props }) => (
-      // @ts-expect-error - React type mismatch between MDX and CodeBlock props
       <CodeBlock {...props}>
-        {/* @ts-expect-error - React type mismatch with children */}
         <Pre>{props.children}</Pre>
       </CodeBlock>
     ),
