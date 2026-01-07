@@ -376,6 +376,104 @@ Too many variants make components hard to maintain:
 ]
 ```
 
+## Generating React Components with Variants
+
+When generating React components from Coral specifications, you can choose how variants are handled:
+
+### Automatic CVA Generation
+
+When using `coralToReact` with `styleFormat: 'className'` and a component that has variants, CVA (Class Variance Authority) is automatically used:
+
+```typescript
+import { coralToReact } from '@reallygoodwork/coral-to-react'
+
+const { reactCode } = await coralToReact(buttonSpec, {
+  styleFormat: 'className',
+  variantStrategy: 'cva', // or omit - auto-detected when variants exist
+  includeTypes: true
+})
+```
+
+The generator automatically:
+- Converts Coral styles to Tailwind classes using `@reallygoodwork/style-to-tailwind`
+- Generates CVA configuration from variant definitions
+- Creates TypeScript props that include variant axes
+- Generates the `cn` helper function for class merging
+
+### Manual CVA Generation
+
+You can also generate CVA configuration directly:
+
+```typescript
+import { generateCVA, generateCNHelper } from '@reallygoodwork/coral-to-react'
+
+// Generate CVA config and code
+const cvaResult = generateCVA(buttonSpec)
+// Returns: { config, code, imports, stateConfigs }
+
+// Generate the cn helper utility
+const cnHelper = generateCNHelper()
+// Returns: cn function implementation using clsx and tailwind-merge
+```
+
+### Variant Props in Generated Components
+
+When variants are present, they're automatically added to the component props interface:
+
+```typescript
+// Generated props interface includes variants
+interface ButtonProps {
+  label: string
+  intent?: 'primary' | 'secondary' | 'destructive'
+  size?: 'sm' | 'md' | 'lg'
+  onClick?: () => void
+}
+```
+
+The component uses these props to determine variant values:
+
+```typescript
+export const Button = (props: ButtonProps) => {
+  const className = buttonVariants({
+    intent: props.intent,
+    size: props.size
+  })
+  return <button className={className}>{props.label}</button>
+}
+```
+
+### Compound Variants with CVA
+
+Compound variants are automatically converted to CVA compound variants:
+
+```json
+{
+  "compoundVariantStyles": [
+    {
+      "conditions": { "intent": "destructive", "size": "sm" },
+      "styles": { "fontWeight": "bold" }
+    }
+  ]
+}
+```
+
+Generates:
+
+```typescript
+const buttonVariants = cva('...', {
+  variants: { ... },
+  compoundVariants: [
+    {
+      intent: 'destructive',
+      size: 'sm',
+      class: 'font-bold'
+    }
+  ]
+})
+```
+
+> **Learn more:** For complete details on generating React components with variants, see the [Coral to React documentation](/docs/packages/coral-to-react).
+
 ## Next Steps
 
 ### Related Guides

@@ -266,7 +266,9 @@ export const Button = (props: ButtonProps) => {
 }
 ```
 
-When using `className` format with variants, the generator automatically uses CVA if `variantStrategy` is set to `'cva'` or if variants are detected.
+### Automatic CVA Detection
+
+When using `styleFormat: 'className'` with components that have variants, CVA is **automatically enabled** even if `variantStrategy` is not explicitly set. The generator detects variants and uses CVA to manage them efficiently.
 
 ### Variant Strategy
 
@@ -274,15 +276,24 @@ The `variantStrategy` option controls how component variants are handled:
 
 > **Learn more:** For comprehensive information about Coral's variant system, see the [Component Variants guide](/docs/guides/variants) and [Component Variants API](/docs/packages/core/variants).
 
-**`'inline'` (default):** Variants are applied as inline styles or CSS classes directly in the JSX.
+**`'inline'` (default):** Variants are applied as inline styles or CSS classes directly in the JSX. Use this when you want simple, direct style application without CVA.
 
-**`'cva'`:** Uses [Class Variance Authority](https://cva.style) for variant management. Requires `styleFormat: 'className'` and Tailwind CSS. Automatically generates CVA configuration from Coral variant definitions.
+**`'cva'`:** Uses [Class Variance Authority](https://cva.style) for variant management. Requires `styleFormat: 'className'` and Tailwind CSS. Automatically generates CVA configuration from Coral variant definitions. **Automatically enabled** when `styleFormat: 'className'` and variants are detected.
 
 **`'custom'`:** Allows custom variant handling (for advanced use cases).
 
+#### When CVA is Used
+
+CVA is automatically used when:
+- `styleFormat: 'className'` is set, AND
+- The component has `componentVariants` defined, AND
+- `variantStrategy` is `'cva'` or not specified (defaults to auto-detection)
+
+You can explicitly disable CVA by setting `variantStrategy: 'inline'`.
+
 #### CVA Example
 
-When using `variantStrategy: 'cva'` with variants:
+When using `variantStrategy: 'cva'` (or auto-detected) with variants:
 
 ```typescript
 // Coral spec with variants
@@ -291,7 +302,18 @@ const buttonSpec = {
     axes: [
       { name: 'intent', values: ['primary', 'secondary'], default: 'primary' },
       { name: 'size', values: ['sm', 'md', 'lg'], default: 'md' }
+    ],
+    compounds: [
+      {
+        conditions: { intent: 'destructive', size: 'sm' },
+        description: 'Small destructive buttons need extra emphasis'
+      }
     ]
+  },
+  styles: {
+    display: 'inline-flex',
+    borderRadius: '6px',
+    fontWeight: '500'
   },
   variantStyles: {
     intent: {
@@ -303,14 +325,29 @@ const buttonSpec = {
       md: { padding: '8px 16px', fontSize: '14px' },
       lg: { padding: '12px 24px', fontSize: '16px' }
     }
+  },
+  compoundVariantStyles: [
+    {
+      conditions: { intent: 'destructive', size: 'sm' },
+      styles: { fontWeight: 'bold' }
+    }
   }
 };
 
-// Generated React code
+const { reactCode } = await coralToReact(buttonSpec, {
+  styleFormat: 'className',
+  variantStrategy: 'cva', // or omit - auto-detected
+  includeTypes: true
+});
+```
+
+**Generated React code:**
+
+```typescript
 import { cva } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
-const buttonVariants = cva('rounded font-medium', {
+const buttonVariants = cva('inline-flex rounded font-medium', {
   variants: {
     intent: {
       primary: 'bg-blue-500 text-white',
@@ -322,17 +359,47 @@ const buttonVariants = cva('rounded font-medium', {
       lg: 'px-6 py-3 text-base'
     }
   },
+  compoundVariants: [
+    {
+      intent: 'destructive',
+      size: 'sm',
+      class: 'font-bold'
+    }
+  ],
   defaultVariants: {
     intent: 'primary',
     size: 'md'
   }
 });
 
+interface ButtonProps {
+  label: string
+  intent?: 'primary' | 'secondary'
+  size?: 'sm' | 'md' | 'lg'
+  onClick?: () => void
+}
+
 export const Button = (props: ButtonProps) => {
-  const className = buttonVariants({ intent: props.intent, size: props.size });
-  return <button className={className}>{props.label}</button>;
+  const className = buttonVariants({
+    intent: props.intent,
+    size: props.size
+  });
+  return (
+    <button className={className} onClick={props.onClick}>
+      {props.label}
+    </button>
+  );
 };
 ```
+
+**Key Features:**
+
+- **Base styles** are converted to Tailwind classes and included in the CVA base
+- **Variant styles** become CVA variant definitions
+- **Compound variants** are automatically converted to CVA compound variants
+- **Default variants** are set from Coral's default values
+- **TypeScript props** automatically include variant axes as optional props
+- **Style conversion** uses `@reallygoodwork/style-to-tailwind` to convert CSS to Tailwind classes
 
 > **Note:** CVA generation requires the `@reallygoodwork/style-to-tailwind` package to convert Coral styles to Tailwind classes. See the [Style to Tailwind documentation](/docs/packages/style-to-tailwind) for details.
 
@@ -652,6 +719,99 @@ const inlineStyle = stylesToInlineStyle({ padding: '20px', margin: '10px' });
 // 'style={{ padding: "20px", margin: "10px" }}'
 ```
 
+### `generateCVA`
+
+Generate Class Variance Authority (CVA) configuration and code from Coral component variants. This function is used internally by `coralToReact` but can also be called directly for custom CVA generation.
+
+```typescript
+import { generateCVA } from '@reallygoodwork/coral-to-react';
+
+const result = generateCVA(buttonSpec, {
+  includeStates: false, // Include state styles (hover, focus, etc.)
+  nodeId: undefined, // Generate for specific node (defaults to root)
+});
+
+// Returns:
+// {
+//   config: CVAConfig, // CVA configuration object
+//   code: string, // Generated CVA function call code
+//   imports: string[], // Required import statements
+//   stateConfigs?: Record<string, CVAConfig> // State-specific CVA configs
+// }
+```
+
+**Example:**
+
+```typescript
+const buttonSpec = {
+  componentVariants: {
+    axes: [
+      { name: 'intent', values: ['primary', 'secondary'], default: 'primary' },
+      { name: 'size', values: ['sm', 'md', 'lg'], default: 'md' }
+    ]
+  },
+  variantStyles: {
+    intent: {
+      primary: { backgroundColor: '#007bff', color: '#fff' },
+      secondary: { backgroundColor: '#6c757d', color: '#fff' }
+    },
+    size: {
+      sm: { padding: '4px 8px', fontSize: '12px' },
+      md: { padding: '8px 16px', fontSize: '14px' },
+      lg: { padding: '12px 24px', fontSize: '16px' }
+    }
+  }
+};
+
+const result = generateCVA(buttonSpec);
+
+// result.code:
+// const componentVariants = cva('', {
+//   variants: {
+//     intent: {
+//       primary: 'bg-blue-500 text-white',
+//       secondary: 'bg-gray-500 text-white'
+//     },
+//     size: {
+//       sm: 'px-2 py-1 text-xs',
+//       md: 'px-4 py-2 text-sm',
+//       lg: 'px-6 py-3 text-base'
+//     }
+//   },
+//   defaultVariants: {
+//     intent: 'primary',
+//     size: 'md'
+//   }
+// })
+```
+
+### `generateCNHelper`
+
+Generate the `cn` utility function for merging Tailwind classes. This helper combines `clsx` and `tailwind-merge` for proper class merging and is automatically included when generating components with CVA support.
+
+```typescript
+import { generateCNHelper } from '@reallygoodwork/coral-to-react';
+
+const cnHelper = generateCNHelper();
+
+// Returns:
+// import { clsx, type ClassValue } from 'clsx'
+// import { twMerge } from 'tailwind-merge'
+//
+// export function cn(...inputs: ClassValue[]) {
+//   return twMerge(clsx(inputs))
+// }
+```
+
+This utility is commonly used with CVA for merging variant classes with additional classes:
+
+```typescript
+const className = cn(
+  buttonVariants({ intent: props.intent, size: props.size }),
+  props.className // Merge with additional classes
+);
+```
+
 ---
 
 ## Complete Examples
@@ -829,7 +989,7 @@ Configuration options for React generation.
       default: "'function'",
     },
     styleFormat: {
-      description: 'How to output styles',
+      description: 'How to output styles. When set to "className" with variants, CVA is automatically used.',
       type: "'inline' | 'className'",
       default: "'inline'",
     },
@@ -854,9 +1014,9 @@ Configuration options for React generation.
       default: 'false',
     },
     variantStrategy: {
-      description: 'Variant handling strategy',
+      description: 'Variant handling strategy. When "className" styleFormat is used with variants, CVA is automatically enabled unless explicitly set to "inline".',
       type: "'cva' | 'inline' | 'custom'",
-      default: "'inline'",
+      default: "'inline' (auto-detects CVA when styleFormat is className and variants exist)",
     },
   }}
 />

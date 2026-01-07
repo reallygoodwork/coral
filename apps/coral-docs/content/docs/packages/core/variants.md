@@ -259,4 +259,27 @@ Apply styles when multiple conditions match:
 - [Component Composition API](/docs/packages/core/composition) - Variant overrides in instances
 
 ### Transform Packages
-- [Coral to React](/docs/packages/coral-to-react) - Generate React components with CVA variant support
+- [Coral to React](/docs/packages/coral-to-react) - Generate React components with automatic CVA variant support
+
+## React Generation with Variants
+
+When generating React components, variants are automatically converted to CVA (Class Variance Authority) when using `styleFormat: 'className'`:
+
+```typescript
+import { coralToReact } from '@reallygoodwork/coral-to-react'
+
+const { reactCode } = await coralToReact(buttonSpec, {
+  styleFormat: 'className',
+  // variantStrategy: 'cva' is auto-detected when variants exist
+  includeTypes: true
+})
+```
+
+The generator automatically:
+- Converts variant styles to Tailwind classes
+- Generates CVA configuration
+- Adds variant axes to TypeScript props
+- Handles compound variants
+- Includes default variant values
+
+See the [Coral to React documentation](/docs/packages/coral-to-react) for complete details on variant generation.
