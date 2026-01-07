@@ -1,3 +1,14 @@
+## [1.6.1](https://github.com/reallygoodwork/coral/compare/@reallygoodwork/coral-core@1.6.0...@reallygoodwork/coral-core@1.6.1) (2026-01-07)
+
+
+### Bug Fixes
+
+* adds variant support ([d711342](https://github.com/reallygoodwork/coral/commit/d71134201c431e527f34e84dbee581d129ab8d93))
+* **docs:** removes ts comment ([c334287](https://github.com/reallygoodwork/coral/commit/c334287d86eee63ea3cf619e76b0aa4cae5aaeb5))
+* **docs:** removes ts-ignore statements ([914f83c](https://github.com/reallygoodwork/coral/commit/914f83c3b46cf2a0e65aea9725e552f674fe39f2))
+* updates node types ([0728c4d](https://github.com/reallygoodwork/coral/commit/0728c4da32826f85b6037ba9b9df137768055504))
+* updates type references throughout ([77d7186](https://github.com/reallygoodwork/coral/commit/77d7186137ff02d9b075a91f4ff4b67bfed8f673))
+
 # [1.6.0](https://github.com/reallygoodwork/coral/compare/@reallygoodwork/coral-core@1.5.0...@reallygoodwork/coral-core@1.6.0) (2025-12-17)
 
 
