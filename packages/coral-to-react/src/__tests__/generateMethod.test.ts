@@ -48,7 +48,9 @@ describe('generateMethods', () => {
     }
 
     const result = generateMethod(method)
-    expect(result).toContain('function handleSubmit(data: object, callback: function)')
+    expect(result).toContain(
+      'function handleSubmit(data: object, callback: function)',
+    )
   })
 
   it('should generate method with default values', () => {

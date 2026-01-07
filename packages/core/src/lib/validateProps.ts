@@ -1,18 +1,23 @@
-import type { CoralNode, CoralRootNode } from '../structures/coral'
 import {
   extractComponentName,
   findComponentInstances,
   isPropBinding,
 } from '../structures/composition'
-import type { ComponentInstance } from '../structures/composition'
+import type { ConditionalExpression } from '../structures/conditional'
+import type { CoralNode, CoralRootNode } from '../structures/coral'
 import type { ComponentPropsDefinition } from '../structures/props'
+import { isPropReference } from '../structures/references'
 import type { LoadedPackage } from './packageLoader'
 
 /**
  * Prop validation error
  */
 export interface PropValidationError {
-  type: 'missing-required' | 'type-mismatch' | 'invalid-enum' | 'constraint-violation'
+  type:
+    | 'missing-required'
+    | 'type-mismatch'
+    | 'invalid-enum'
+    | 'constraint-violation'
   componentName: string
   propName: string
   message: string
@@ -104,7 +109,11 @@ function validateComponentProps(
       const binding = instance.propBindings?.[propName]
 
       // Check required
-      if (propDef.required && binding === undefined && propDef.default === undefined) {
+      if (
+        propDef.required &&
+        binding === undefined &&
+        propDef.default === undefined
+      ) {
         errors.push({
           type: 'missing-required',
           componentName,
@@ -143,8 +152,15 @@ function validateComponentProps(
       }
 
       // Validate enum values
-      if (binding !== undefined && !isPropBinding(binding) && isEnumType(propDef.type)) {
-        if (!propDef.type.enum.includes(binding as string)) {
+      if (
+        binding !== undefined &&
+        !isPropBinding(binding) &&
+        isEnumType(propDef.type)
+      ) {
+        if (
+          typeof binding === 'string' &&
+          !propDef.type.enum.includes(binding)
+        ) {
           errors.push({
             type: 'invalid-enum',
             componentName,
@@ -248,15 +264,23 @@ export function findUnusedProps(component: CoralRootNode): string[] {
 
   function collectUsedProps(node: CoralNode) {
     // Check text content
-    if (typeof node.textContent === 'object' && '$prop' in node.textContent) {
-      usedProps.add(node.textContent.$prop as string)
+    if (
+      node.textContent &&
+      typeof node.textContent === 'object' &&
+      isPropReference(node.textContent)
+    ) {
+      usedProps.add(node.textContent.$prop)
     }
 
     // Check element attributes
     if (node.elementAttributes) {
       for (const value of Object.values(node.elementAttributes)) {
-        if (typeof value === 'object' && value !== null && '$prop' in value) {
-          usedProps.add((value as { $prop: string }).$prop)
+        if (
+          typeof value === 'object' &&
+          value !== null &&
+          isPropReference(value)
+        ) {
+          usedProps.add(value.$prop)
         }
       }
     }
@@ -289,36 +313,51 @@ export function findUnusedProps(component: CoralRootNode): string[] {
   return Array.from(definedProps).filter((prop) => !usedProps.has(prop))
 }
 
+/**
+ * Type guard for conditional expressions
+ */
+function isConditionalExpression(expr: unknown): expr is ConditionalExpression {
+  if (typeof expr !== 'object' || expr === null) return false
+  return (
+    '$prop' in expr ||
+    '$not' in expr ||
+    '$and' in expr ||
+    '$or' in expr ||
+    '$eq' in expr ||
+    '$ne' in expr
+  )
+}
+
 function collectPropsFromConditional(expr: unknown, usedProps: Set<string>) {
-  if (!expr || typeof expr !== 'object') return
+  if (!isConditionalExpression(expr)) return
 
   if ('$prop' in expr) {
-    usedProps.add((expr as { $prop: string }).$prop)
+    usedProps.add(expr.$prop)
   }
 
   if ('$not' in expr) {
-    collectPropsFromConditional((expr as { $not: unknown }).$not, usedProps)
+    collectPropsFromConditional(expr.$not, usedProps)
   }
 
   if ('$and' in expr) {
-    for (const item of (expr as { $and: unknown[] }).$and) {
+    for (const item of expr.$and) {
       collectPropsFromConditional(item, usedProps)
     }
   }
 
   if ('$or' in expr) {
-    for (const item of (expr as { $or: unknown[] }).$or) {
+    for (const item of expr.$or) {
       collectPropsFromConditional(item, usedProps)
     }
   }
 
   if ('$eq' in expr) {
-    const [left] = (expr as { $eq: [unknown, unknown] }).$eq
+    const [left] = expr.$eq
     collectPropsFromConditional(left, usedProps)
   }
 
   if ('$ne' in expr) {
-    const [left] = (expr as { $ne: [unknown, unknown] }).$ne
+    const [left] = expr.$ne
     collectPropsFromConditional(left, usedProps)
   }
 }

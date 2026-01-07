@@ -18,7 +18,9 @@ import { zCoralStyleSchema } from './styles'
 export const zVariantValueStylesSchema = z
   .record(
     z.string().describe('Variant value (e.g., "primary", "secondary")'),
-    zCoralStyleSchema.describe('Styles to apply when this variant value is active'),
+    zCoralStyleSchema.describe(
+      'Styles to apply when this variant value is active',
+    ),
   )
   .describe('Map of variant values to their style overrides')
 

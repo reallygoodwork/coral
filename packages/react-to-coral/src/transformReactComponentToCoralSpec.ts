@@ -10,6 +10,7 @@ import type {
   CoralMethodType,
   CoralRootNode,
   CoralStateType,
+  CoralStyleType,
   CoralTSTypes,
 } from '@reallygoodwork/coral-core'
 import { extractResponsiveStylesFromObject } from '@reallygoodwork/coral-core'
@@ -108,18 +109,16 @@ export const transformReactComponentToSpec = (
         result.imports.push({
           source: path.node.source.value,
           version: 'latest', // Add this line
-          specifiers: path.node.specifiers.map(
-            (spec) => ({
-              name: spec.local.name,
-              // Add isDefault and as properties if needed
-              isDefault: t.isImportDefaultSpecifier(spec),
-              as: t.isImportSpecifier(spec)
-                ? 'name' in spec.imported
-                  ? spec.imported.name
-                  : spec.imported.value
-                : undefined,
-            }),
-          ),
+          specifiers: path.node.specifiers.map((spec) => ({
+            name: spec.local.name,
+            // Add isDefault and as properties if needed
+            isDefault: t.isImportDefaultSpecifier(spec),
+            as: t.isImportSpecifier(spec)
+              ? 'name' in spec.imported
+                ? spec.imported.name
+                : spec.imported.value
+              : undefined,
+          })),
         })
       },
 
@@ -160,14 +159,16 @@ export const transformReactComponentToSpec = (
       // Capture TypeScript type alias declarations
       TSTypeAliasDeclaration(path) {
         if (result.typeDefinitions && t.isIdentifier(path.node.id)) {
-          result.typeDefinitions.set(path.node.id.name, path.node as any)
+          // path.node is already t.TSTypeAliasDeclaration in this handler
+          result.typeDefinitions.set(path.node.id.name, path.node)
         }
       },
 
       // Capture TypeScript interface declarations
       TSInterfaceDeclaration(path) {
         if (result.typeDefinitions && t.isIdentifier(path.node.id)) {
-          result.typeDefinitions.set(path.node.id.name, path.node as any)
+          // path.node is already t.TSInterfaceDeclaration in this handler
+          result.typeDefinitions.set(path.node.id.name, path.node)
         }
       },
 
@@ -178,7 +179,7 @@ export const transformReactComponentToSpec = (
           result.type = 'Function'
           const props = extractProps(
             // biome-ignore lint/suspicious/noExplicitAny: Type mismatch between @babel/types versions
-            path.node.params[0] as any || null,
+            (path.node.params[0] as any) || null,
             result.typeDefinitions,
           )
           if (props) {
@@ -283,16 +284,16 @@ export const transformReactComponentToSpec = (
   }
 
   try {
-    const extractValue = (prop: any): any => {
+    const extractValue = (prop: unknown): unknown => {
       // Handle new format with type and value
       if (prop && typeof prop === 'object' && 'value' in prop) {
-        return prop.value
+        return (prop as { value: unknown }).value
       }
       // Handle legacy format (direct value)
       return prop
     }
 
-    const extractedProps: Record<string, any> = {}
+    const extractedProps: Record<string, unknown> = {}
 
     // Extract values from the new component property format
     Object.entries(result.rootElement?.componentProperties || {}).forEach(
@@ -341,9 +342,15 @@ export const transformReactComponentToSpec = (
     // }
 
     // Combine inline styles and Tailwind classes
-    const combinedStyles = {
-      ...(styles ? styles : {}),
-      ...tailwindToCSS(className || ''),
+    // Ensure className is a string
+    const classNameStr = typeof className === 'string' ? className : ''
+    const tailwindStyles = tailwindToCSS(classNameStr)
+
+    // Convert tailwindToCSS output (Record<string, string>) to CoralStyleType format
+    // tailwindToCSS returns CSS properties as strings, which is compatible with CoralStyleType
+    const combinedStyles: Record<string, CoralStyleType> = {
+      ...(styles && typeof styles === 'object' ? styles : {}),
+      ...tailwindStyles,
     }
 
     // Extract responsive styles from media queries
@@ -476,22 +483,27 @@ const extractPropsFromReactFC = (
 const extractPropsFromTypeLiteralForFC = (
   typeLiteral: t.TSTypeLiteral,
 ): CoralComponentPropertyType => {
-  const props: Record<string, any> = {}
+  const props: CoralComponentPropertyType = {}
 
   typeLiteral.members.forEach((member) => {
     if (t.isTSPropertySignature(member) && t.isIdentifier(member.key)) {
       const name = member.key.name
       const isOptional = member.optional || false
-      let type: CoralTSTypes | string = 'any'
+      let type: CoralTSTypes | string = null
 
       if (member.typeAnnotation) {
         type = getTypeFromAnnotation(member.typeAnnotation)
       }
 
-      const propInfo: any = {
+      const propInfo = {
         type: type,
         value: name,
         optional: isOptional,
+      } as {
+        type: CoralTSTypes | string
+        value: string
+        optional?: boolean
+        description?: string
       }
 
       // Add description for complex types
@@ -514,22 +526,27 @@ const extractPropsFromTypeLiteralForFC = (
 const extractPropsFromInterfaceForFC = (
   interfaceDecl: t.TSInterfaceDeclaration,
 ): CoralComponentPropertyType => {
-  const props: Record<string, any> = {}
+  const props: CoralComponentPropertyType = {}
 
   interfaceDecl.body.body.forEach((member) => {
     if (t.isTSPropertySignature(member) && t.isIdentifier(member.key)) {
       const name = member.key.name
       const isOptional = member.optional || false
-      let type: CoralTSTypes | string = 'any'
+      let type: CoralTSTypes | string = null
 
       if (member.typeAnnotation) {
         type = getTypeFromAnnotation(member.typeAnnotation)
       }
 
-      const propInfo: any = {
+      const propInfo = {
         type: type,
         value: name,
         optional: isOptional,
+      } as {
+        type: CoralTSTypes | string
+        value: string
+        optional?: boolean
+        description?: string
       }
 
       // Add description for complex types

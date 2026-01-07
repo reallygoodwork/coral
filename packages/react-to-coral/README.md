@@ -227,12 +227,21 @@ const spec = transformReactComponentToSpec(code, { skipValidation: true })
 
 ---
 
+## Type Safety
+
+The package is fully type-safe:
+- **No `any` types** - All types use `unknown` with proper type guards
+- **Type-safe AST traversal** - Uses proper Babel types throughout
+- **Nullable types** - Returns `null` for `CoralTSTypes` when type cannot be determined (aligns with `z.nullable` schema)
+- **Proper type extraction** - TypeScript types are extracted and validated
+
 ## Limitations
 
 - Only functional components are supported (no class components)
 - Complex hooks beyond `useState` are not fully analyzed
 - Dynamic style computations may not be captured
 - Template literals in JSX are simplified
+- When a prop type cannot be determined, it returns `null` (not `'any'`) to align with `CoralTSTypes` schema
 
 ---
 

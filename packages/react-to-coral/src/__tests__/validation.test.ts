@@ -1,5 +1,8 @@
 import { transformReactComponentToSpec } from '../transformReactComponentToCoralSpec'
-import { formatValidationResults, validateReactComponent } from '../validateInput'
+import {
+  formatValidationResults,
+  validateReactComponent,
+} from '../validateInput'
 
 describe('Input Validation and Error Handling', () => {
   describe('validateReactComponent', () => {
@@ -59,7 +62,9 @@ describe('Input Validation and Error Handling', () => {
       const result = validateReactComponent(component)
 
       expect(result.isValid).toBe(false)
-      expect(result.errors.some((e) => e.message.includes('parentheses'))).toBe(true)
+      expect(result.errors.some((e) => e.message.includes('parentheses'))).toBe(
+        true,
+      )
     })
 
     it('should warn about missing React import', () => {
@@ -71,7 +76,9 @@ describe('Input Validation and Error Handling', () => {
 
       const result = validateReactComponent(component)
 
-      expect(result.warnings.some((w) => w.message.includes('No React import'))).toBe(true)
+      expect(
+        result.warnings.some((w) => w.message.includes('No React import')),
+      ).toBe(true)
     })
 
     it('should warn about class components', () => {
@@ -87,7 +94,9 @@ describe('Input Validation and Error Handling', () => {
 
       const result = validateReactComponent(component)
 
-      expect(result.warnings.some((w) => w.message.includes('Class components'))).toBe(true)
+      expect(
+        result.warnings.some((w) => w.message.includes('Class components')),
+      ).toBe(true)
     })
 
     it('should warn about advanced React features', () => {
@@ -107,8 +116,12 @@ describe('Input Validation and Error Handling', () => {
 
       const result = validateReactComponent(component)
 
-      expect(result.warnings.some((w) => w.message.includes('React Suspense'))).toBe(true)
-      expect(result.warnings.some((w) => w.message.includes('React.lazy'))).toBe(true)
+      expect(
+        result.warnings.some((w) => w.message.includes('React Suspense')),
+      ).toBe(true)
+      expect(
+        result.warnings.some((w) => w.message.includes('React.lazy')),
+      ).toBe(true)
     })
   })
 
@@ -171,7 +184,9 @@ describe('Input Validation and Error Handling', () => {
       `
 
       expect(() => {
-        transformReactComponentToSpec(invalidComponent, { skipValidation: true })
+        transformReactComponentToSpec(invalidComponent, {
+          skipValidation: true,
+        })
       }).toThrow('No JSX element found') // Should fail at later stage, not validation
     })
 
@@ -235,8 +250,20 @@ describe('Input Validation and Error Handling', () => {
     it('should format validation with errors and warnings', () => {
       const result = {
         isValid: false,
-        errors: [{ type: 'syntax' as const, message: 'Syntax error', suggestion: 'Fix syntax' }],
-        warnings: [{ type: 'compatibility' as const, message: 'Warning message', suggestion: 'Consider this' }],
+        errors: [
+          {
+            type: 'syntax' as const,
+            message: 'Syntax error',
+            suggestion: 'Fix syntax',
+          },
+        ],
+        warnings: [
+          {
+            type: 'compatibility' as const,
+            message: 'Warning message',
+            suggestion: 'Consider this',
+          },
+        ],
       }
       const formatted = formatValidationResults(result)
 

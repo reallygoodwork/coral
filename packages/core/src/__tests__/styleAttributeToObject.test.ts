@@ -53,7 +53,8 @@ describe('styleAttributeToObject', () => {
   })
 
   it('should handle styles with multiple colons in values', () => {
-    const style = 'background: linear-gradient(to right, red, blue); color: white'
+    const style =
+      'background: linear-gradient(to right, red, blue); color: white'
     const result = styleAttributeToObject(style)
 
     expect(result).toEqual({
@@ -84,7 +85,8 @@ describe('styleAttributeToObject', () => {
   })
 
   it('should handle complex CSS properties', () => {
-    const style = 'box-shadow: 0 2px 4px rgba(0,0,0,0.1); transform: translateX(10px) rotate(45deg)'
+    const style =
+      'box-shadow: 0 2px 4px rgba(0,0,0,0.1); transform: translateX(10px) rotate(45deg)'
     const result = styleAttributeToObject(style)
 
     expect(result).toEqual({

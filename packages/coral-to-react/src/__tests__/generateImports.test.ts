@@ -69,13 +69,17 @@ describe('generateImports', () => {
       },
       {
         source: 'react',
-        specifiers: [{ name: 'useState', isDefault: false, as: 'useCustomState' }],
+        specifiers: [
+          { name: 'useState', isDefault: false, as: 'useCustomState' },
+        ],
         version: '1.0.0',
       },
     ]
 
     const result = generateImports(imports)
     expect(result).toContain("import CustomButton from './Button'")
-    expect(result).toContain("import { useState as useCustomState } from 'react'")
+    expect(result).toContain(
+      "import { useState as useCustomState } from 'react'",
+    )
   })
 })

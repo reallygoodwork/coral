@@ -207,7 +207,10 @@ export function getPropertyPrefix(property: string): string | null {
 /**
  * Build a Tailwind class from property and scale
  */
-export function buildScaleClass(property: string, scale: string): string | null {
+export function buildScaleClass(
+  property: string,
+  scale: string,
+): string | null {
   const prefix = getPropertyPrefix(property)
   if (!prefix) return null
 

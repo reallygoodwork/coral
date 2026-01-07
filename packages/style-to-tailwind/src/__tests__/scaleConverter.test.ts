@@ -1,4 +1,8 @@
-import { convertToTailwindScale, buildScaleClass, getPropertyPrefix } from '../scaleConverter'
+import {
+  convertToTailwindScale,
+  buildScaleClass,
+  getPropertyPrefix,
+} from '../scaleConverter'
 
 describe('scaleConverter', () => {
   describe('convertToTailwindScale', () => {

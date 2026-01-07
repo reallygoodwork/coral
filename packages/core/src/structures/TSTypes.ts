@@ -1,4 +1,4 @@
-import * as z from "zod";
+import * as z from 'zod'
 
 /**
  * Represents a type of a component property.
@@ -6,15 +6,15 @@ import * as z from "zod";
  */
 export const zCoralTSTypes = z.nullable(
   z.union([
-    z.literal("string"),
-    z.literal("number"),
-    z.literal("boolean"),
-    z.literal("array"),
-    z.literal("object"),
-    z.literal("null"),
-    z.literal("undefined"),
-    z.literal("function"),
-  ])
-);
+    z.literal('string'),
+    z.literal('number'),
+    z.literal('boolean'),
+    z.literal('array'),
+    z.literal('object'),
+    z.literal('null'),
+    z.literal('undefined'),
+    z.literal('function'),
+  ]),
+)
 
-export type CoralTSTypes = z.infer<typeof zCoralTSTypes>;
+export type CoralTSTypes = z.infer<typeof zCoralTSTypes>

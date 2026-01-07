@@ -1,8 +1,8 @@
 import {
-  zConditionalExpressionSchema,
+  type ConditionalExpression,
   evaluateCondition,
   isConditionalExpression,
-  type ConditionalExpression,
+  zConditionalExpressionSchema,
 } from '../structures/conditional'
 
 describe('Conditional Expressions', () => {
@@ -48,7 +48,12 @@ describe('Conditional Expressions', () => {
         $and: [
           { $prop: 'enabled' },
           { $not: { $prop: 'loading' } },
-          { $or: [{ $eq: [{ $prop: 'size' }, 'sm'] }, { $eq: [{ $prop: 'size' }, 'md'] }] },
+          {
+            $or: [
+              { $eq: [{ $prop: 'size' }, 'sm'] },
+              { $eq: [{ $prop: 'size' }, 'md'] },
+            ],
+          },
         ],
       }
       const result = zConditionalExpressionSchema.safeParse(expr)
@@ -58,18 +63,28 @@ describe('Conditional Expressions', () => {
 
   describe('evaluateCondition', () => {
     it('should evaluate simple prop reference', () => {
-      expect(evaluateCondition({ $prop: 'isVisible' }, { isVisible: true })).toBe(true)
-      expect(evaluateCondition({ $prop: 'isVisible' }, { isVisible: false })).toBe(false)
+      expect(
+        evaluateCondition({ $prop: 'isVisible' }, { isVisible: true }),
+      ).toBe(true)
+      expect(
+        evaluateCondition({ $prop: 'isVisible' }, { isVisible: false }),
+      ).toBe(false)
       expect(evaluateCondition({ $prop: 'isVisible' }, {})).toBe(false)
     })
 
     it('should evaluate negation', () => {
-      expect(evaluateCondition({ $not: { $prop: 'loading' } }, { loading: false })).toBe(true)
-      expect(evaluateCondition({ $not: { $prop: 'loading' } }, { loading: true })).toBe(false)
+      expect(
+        evaluateCondition({ $not: { $prop: 'loading' } }, { loading: false }),
+      ).toBe(true)
+      expect(
+        evaluateCondition({ $not: { $prop: 'loading' } }, { loading: true }),
+      ).toBe(false)
     })
 
     it('should evaluate AND expression', () => {
-      const expr: ConditionalExpression = { $and: [{ $prop: 'a' }, { $prop: 'b' }] }
+      const expr: ConditionalExpression = {
+        $and: [{ $prop: 'a' }, { $prop: 'b' }],
+      }
       expect(evaluateCondition(expr, { a: true, b: true })).toBe(true)
       expect(evaluateCondition(expr, { a: true, b: false })).toBe(false)
       expect(evaluateCondition(expr, { a: false, b: true })).toBe(false)
@@ -77,7 +92,9 @@ describe('Conditional Expressions', () => {
     })
 
     it('should evaluate OR expression', () => {
-      const expr: ConditionalExpression = { $or: [{ $prop: 'a' }, { $prop: 'b' }] }
+      const expr: ConditionalExpression = {
+        $or: [{ $prop: 'a' }, { $prop: 'b' }],
+      }
       expect(evaluateCondition(expr, { a: true, b: true })).toBe(true)
       expect(evaluateCondition(expr, { a: true, b: false })).toBe(true)
       expect(evaluateCondition(expr, { a: false, b: true })).toBe(true)
@@ -101,15 +118,30 @@ describe('Conditional Expressions', () => {
       const expr: ConditionalExpression = {
         $and: [
           { $and: [{ $prop: 'enabled' }, { $not: { $prop: 'loading' } }] },
-          { $or: [{ $eq: [{ $prop: 'size' }, 'lg'] }, { $eq: [{ $prop: 'size' }, 'md'] }] },
+          {
+            $or: [
+              { $eq: [{ $prop: 'size' }, 'lg'] },
+              { $eq: [{ $prop: 'size' }, 'md'] },
+            ],
+          },
         ],
       }
 
-      expect(evaluateCondition(expr, { enabled: true, loading: false, size: 'lg' })).toBe(true)
-      expect(evaluateCondition(expr, { enabled: true, loading: false, size: 'md' })).toBe(true)
-      expect(evaluateCondition(expr, { enabled: true, loading: false, size: 'sm' })).toBe(false)
-      expect(evaluateCondition(expr, { enabled: true, loading: true, size: 'lg' })).toBe(false)
-      expect(evaluateCondition(expr, { enabled: false, loading: false, size: 'lg' })).toBe(false)
+      expect(
+        evaluateCondition(expr, { enabled: true, loading: false, size: 'lg' }),
+      ).toBe(true)
+      expect(
+        evaluateCondition(expr, { enabled: true, loading: false, size: 'md' }),
+      ).toBe(true)
+      expect(
+        evaluateCondition(expr, { enabled: true, loading: false, size: 'sm' }),
+      ).toBe(false)
+      expect(
+        evaluateCondition(expr, { enabled: true, loading: true, size: 'lg' }),
+      ).toBe(false)
+      expect(
+        evaluateCondition(expr, { enabled: false, loading: false, size: 'lg' }),
+      ).toBe(false)
     })
   })
 

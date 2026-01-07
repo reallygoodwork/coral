@@ -11,7 +11,8 @@ describe('transformHTMLToSpec', () => {
   })
 
   it('should transform HTML with attributes', () => {
-    const html = '<div id="test" class="container" data-test="value">Content</div>'
+    const html =
+      '<div id="test" class="container" data-test="value">Content</div>'
     const result = transformHTMLToSpec(html)
 
     expect(result.elementType).toBe('div')
@@ -102,8 +103,12 @@ describe('transformHTMLToSpec', () => {
     // Check header structure
     expect(result.children?.[0]?.elementType).toBe('header')
     expect(result.children?.[0]?.children?.[0]?.elementType).toBe('nav')
-    expect(result.children?.[0]?.children?.[0]?.children?.[0]?.elementType).toBe('ul')
-    expect(result.children?.[0]?.children?.[0]?.children?.[0]?.children).toHaveLength(2)
+    expect(
+      result.children?.[0]?.children?.[0]?.children?.[0]?.elementType,
+    ).toBe('ul')
+    expect(
+      result.children?.[0]?.children?.[0]?.children?.[0]?.children,
+    ).toHaveLength(2)
 
     // Check main structure
     expect(result.children?.[1]?.elementType).toBe('main')
@@ -195,7 +200,10 @@ describe('transformHTMLToSpec', () => {
       if (result.styles.padding) {
         expect(typeof result.styles.padding).not.toBe('string')
         expect(typeof result.styles.padding).not.toBe('number')
-        if (typeof result.styles.padding === 'object' && result.styles.padding !== null) {
+        if (
+          typeof result.styles.padding === 'object' &&
+          result.styles.padding !== null
+        ) {
           expect('value' in result.styles.padding).toBe(true)
           expect('unit' in result.styles.padding).toBe(true)
         }

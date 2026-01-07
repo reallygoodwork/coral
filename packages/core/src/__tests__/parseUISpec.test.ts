@@ -74,7 +74,9 @@ describe('parseUISpec', () => {
 
     const result = await parseUISpec(specWithProps)
 
-    expect(result.componentProperties).toEqual(specWithProps.componentProperties)
+    expect(result.componentProperties).toEqual(
+      specWithProps.componentProperties,
+    )
   })
 
   it('should parse specification with state hooks', async () => {

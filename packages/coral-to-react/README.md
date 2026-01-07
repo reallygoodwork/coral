@@ -412,6 +412,14 @@ const { reactCode, cssCode } = await coralToReact(spec, {
 
 ---
 
+## Type Safety
+
+The package is fully type-safe:
+- **No `any` types** - All types use `unknown` with proper type guards
+- **Type-safe style handling** - `CoralStyleType` properly typed with recursive support
+- **Safe type assertions** - Uses `as unknown as T` pattern only when necessary for Babel AST types
+- **Proper null handling** - Handles `null` values in `CoralTSTypes` correctly
+
 ## Related Packages
 
 - [@reallygoodwork/coral-core](https://www.npmjs.com/package/@reallygoodwork/coral-core) - Core Coral types

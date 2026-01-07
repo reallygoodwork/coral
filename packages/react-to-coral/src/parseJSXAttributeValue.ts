@@ -64,8 +64,7 @@ const parseJSXExpression = (
 
   // Template literals
   if (t.isTemplateLiteral(expression)) {
-    // biome-ignore lint/suspicious/noExplicitAny: Type mismatch between @babel/generator and @babel/types versions
-    return `\`${generate(expression as any).code.slice(1, -1)}\``
+    return `\`${generate(expression as unknown as t.Node).code.slice(1, -1)}\``
   }
 
   // Array expressions
@@ -73,11 +72,9 @@ const parseJSXExpression = (
     const elements = expression.elements.map((el) => {
       if (!el) return 'undefined'
       if (t.isSpreadElement(el)) {
-        // biome-ignore lint/suspicious/noExplicitAny: Type mismatch between @babel/generator and @babel/types versions
-        return `...${generate(el.argument as any).code}`
+        return `...${generate(el.argument as unknown as t.Node).code}`
       }
-      // biome-ignore lint/suspicious/noExplicitAny: Type mismatch between @babel/generator and @babel/types versions
-      return generate(el as any).code
+      return generate(el as unknown as t.Node).code
     })
     return `[${elements.join(', ')}]`
   }
@@ -86,79 +83,66 @@ const parseJSXExpression = (
   if (t.isObjectExpression(expression)) {
     const properties = expression.properties.map((prop) => {
       if (t.isSpreadElement(prop)) {
-        // biome-ignore lint/suspicious/noExplicitAny: Type mismatch between @babel/generator and @babel/types versions
-        return `...${generate(prop.argument as any).code}`
+        return `...${generate(prop.argument as unknown as t.Node).code}`
       }
-      // biome-ignore lint/suspicious/noExplicitAny: Type mismatch between @babel/generator and @babel/types versions
-      return generate(prop as any).code
+      return generate(prop as unknown as t.Node).code
     })
     return `{${properties.join(', ')}}`
   }
 
   // Arrow functions
   if (t.isArrowFunctionExpression(expression)) {
-    // biome-ignore lint/suspicious/noExplicitAny: Type mismatch between @babel/generator and @babel/types versions
-    return `{${generate(expression as any).code}}`
+    return `{${generate(expression as unknown as t.Node).code}}`
   }
 
   // Function expressions
   if (t.isFunctionExpression(expression)) {
-    // biome-ignore lint/suspicious/noExplicitAny: Type mismatch between @babel/generator and @babel/types versions
-    return `{${generate(expression as any).code}}`
+    return `{${generate(expression as unknown as t.Node).code}}`
   }
 
   // Call expressions
   if (t.isCallExpression(expression)) {
-    // biome-ignore lint/suspicious/noExplicitAny: Type mismatch between @babel/generator and @babel/types versions
-    return `{${generate(expression as any).code}}`
+    return `{${generate(expression as unknown as t.Node).code}}`
   }
 
   // Member expressions (e.g., obj.prop, obj[key])
   if (t.isMemberExpression(expression)) {
-    // biome-ignore lint/suspicious/noExplicitAny: Type mismatch between @babel/generator and @babel/types versions
-    return `{${generate(expression as any).code}}`
+    return `{${generate(expression as unknown as t.Node).code}}`
   }
 
   // Logical expressions (&&, ||)
   if (t.isLogicalExpression(expression)) {
-    // biome-ignore lint/suspicious/noExplicitAny: Type mismatch between @babel/generator and @babel/types versions
-    return `{${generate(expression as any).code}}`
+    return `{${generate(expression as unknown as t.Node).code}}`
   }
 
   // Binary expressions (+, -, *, /, etc.)
   if (t.isBinaryExpression(expression)) {
-    // biome-ignore lint/suspicious/noExplicitAny: Type mismatch between @babel/generator and @babel/types versions
-    return `{${generate(expression as any).code}}`
+    return `{${generate(expression as unknown as t.Node).code}}`
   }
 
   // Unary expressions (!, -, +, etc.)
   if (t.isUnaryExpression(expression)) {
-    // biome-ignore lint/suspicious/noExplicitAny: Type mismatch between @babel/generator and @babel/types versions
-    return `{${generate(expression as any).code}}`
+    return `{${generate(expression as unknown as t.Node).code}}`
   }
 
   // Conditional expressions (ternary)
   if (t.isConditionalExpression(expression)) {
-    // biome-ignore lint/suspicious/noExplicitAny: Type mismatch between @babel/generator and @babel/types versions
-    return `{${generate(expression as any).code}}`
+    return `{${generate(expression as unknown as t.Node).code}}`
   }
 
   // Assignment expressions
   if (t.isAssignmentExpression(expression)) {
-    // biome-ignore lint/suspicious/noExplicitAny: Type mismatch between @babel/generator and @babel/types versions
-    return `{${generate(expression as any).code}}`
+    return `{${generate(expression as unknown as t.Node).code}}`
   }
 
   // Update expressions (++, --)
   if (t.isUpdateExpression(expression)) {
-    // biome-ignore lint/suspicious/noExplicitAny: Type mismatch between @babel/generator and @babel/types versions
-    return `{${generate(expression as any).code}}`
+    return `{${generate(expression as unknown as t.Node).code}}`
   }
 
   // Sequence expressions (comma operator)
   if (t.isSequenceExpression(expression)) {
-    // biome-ignore lint/suspicious/noExplicitAny: Type mismatch between @babel/generator and @babel/types versions
-    return `{${generate(expression as any).code}}`
+    return `{${generate(expression as unknown as t.Node).code}}`
   }
 
   // For any other expression types, fall back to code generation

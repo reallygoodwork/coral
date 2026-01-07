@@ -28,14 +28,18 @@ describe('getTypeFromAnnotation', () => {
   })
 
   it('should return "function" for a TSFunctionType', () => {
-    const annotation = t.tsTypeAnnotation(t.tsFunctionType(null, [t.identifier('param1')]))
+    const annotation = t.tsTypeAnnotation(
+      t.tsFunctionType(null, [t.identifier('param1')]),
+    )
     const result = getTypeFromAnnotation(annotation)
     // Function types can be "(unknown) => void" or similar, not just "function"
     expect(result).toMatch(/=>|function/)
   })
 
   it('should return the type name for a TSTypeReference', () => {
-    const annotation = t.tsTypeAnnotation(t.tsTypeReference(t.identifier('MyType')))
+    const annotation = t.tsTypeAnnotation(
+      t.tsTypeReference(t.identifier('MyType')),
+    )
     const result = getTypeFromAnnotation(annotation)
     expect(result).toBe('MyType')
   })
@@ -46,9 +50,9 @@ describe('getTypeFromAnnotation', () => {
     expect(result).toBe('any')
   })
 
-  it('should return "any" for a non-TS-type-annotation', () => {
+  it('should return null for a non-TS-type-annotation', () => {
     const annotation = t.typeAnnotation(t.anyTypeAnnotation())
     const result = getTypeFromAnnotation(annotation)
-    expect(result).toBe('any')
+    expect(result).toBe(null)
   })
 })

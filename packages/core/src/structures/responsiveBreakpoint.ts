@@ -10,8 +10,12 @@ export const zBreakpointTypeSchema = z
 // Simple breakpoint: single condition (e.g., min-width: 768px)
 export const zSimpleBreakpointSchema = z
   .object({
-    type: zBreakpointTypeSchema.describe('The type of the breakpoint condition'),
-    value: z.string().describe('The value of the breakpoint (e.g., "768px", "50rem")'),
+    type: zBreakpointTypeSchema.describe(
+      'The type of the breakpoint condition',
+    ),
+    value: z
+      .string()
+      .describe('The value of the breakpoint (e.g., "768px", "50rem")'),
   })
   .describe('A simple breakpoint with a single condition')
 
@@ -20,14 +24,18 @@ export const zRangeBreakpointSchema = z
   .object({
     min: z
       .object({
-        type: z.enum(['min-width', 'min-height']).describe('The minimum condition type'),
+        type: z
+          .enum(['min-width', 'min-height'])
+          .describe('The minimum condition type'),
         value: z.string().describe('The minimum value (e.g., "768px")'),
       })
       .optional()
       .describe('The minimum condition for the range'),
     max: z
       .object({
-        type: z.enum(['max-width', 'max-height']).describe('The maximum condition type'),
+        type: z
+          .enum(['max-width', 'max-height'])
+          .describe('The maximum condition type'),
         value: z.string().describe('The maximum value (e.g., "1024px")'),
       })
       .optional()
@@ -46,9 +54,18 @@ export const zBreakpointSchema = z
 // Responsive style entry
 export const zResponsiveStyleSchema = z
   .object({
-    breakpoint: zBreakpointSchema.describe('The breakpoint at which these styles apply'),
-    label: z.string().optional().describe('Optional label for this breakpoint (e.g., "Mobile", "Tablet")'),
-    styles: zCoralStyleSchema.describe('The styles to apply at this breakpoint'),
+    breakpoint: zBreakpointSchema.describe(
+      'The breakpoint at which these styles apply',
+    ),
+    label: z
+      .string()
+      .optional()
+      .describe(
+        'Optional label for this breakpoint (e.g., "Mobile", "Tablet")',
+      ),
+    styles: zCoralStyleSchema.describe(
+      'The styles to apply at this breakpoint',
+    ),
   })
   .describe('A set of styles to apply at a specific breakpoint')
 
@@ -56,7 +73,9 @@ export const zResponsiveStyleSchema = z
 export const zCoralResponsiveStylesSchema = z
   .array(zResponsiveStyleSchema)
   .optional()
-  .describe('An array of responsive style definitions for different breakpoints')
+  .describe(
+    'An array of responsive style definitions for different breakpoints',
+  )
 
 // Export types
 export type BreakpointType = z.infer<typeof zBreakpointTypeSchema>

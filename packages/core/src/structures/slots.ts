@@ -47,10 +47,16 @@ export const zSlotDefinitionSchema = z
       .describe('Allowed Coral component types'),
 
     /** Can this slot accept multiple children? */
-    multiple: z.boolean().default(true).describe('Whether slot accepts multiple children'),
+    multiple: z
+      .boolean()
+      .default(true)
+      .describe('Whether slot accepts multiple children'),
 
     /** Is content required for this slot? */
-    required: z.boolean().default(false).describe('Whether content is required'),
+    required: z
+      .boolean()
+      .default(false)
+      .describe('Whether content is required'),
   })
   .describe('Slot definition')
 
@@ -112,7 +118,9 @@ export function isSlotForward(value: unknown): value is SlotForward {
 /**
  * Check if a value is a prop reference (for slot content)
  */
-export function isSlotPropReference(value: unknown): value is { $prop: string } {
+export function isSlotPropReference(
+  value: unknown,
+): value is { $prop: string } {
   return typeof value === 'object' && value !== null && '$prop' in value
 }
 
@@ -148,18 +156,24 @@ export function validateSlotContent(
 
   // Check multiple
   if (!definition.multiple && Array.isArray(content) && content.length > 1) {
-    errors.push(`Slot "${definition.name}" only accepts single child, got ${content.length}`)
+    errors.push(
+      `Slot "${definition.name}" only accepts single child, got ${content.length}`,
+    )
   }
 
   // Check allowed elements (if content is node-like)
   if (definition.allowedElements && content) {
     const nodes = Array.isArray(content) ? content : [content]
     for (const node of nodes) {
-      if (typeof node === 'object' && node !== null && 'elementType' in node) {
-        const elementType = (node as { elementType: string }).elementType
-        if (!definition.allowedElements.includes(elementType)) {
+      if (
+        typeof node === 'object' &&
+        node !== null &&
+        'elementType' in node &&
+        typeof node.elementType === 'string'
+      ) {
+        if (!definition.allowedElements.includes(node.elementType)) {
           errors.push(
-            `Slot "${definition.name}" does not allow element type "${elementType}". ` +
+            `Slot "${definition.name}" does not allow element type "${node.elementType}". ` +
               `Allowed: ${definition.allowedElements.join(', ')}`,
           )
         }
@@ -171,9 +185,13 @@ export function validateSlotContent(
   if (definition.allowedComponents && content) {
     const nodes = Array.isArray(content) ? content : [content]
     for (const node of nodes) {
-      if (typeof node === 'object' && node !== null && 'type' in node) {
-        const type = (node as { type: string }).type
-        if (type === 'COMPONENT_INSTANCE' || type === 'INSTANCE') {
+      if (
+        typeof node === 'object' &&
+        node !== null &&
+        'type' in node &&
+        typeof node.type === 'string'
+      ) {
+        if (node.type === 'COMPONENT_INSTANCE' || node.type === 'INSTANCE') {
           // Would need to check component name against allowedComponents
           // This is a simplified check - full validation needs component resolution
         }
@@ -217,6 +235,6 @@ export function isSlotTarget(node: unknown): node is { slotTarget: string } {
     typeof node === 'object' &&
     node !== null &&
     'slotTarget' in node &&
-    typeof (node as { slotTarget: unknown }).slotTarget === 'string'
+    typeof node.slotTarget === 'string'
   )
 }

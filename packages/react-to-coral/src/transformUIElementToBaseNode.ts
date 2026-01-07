@@ -2,6 +2,7 @@ import type {
   CoralComponentPropertyType,
   CoralElementType,
   CoralRootNode,
+  CoralStyleType,
 } from '@reallygoodwork/coral-core'
 import { extractResponsiveStylesFromObject } from '@reallygoodwork/coral-core'
 import { tailwindToCSS } from '@reallygoodwork/coral-tw2css'
@@ -10,16 +11,16 @@ import type { UIElement } from './transformReactComponentToCoralSpec'
 export const transformUIElementToBaseNode = (
   element: UIElement,
 ): CoralRootNode => {
-  const extractValue = (prop: any): any => {
+  const extractValue = (prop: unknown): unknown => {
     // Handle new format with type and value
     if (prop && typeof prop === 'object' && 'value' in prop) {
-      return prop.value
+      return (prop as { value: unknown }).value
     }
     // Handle legacy format (direct value)
     return prop
   }
 
-  const extractedProps: Record<string, any> = {}
+  const extractedProps: Record<string, unknown> = {}
 
   // Extract values from the new component property format
   Object.entries(element.componentProperties || {}).forEach(([key, prop]) => {
@@ -45,8 +46,16 @@ export const transformUIElementToBaseNode = (
     }
   })
 
-  if (className) {
-    elementAttributes.class = className
+  // Ensure className is a string before using it
+  const classNameStr =
+    typeof className === 'string'
+      ? className
+      : Array.isArray(className)
+        ? className.join(' ')
+        : ''
+
+  if (classNameStr) {
+    elementAttributes.class = classNameStr
   }
 
   // Preserve the original component properties format (with types)
@@ -58,9 +67,14 @@ export const transformUIElementToBaseNode = (
   })
 
   // Combine inline styles and Tailwind classes
-  const combinedStyles = {
-    ...(styles ? styles : {}),
-    ...tailwindToCSS(className || ''),
+  // Ensure styles is properly typed and classNameStr is a string
+  const tailwindStyles = tailwindToCSS(classNameStr)
+  // tailwindToCSS returns Record<string, string>, which is compatible with CoralStyleType
+  const combinedStyles: Record<string, CoralStyleType> = {
+    ...(styles && typeof styles === 'object' && !Array.isArray(styles)
+      ? (styles as Record<string, CoralStyleType>)
+      : {}),
+    ...(tailwindStyles as Record<string, CoralStyleType>),
   }
 
   // Extract responsive styles from media queries

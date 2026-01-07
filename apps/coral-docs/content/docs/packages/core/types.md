@@ -7,7 +7,18 @@ description: Type definitions and type guard functions.
 
 Type definitions and utility functions for working with Coral specifications.
 
+## Type Safety
+
+Coral Core is fully type-safe with zero `any` types and no type assertions:
+
+- **All `any` types removed** - Replaced with `unknown` and proper type guards
+- **No `as` assertions** - Type guards provide safe type narrowing
+- **Recursive types** - `CoralStyleType` is an interface supporting nested styles
+- **Nullable types** - `CoralTSTypes` is `z.nullable` - returns `null` when type cannot be determined
+
 ## Type Guards
+
+Type guards provide safe type narrowing without type assertions:
 
 ```typescript
 import {
@@ -34,12 +45,14 @@ import {
   isSlotForward,
 } from '@reallygoodwork/coral-core'
 
-// Example usage
+// Example usage - TypeScript automatically narrows types
 if (isTokenReference(value)) {
+  // value.$token is available - TypeScript knows this is TokenReference
   console.log(`Token path: ${value.$token}`)
 }
 
 if (isComponentInstance(node)) {
+  // node.$component is available - TypeScript knows this is ComponentInstance
   console.log(`Component ref: ${node.$component.ref}`)
 }
 ```
@@ -324,6 +337,102 @@ type LoadedPackage = {
 ```
 
 ---
+
+## Core Type Definitions
+
+### CoralTSTypes
+
+```typescript
+// CoralTSTypes is nullable - can be null when type cannot be determined
+type CoralTSTypes =
+  | 'string'
+  | 'number'
+  | 'boolean'
+  | 'array'
+  | 'object'
+  | 'null'
+  | 'undefined'
+  | 'function'
+  | null  // Returned when type cannot be determined
+
+// Defined as z.nullable in the schema
+export const zCoralTSTypes = z.nullable(
+  z.union([
+    z.literal('string'),
+    z.literal('number'),
+    z.literal('boolean'),
+    z.literal('array'),
+    z.literal('object'),
+    z.literal('null'),
+    z.literal('undefined'),
+    z.literal('function'),
+  ])
+)
+```
+
+### CoralStyleType
+
+```typescript
+// CoralStyleType is an interface (not type alias) to support recursive references
+interface CoralStyleType {
+  [key: string]:
+    | string
+    | number
+    | CoralColorType
+    | CoralGradientType
+    | Dimension
+    | CoralStyleType  // Recursive for nested styles (e.g., responsive breakpoints)
+}
+
+// Schema uses z.lazy() for recursive validation
+export const zCoralStyleSchema: z.ZodType<CoralStyleType> = z.lazy(() =>
+  z.record(
+    z.string(),
+    z.union([
+      zCoralStyleValueSchema,
+      z.record(z.string(), z.union([zCoralStyleValueSchema, zCoralStyleSchema]))
+    ])
+  )
+)
+```
+
+### Type Safety Best Practices
+
+1. **Use type guards instead of assertions**:
+   ```typescript
+   // ❌ Bad - type assertion
+   const value = node.textContent as PropReference
+
+   // ✅ Good - type guard
+   if (isPropReference(node.textContent)) {
+     // TypeScript knows node.textContent is PropReference here
+     console.log(node.textContent.$prop)
+   }
+   ```
+
+2. **Handle nullable types properly**:
+   ```typescript
+   // CoralTSTypes can be null
+   const propType: CoralTSTypes = getTypeFromAnnotation(annotation)
+   if (propType === null) {
+     // Handle unknown type
+   } else {
+     // propType is one of the literal types
+   }
+   ```
+
+3. **Use `unknown` with type guards**:
+   ```typescript
+   // ❌ Bad - any bypasses type checking
+   function process(value: any) { ... }
+
+   // ✅ Good - unknown requires type narrowing
+   function process(value: unknown) {
+     if (isTokenReference(value)) {
+       // TypeScript knows value is TokenReference
+     }
+   }
+   ```
 
 ## Related
 

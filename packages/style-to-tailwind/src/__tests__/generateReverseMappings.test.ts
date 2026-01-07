@@ -1,4 +1,8 @@
-import { generateReverseMappings, reverseMappings, prefixMappings } from '../generateReverseMappings'
+import {
+  generateReverseMappings,
+  reverseMappings,
+  prefixMappings,
+} from '../generateReverseMappings'
 
 describe('generateReverseMappings', () => {
   describe('reverse mappings generation', () => {
@@ -17,10 +21,13 @@ describe('generateReverseMappings', () => {
       // Check that we have some common properties
       const hasDisplayMapping = 'display' in reverseMappings
       const hasPositionMapping = 'position' in reverseMappings
-      const hasFlexMapping = 'flexDirection' in reverseMappings || 'flex' in reverseMappings
+      const hasFlexMapping =
+        'flexDirection' in reverseMappings || 'flex' in reverseMappings
 
       // At least some of these should exist
-      expect(hasDisplayMapping || hasPositionMapping || hasFlexMapping).toBe(true)
+      expect(hasDisplayMapping || hasPositionMapping || hasFlexMapping).toBe(
+        true,
+      )
     })
 
     it('should have prefix mappings', () => {
@@ -43,17 +50,25 @@ describe('generateReverseMappings', () => {
       // Check structure of first property
       if (properties.length > 0) {
         const firstProp = properties[0]
+        if (!firstProp) {
+          throw new Error('Expected firstProp to be defined')
+        }
         const values = reverseMappings[firstProp]
 
+        expect(values).toBeDefined()
         expect(typeof values).toBe('object')
 
         // Check that values map to Tailwind classes
-        const valueKeys = Object.keys(values)
-        if (valueKeys.length > 0) {
-          const firstValue = valueKeys[0]
-          const twClass = values[firstValue]
+        if (values) {
+          const valueKeys = Object.keys(values)
+          if (valueKeys.length > 0) {
+            const firstValue = valueKeys[0]
+            if (firstValue) {
+              const twClass = values[firstValue]
 
-          expect(typeof twClass).toBe('string')
+              expect(typeof twClass).toBe('string')
+            }
+          }
         }
       }
     })
@@ -65,7 +80,9 @@ describe('generateReverseMappings', () => {
 
         // Common display values might be mapped
         const commonDisplays = ['block', 'flex', 'inline', 'grid', 'none']
-        const hasSomeMapping = commonDisplays.some((value) => value in displayMap)
+        const hasSomeMapping = commonDisplays.some(
+          (value) => value in displayMap,
+        )
 
         expect(hasSomeMapping).toBe(true)
       }
@@ -76,8 +93,16 @@ describe('generateReverseMappings', () => {
         const positionMap = reverseMappings.position
 
         // Common position values
-        const commonPositions = ['static', 'relative', 'absolute', 'fixed', 'sticky']
-        const hasSomeMapping = commonPositions.some((value) => value in positionMap)
+        const commonPositions = [
+          'static',
+          'relative',
+          'absolute',
+          'fixed',
+          'sticky',
+        ]
+        const hasSomeMapping = commonPositions.some(
+          (value) => value in positionMap,
+        )
 
         expect(hasSomeMapping).toBe(true)
       }
@@ -95,11 +120,19 @@ describe('generateReverseMappings', () => {
 
       if (prefixes.length > 0) {
         const firstPrefix = prefixes[0]
+        if (!firstPrefix) {
+          throw new Error('Expected firstPrefix to be defined')
+        }
         const properties = prefixMappings[firstPrefix]
 
-        expect(Array.isArray(properties)).toBe(true)
-        expect(properties.length).toBeGreaterThan(0)
-        expect(typeof properties[0]).toBe('string')
+        expect(properties).toBeDefined()
+        if (properties) {
+          expect(Array.isArray(properties)).toBe(true)
+          expect(properties.length).toBeGreaterThan(0)
+          if (properties.length > 0 && properties[0]) {
+            expect(typeof properties[0]).toBe('string')
+          }
+        }
       }
     })
 

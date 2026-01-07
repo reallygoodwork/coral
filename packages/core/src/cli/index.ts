@@ -9,10 +9,7 @@ import { validateCommand } from './commands/validate'
 
 const program = new Command()
 
-program
-  .name('coral')
-  .description('Coral Design System CLI')
-  .version('1.0.0')
+program.name('coral').description('Coral Design System CLI').version('1.0.0')
 
 program.addCommand(initCommand)
 program.addCommand(validateCommand)

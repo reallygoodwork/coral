@@ -14,7 +14,10 @@ export function generateMethod(method: CoralMethodType): string {
     } else {
       const paramName = param.name
       const paramType = param.tsType ? `: ${param.tsType}` : ''
-      const defaultValue = param.defaultValue !== undefined ? ` = ${JSON.stringify(param.defaultValue)}` : ''
+      const defaultValue =
+        param.defaultValue !== undefined
+          ? ` = ${JSON.stringify(param.defaultValue)}`
+          : ''
       params.push(`${paramName}${paramType}${defaultValue}`)
     }
   }

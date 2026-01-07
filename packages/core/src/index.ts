@@ -14,8 +14,15 @@ export { pascalCaseString } from './lib/pascalCaseString'
 export { transformHTMLToSpec } from './lib/transformHTMLToSpec'
 
 export type { CoralColorType } from './structures/color'
-export type { CoralComponentPropertyType } from './structures/componentProperties'
-export type { CoralNode, CoralRootNode, ComponentMeta } from './structures/coral'
+export type {
+  CoralComponentPropertyType,
+  CoralComponentPropertyWithMetadata,
+} from './structures/componentProperties'
+export type {
+  ComponentMeta,
+  CoralNode,
+  CoralRootNode,
+} from './structures/coral'
 export type { CoralDependencyType } from './structures/dependency'
 export type { CoralDesignTokenType } from './structures/designToken'
 export type { Dimension, DimensionUnit } from './structures/dimension'
@@ -41,366 +48,341 @@ export type { CoralVariantType } from './structures/variant'
 // New schema exports - Structures
 // ============================================================================
 
-// References
-export {
-  zTokenReferenceSchema,
-  zPropReferenceSchema,
-  zComponentReferenceSchema,
-  zAssetReferenceSchema,
-  zExternalReferenceSchema,
-  zAnyReferenceSchema,
-  isTokenReference,
-  isPropReference,
-  isComponentReference,
-  isAssetReference,
-  isExternalReference,
-  isAnyReference,
-} from './structures/references'
 export type {
-  TokenReference,
-  PropReference,
-  ComponentReference,
-  AssetReference,
-  ExternalReference,
-  AnyReference,
-} from './structures/references'
-
-// Conditional expressions
-export {
-  zConditionalExpressionSchema,
-  zConditionalBehaviorSchema,
-  zConditionalStyleSchema,
-  evaluateCondition,
-  isConditionalExpression,
-} from './structures/conditional'
-export type {
-  ConditionalExpression,
-  ConditionalBehavior,
-  ConditionalStyle,
-} from './structures/conditional'
-
-// Variants
-export {
-  zVariantAxisSchema,
-  zCompoundVariantConditionSchema,
-  zComponentVariantsSchema,
-  getVariantCombinations,
-  getDefaultVariantValues,
-  validateVariantValues,
-  matchesCompoundCondition,
-} from './structures/variants'
-export type {
-  VariantAxis,
-  CompoundVariantCondition,
-  ComponentVariants,
-} from './structures/variants'
-
-// Variant styles
-export {
-  zVariantValueStylesSchema,
-  zNodeVariantStylesSchema,
-  zCompoundVariantStyleSchema,
-  zStateStylesSchema,
-  isVariantAwareStateStyles,
-  mergeVariantStyles,
-  applyCompoundStyles,
-} from './structures/variantStyles'
-export type {
-  VariantValueStyles,
-  NodeVariantStyles,
-  CompoundVariantStyle,
-  StateStyles,
-} from './structures/variantStyles'
-
-// Props
-export {
-  zPrimitivePropTypeSchema,
-  zPropTypeSchema,
-  zPropConstraintsSchema,
-  zEditorControlSchema,
-  zComponentPropDefinitionSchema,
-  zComponentPropsDefinitionSchema,
-  propTypeToTypeScript,
-  getRequiredProps,
-  getDefaultPropValues,
-  validatePropValue,
-} from './structures/props'
-export type {
-  PrimitivePropType,
-  PropType,
-  PropConstraints,
-  EditorControl,
-  ComponentPropDefinition,
-  ComponentPropsDefinition,
-} from './structures/props'
-
-// Events
-export {
-  zEventParameterSchema,
-  zComponentEventDefinitionSchema,
-  zComponentEventsDefinitionSchema,
-  eventToTypeScript,
-  getEventPropNames,
-  isEventHandlerName,
-  generateEventJSDoc,
-} from './structures/events'
-export type {
-  EventParameter,
-  ComponentEventDefinition,
-  ComponentEventsDefinition,
-} from './structures/events'
-
+  BindableValue,
+  ComputedValue,
+  EventBinding,
+  EventReference,
+  InlineHandler,
+  PropTransform,
+} from './structures/bindings'
 // Bindings
 export {
-  zPropTransformSchema,
-  zEventReferenceSchema,
-  zComputedValueSchema,
-  zTokenRefSchema,
-  zBindableValueSchema,
-  zInlineHandlerSchema,
-  zEventBindingSchema,
-  isPropTransform,
-  isEventReference,
-  isComputedValue,
-  isTokenRef,
-  isInlineHandler,
-  isBinding,
   applyTransform,
-  resolveComputed,
   extractValue,
+  isBinding,
+  isComputedValue,
+  isEventReference,
+  isInlineHandler,
+  isPropTransform,
+  isTokenRef,
+  resolveComputed,
+  zBindableValueSchema,
+  zComputedValueSchema,
+  zEventBindingSchema,
+  zEventReferenceSchema,
+  zInlineHandlerSchema,
+  zPropTransformSchema,
+  zTokenRefSchema,
 } from './structures/bindings'
 export type {
-  PropTransform,
-  EventReference,
-  ComputedValue,
-  BindableValue,
-  InlineHandler,
-  EventBinding,
-} from './structures/bindings'
-
-// Slots
-export {
-  zSlotDefinitionSchema,
-  zSlotForwardSchema,
-  zSlotBindingSchema,
-  isSlotForward,
-  isSlotPropReference,
-  getRequiredSlots,
-  validateSlotContent,
-  createDefaultSlotDefinition,
-  findSlotDefinition,
-  isSlotTarget,
-} from './structures/slots'
-export type {
-  SlotDefinition,
-  SlotForward,
-  SlotBinding,
-} from './structures/slots'
-
-// Composition
-export {
-  zComponentInstanceRefSchema,
-  zPropBindingSchema,
-  zComponentInstanceSchema,
-  zComponentSetMemberSchema,
-  zSharedContextPropertySchema,
-  zComponentSetSchema,
-  isComponentInstance,
-  isPropBinding,
-  extractComponentName,
-  toPascalCase,
-  toKebabCase,
-  getInstanceDependencies,
-  findComponentInstances,
-  buildDependencyGraph,
-  findCircularDependencies,
-} from './structures/composition'
-export type {
-  ComponentInstanceRef,
-  PropBinding,
-  ComponentInstance,
-  ComponentSetMember,
-  SharedContextProperty,
-  ComponentSet,
-} from './structures/composition'
-
-// Package
-export {
-  zTokenContextSchema,
-  zTokensConfigSchema,
-  zComponentsConfigSchema,
-  zAssetsConfigSchema,
-  zPresetsConfigSchema,
-  zExportTargetSchema,
-  zCoralSpecSchema,
-  zCoralConfigSchema,
-  parsePackageRef,
-  createDefaultConfig,
-  validateConfig,
-  getDefaultExportTarget,
-  resolveConfigPath,
-} from './structures/package'
-export type {
-  TokenContext,
-  TokensConfig,
-  ComponentsConfig,
-  AssetsConfig,
-  PresetsConfig,
-  ExportTarget,
-  CoralSpec,
-  CoralConfig,
-} from './structures/package'
-
-// Component Index
-export {
-  zComponentEntrySchema,
-  zCategorySchema,
-  zComponentIndexSchema,
-  createComponentIndex,
-  addComponentToIndex,
-  removeComponentFromIndex,
-  findComponentEntry,
-  getComponentsByCategory,
-  getComponentsByStatus,
-  searchComponentsByTag,
-  getUniqueCategories,
-  getAllTags,
-} from './structures/componentIndex'
-export type {
-  ComponentEntry,
   Category,
+  ComponentEntry,
   ComponentIndex,
 } from './structures/componentIndex'
-
+// Component Index
+export {
+  addComponentToIndex,
+  createComponentIndex,
+  findComponentEntry,
+  getAllTags,
+  getComponentsByCategory,
+  getComponentsByStatus,
+  getUniqueCategories,
+  removeComponentFromIndex,
+  searchComponentsByTag,
+  zCategorySchema,
+  zComponentEntrySchema,
+  zComponentIndexSchema,
+} from './structures/componentIndex'
+export type {
+  ComponentInstance,
+  ComponentInstanceRef,
+  ComponentSet,
+  ComponentSetMember,
+  PropBinding,
+  SharedContextProperty,
+} from './structures/composition'
+// Composition
+export {
+  buildDependencyGraph,
+  extractComponentName,
+  findCircularDependencies,
+  findComponentInstances,
+  getInstanceDependencies,
+  isComponentInstance,
+  isPropBinding,
+  toKebabCase,
+  toPascalCase,
+  zComponentInstanceRefSchema,
+  zComponentInstanceSchema,
+  zComponentSetMemberSchema,
+  zComponentSetSchema,
+  zPropBindingSchema,
+  zSharedContextPropertySchema,
+} from './structures/composition'
+export type {
+  ConditionalBehavior,
+  ConditionalExpression,
+  ConditionalStyle,
+} from './structures/conditional'
+// Conditional expressions
+export {
+  evaluateCondition,
+  isConditionalExpression,
+  zConditionalBehaviorSchema,
+  zConditionalExpressionSchema,
+  zConditionalStyleSchema,
+} from './structures/conditional'
+export type {
+  ComponentEventDefinition,
+  ComponentEventsDefinition,
+  EventParameter,
+} from './structures/events'
+// Events
+export {
+  eventToTypeScript,
+  generateEventJSDoc,
+  getEventPropNames,
+  isEventHandlerName,
+  zComponentEventDefinitionSchema,
+  zComponentEventsDefinitionSchema,
+  zEventParameterSchema,
+} from './structures/events'
+export type {
+  AssetsConfig,
+  ComponentsConfig,
+  CoralConfig,
+  CoralSpec,
+  ExportTarget,
+  PresetsConfig,
+  TokenContext,
+  TokensConfig,
+} from './structures/package'
+// Package
+export {
+  createDefaultConfig,
+  getDefaultExportTarget,
+  parsePackageRef,
+  resolveConfigPath,
+  validateConfig,
+  zAssetsConfigSchema,
+  zComponentsConfigSchema,
+  zCoralConfigSchema,
+  zCoralSpecSchema,
+  zExportTargetSchema,
+  zPresetsConfigSchema,
+  zTokenContextSchema,
+  zTokensConfigSchema,
+} from './structures/package'
+export type {
+  ComponentPropDefinition,
+  ComponentPropsDefinition,
+  EditorControl,
+  PrimitivePropType,
+  PropConstraints,
+  PropType,
+} from './structures/props'
+// Props
+export {
+  getDefaultPropValues,
+  getRequiredProps,
+  propTypeToTypeScript,
+  validatePropValue,
+  zComponentPropDefinitionSchema,
+  zComponentPropsDefinitionSchema,
+  zEditorControlSchema,
+  zPrimitivePropTypeSchema,
+  zPropConstraintsSchema,
+  zPropTypeSchema,
+} from './structures/props'
+export type {
+  AnyReference,
+  AssetReference,
+  ComponentReference,
+  ExternalReference,
+  PropReference,
+  TokenReference,
+} from './structures/references'
+// References
+export {
+  isAnyReference,
+  isAssetReference,
+  isComponentReference,
+  isExternalReference,
+  isPropReference,
+  isTokenReference,
+  zAnyReferenceSchema,
+  zAssetReferenceSchema,
+  zComponentReferenceSchema,
+  zExternalReferenceSchema,
+  zPropReferenceSchema,
+  zTokenReferenceSchema,
+} from './structures/references'
+export type {
+  SlotBinding,
+  SlotDefinition,
+  SlotForward,
+} from './structures/slots'
+// Slots
+export {
+  createDefaultSlotDefinition,
+  findSlotDefinition,
+  getRequiredSlots,
+  isSlotForward,
+  isSlotPropReference,
+  isSlotTarget,
+  validateSlotContent,
+  zSlotBindingSchema,
+  zSlotDefinitionSchema,
+  zSlotForwardSchema,
+} from './structures/slots'
+export type {
+  ContextDefinition,
+  ContextDimension,
+  TokenIndex,
+  TokenSource,
+} from './structures/tokenIndex'
 // Token Index
 export {
-  zTokenSourceSchema,
-  zContextDimensionSchema,
-  zContextDefinitionSchema,
-  zTokenIndexSchema,
-  createTokenIndex,
   addTokenSource,
-  getSourcesByLayer,
-  getOrderedSources,
-  getDefaultContext,
-  getContextNames,
-  findContextDefinition,
   createDefaultTokenIndex,
+  createTokenIndex,
+  findContextDefinition,
+  getContextNames,
+  getDefaultContext,
+  getOrderedSources,
+  getSourcesByLayer,
+  zContextDefinitionSchema,
+  zContextDimensionSchema,
+  zTokenIndexSchema,
+  zTokenSourceSchema,
 } from './structures/tokenIndex'
 export type {
-  TokenSource,
-  ContextDimension,
-  ContextDefinition,
-  TokenIndex,
-} from './structures/tokenIndex'
+  CompoundVariantStyle,
+  NodeVariantStyles,
+  StateStyles,
+  VariantValueStyles,
+} from './structures/variantStyles'
+// Variant styles
+export {
+  applyCompoundStyles,
+  isVariantAwareStateStyles,
+  mergeVariantStyles,
+  zCompoundVariantStyleSchema,
+  zNodeVariantStylesSchema,
+  zStateStylesSchema,
+  zVariantValueStylesSchema,
+} from './structures/variantStyles'
+export type {
+  ComponentVariants,
+  CompoundVariantCondition,
+  VariantAxis,
+} from './structures/variants'
+// Variants
+export {
+  getDefaultVariantValues,
+  getVariantCombinations,
+  matchesCompoundCondition,
+  validateVariantValues,
+  zComponentVariantsSchema,
+  zCompoundVariantConditionSchema,
+  zVariantAxisSchema,
+} from './structures/variants'
 
 // ============================================================================
 // New utility exports - Lib
 // ============================================================================
 
-// Package loader
+export type { ResolvedInstance } from './lib/compositionUtils'
+// Composition utilities
 export {
-  loadPackage,
-  getComponent,
-  getComponentNames,
-  hasComponent,
-} from './lib/packageLoader'
+  countComponentInstances,
+  flattenComponentTree,
+  getComponentDependencies,
+  getComponentOrder,
+  hasComponentInstances,
+  resolveComponentInstance,
+  validateComposition,
+} from './lib/compositionUtils'
+// Type generation
+export {
+  generateComponentJSDoc,
+  generateComponentTypes,
+  generatePackageTypes,
+  generatePropsInterface,
+  generateVariantDefaults,
+  generateVariantTypes,
+  propTypeToTS,
+} from './lib/generateTypes'
 export type {
   LoadedPackage,
   PackageLoaderOptions,
 } from './lib/packageLoader'
-
+// Package loader
+export {
+  getComponent,
+  getComponentNames,
+  hasComponent,
+  loadPackage,
+} from './lib/packageLoader'
+export type {
+  PackageData,
+  PackageWriterOptions,
+} from './lib/packageWriter'
 // Package writer
 export {
-  writePackage,
-  writeComponent,
-  writeTokens,
   createComponentScaffold,
   createTokenScaffold,
+  writeComponent,
+  writePackage,
+  writeTokens,
 } from './lib/packageWriter'
-export type {
-  PackageWriterOptions,
-  PackageData,
-} from './lib/packageWriter'
-
-// Package validation
+// Props resolution
 export {
-  validatePackage,
-} from './lib/validatePackage'
-export type {
-  ValidationError,
-  ValidationWarning,
-  ValidationResult,
-} from './lib/validatePackage'
-
-// Props validation
-export {
-  validateProps,
-  findUnusedProps,
-} from './lib/validateProps'
-export type {
-  PropValidationError,
-  PropValidationWarning,
-  PropValidationResult,
-} from './lib/validateProps'
-
-// Variant styles resolution
-export {
-  resolveNodeStyles,
-  resolveTreeStyles,
-  resolveStateStyles,
-  getAllNodeStyles,
-  generateVariantStyleMap,
-  variantsToClassName,
-} from './lib/resolveVariantStyles'
-export type {
-  VariantContext,
-} from './lib/resolveVariantStyles'
-
-// Reference resolution
-export {
-  createReferenceResolver,
-  resolveStyleReferences,
-  resolveValue,
-  collectTokenReferences,
-  collectPropReferences,
-} from './lib/resolveReferences'
+  collectReferencedEvents,
+  collectReferencedProps,
+  resolveAllEventBindings,
+  resolveAllPropBindings,
+  resolveEventBinding,
+  resolvePropBinding,
+} from './lib/resolveProps'
 export type {
   ReferenceResolver,
   ReferenceResolverOptions,
 } from './lib/resolveReferences'
-
-// Props resolution
+// Reference resolution
 export {
-  resolvePropBinding,
-  resolveEventBinding,
-  resolveAllPropBindings,
-  resolveAllEventBindings,
-  collectReferencedProps,
-  collectReferencedEvents,
-} from './lib/resolveProps'
-
-// Composition utilities
+  collectPropReferences,
+  collectTokenReferences,
+  createReferenceResolver,
+  resolveStyleReferences,
+  resolveValue,
+} from './lib/resolveReferences'
+export type { VariantContext } from './lib/resolveVariantStyles'
+// Variant styles resolution
 export {
-  resolveComponentInstance,
-  flattenComponentTree,
-  getComponentDependencies,
-  validateComposition,
-  getComponentOrder,
-  hasComponentInstances,
-  countComponentInstances,
-} from './lib/compositionUtils'
+  generateVariantStyleMap,
+  getAllNodeStyles,
+  resolveNodeStyles,
+  resolveStateStyles,
+  resolveTreeStyles,
+  variantsToClassName,
+} from './lib/resolveVariantStyles'
 export type {
-  ResolvedInstance,
-} from './lib/compositionUtils'
-
-// Type generation
+  ValidationError,
+  ValidationResult,
+  ValidationWarning,
+} from './lib/validatePackage'
+// Package validation
+export { validatePackage } from './lib/validatePackage'
+export type {
+  PropValidationError,
+  PropValidationResult,
+  PropValidationWarning,
+} from './lib/validateProps'
+// Props validation
 export {
-  generatePropsInterface,
-  propTypeToTS,
-  generateComponentTypes,
-  generatePackageTypes,
-  generateComponentJSDoc,
-  generateVariantTypes,
-  generateVariantDefaults,
-} from './lib/generateTypes'
+  findUnusedProps,
+  validateProps,
+} from './lib/validateProps'

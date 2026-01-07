@@ -10,6 +10,7 @@ export const fontFamily = {
   },
   'font-mono': {
     property: 'fontFamily',
-    value: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+    value:
+      'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
   },
 }

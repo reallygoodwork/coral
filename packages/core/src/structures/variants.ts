@@ -57,11 +57,16 @@ export const zCompoundVariantConditionSchema = z
       .describe('Map of axis names to required values'),
 
     /** Description of when/why this compound applies */
-    description: z.string().optional().describe('Description of this compound condition'),
+    description: z
+      .string()
+      .optional()
+      .describe('Description of this compound condition'),
   })
   .describe('Compound variant condition - applies when multiple axes match')
 
-export type CompoundVariantCondition = z.infer<typeof zCompoundVariantConditionSchema>
+export type CompoundVariantCondition = z.infer<
+  typeof zCompoundVariantConditionSchema
+>
 
 /**
  * Component-level variant definition

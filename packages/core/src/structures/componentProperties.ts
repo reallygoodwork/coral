@@ -1,23 +1,31 @@
-import * as z from "zod";
+import * as z from 'zod'
 
-import { zCoralNameSchema } from "./name";
-import { zCoralTSTypes } from "./TSTypes";
+import { zCoralNameSchema } from './name'
+import { zCoralTSTypes } from './TSTypes'
 
 /**
  * Represents a generic value that can be any valid type.
  * Uses z.unknown() instead of z.any() for type safety - TypeScript will
  * require type narrowing before use, preventing unsafe operations.
  */
-const genericValue = z.unknown();
+const genericValue = z.unknown()
 
 /**
  * Represents the type definition for a component property.
- * Can be a single type or an array of types used as a union (OR).
+ * Can be a single type (CoralTSTypes literal, string for complex types, or null),
+ * or an array of types used as a union (OR).
  */
 const propertyType = z.union([
   zCoralTSTypes,
-  z.array(zCoralTSTypes).describe("An array of types used as or"),
-]);
+  z
+    .string()
+    .describe(
+      'Complex TypeScript type as string (e.g., "React.ReactNode", "Record<string, number>")',
+    ),
+  z
+    .array(z.union([zCoralTSTypes, z.string()]))
+    .describe('An array of types used as or'),
+])
 
 /**
  * Component property with type, options, and default value.
@@ -28,9 +36,11 @@ const propertyWithOptions = z.object({
   options: z
     .record(z.string(), genericValue)
     .nullish()
-    .describe("The options of the variant"),
-  defaultValue: genericValue.describe("The default value of the component property"),
-});
+    .describe('The options of the variant'),
+  defaultValue: genericValue.describe(
+    'The default value of the component property',
+  ),
+})
 
 /**
  * Component property with type and value.
@@ -38,20 +48,40 @@ const propertyWithOptions = z.object({
  */
 const propertyWithValue = z.object({
   type: propertyType,
-  value: genericValue.describe("The value of the variant property"),
-});
+  value: genericValue.describe('The value of the variant property'),
+})
+
+/**
+ * Extended property with value that includes optional and description fields.
+ * Used when extracting props from React components where we have additional metadata.
+ * This is now part of the unified component property schema.
+ */
+export const zCoralComponentPropertyWithMetadataSchema =
+  propertyWithValue.extend({
+    optional: z
+      .boolean()
+      .optional()
+      .describe('Whether the property is optional'),
+    description: z.string().optional().describe('Description of the property'),
+    defaultValue: genericValue.optional().describe('Default value if provided'),
+  })
+
+export type CoralComponentPropertyWithMetadata = z.infer<
+  typeof zCoralComponentPropertyWithMetadataSchema
+>
 
 export const zCoralComponentPropertySchema = z
   .record(
-    zCoralNameSchema.describe("The name of the component property"),
+    zCoralNameSchema.describe('The name of the component property'),
     z.union([
       genericValue,
       propertyWithOptions,
       propertyWithValue,
-    ])
+      zCoralComponentPropertyWithMetadataSchema,
+    ]),
   )
-  .describe("The properties passed to the component");
+  .describe('The properties passed to the component')
 
 export type CoralComponentPropertyType = z.infer<
   typeof zCoralComponentPropertySchema
->;
+>

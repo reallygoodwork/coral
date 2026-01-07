@@ -7,7 +7,10 @@ import * as z from 'zod'
 export const zTokenReferenceSchema = z
   .object({
     $token: z.string().describe('The token path (e.g., "color.primary.500")'),
-    $fallback: z.unknown().optional().describe('Fallback value if token not found'),
+    $fallback: z
+      .unknown()
+      .optional()
+      .describe('Fallback value if token not found'),
   })
   .describe('A reference to a design token')
 
@@ -113,7 +116,9 @@ export function isPropReference(value: unknown): value is PropReference {
 /**
  * Check if a value is a component reference
  */
-export function isComponentReference(value: unknown): value is ComponentReference {
+export function isComponentReference(
+  value: unknown,
+): value is ComponentReference {
   return typeof value === 'object' && value !== null && '$component' in value
 }
 
@@ -127,7 +132,9 @@ export function isAssetReference(value: unknown): value is AssetReference {
 /**
  * Check if a value is an external reference
  */
-export function isExternalReference(value: unknown): value is ExternalReference {
+export function isExternalReference(
+  value: unknown,
+): value is ExternalReference {
   return typeof value === 'object' && value !== null && '$external' in value
 }
 

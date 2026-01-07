@@ -38,8 +38,10 @@ export async function generateComponent(
   const useCSS = styleFormat === 'className'
 
   // Auto-detect CVA usage if component has variants and strategy is not explicitly set
-  const hasVariants = spec.componentVariants?.axes && spec.componentVariants.axes.length > 0
-  const useCVA = variantStrategy === 'cva' || (hasVariants && styleFormat === 'className')
+  const hasVariants =
+    spec.componentVariants?.axes && spec.componentVariants.axes.length > 0
+  const useCVA =
+    variantStrategy === 'cva' || (hasVariants && styleFormat === 'className')
 
   // Generate ID mapping for CSS classes (shared between CSS and JSX generation)
   const idMapping = new Map<CoralNode, string>()
@@ -152,11 +154,12 @@ export async function generateComponent(
     const hasProps =
       spec.componentProperties &&
       Object.keys(spec.componentProperties).length > 0
-    const propsParam = hasProps || hasVariants
-      ? includeTypes && propsInterface
-        ? `props${propsType}`
-        : 'props'
-      : ''
+    const propsParam =
+      hasProps || hasVariants
+        ? includeTypes && propsInterface
+          ? `props${propsType}`
+          : 'props'
+        : ''
     const componentStart = `export const ${componentName} = (${propsParam}) => {`
     parts.push(componentStart)
 
@@ -209,11 +212,12 @@ export async function generateComponent(
     const hasProps =
       spec.componentProperties &&
       Object.keys(spec.componentProperties).length > 0
-    const propsParam = hasProps || hasVariants
-      ? includeTypes && propsInterface
-        ? `props${propsType}`
-        : 'props'
-      : ''
+    const propsParam =
+      hasProps || hasVariants
+        ? includeTypes && propsInterface
+          ? `props${propsType}`
+          : 'props'
+        : ''
     const componentStart = `export function ${componentName}(${propsParam}) {`
     parts.push(componentStart)
 

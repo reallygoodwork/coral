@@ -2,10 +2,9 @@ import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
 
 import { Command } from 'commander'
-
+import { writePackage } from '../../lib/packageWriter'
 import { createDefaultConfig } from '../../structures/package'
 import { createDefaultTokenIndex } from '../../structures/tokenIndex'
-import { writePackage } from '../../lib/packageWriter'
 
 export const initCommand = new Command('init')
   .description('Initialize a new Coral package')

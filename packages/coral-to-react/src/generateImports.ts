@@ -31,7 +31,9 @@ export function generateImports(imports?: CoralImportType[]): string {
           return s.name
         })
         .join(', ')
-      importStatements.push(`import ${defaultAlias}, { ${namedList} } from '${importSpec.source}'`)
+      importStatements.push(
+        `import ${defaultAlias}, { ${namedList} } from '${importSpec.source}'`,
+      )
     } else if (namedImports.length > 0) {
       // Only named imports
       const namedList = namedImports
@@ -42,7 +44,9 @@ export function generateImports(imports?: CoralImportType[]): string {
           return s.name
         })
         .join(', ')
-      importStatements.push(`import { ${namedList} } from '${importSpec.source}'`)
+      importStatements.push(
+        `import { ${namedList} } from '${importSpec.source}'`,
+      )
     }
   }
 

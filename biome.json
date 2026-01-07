@@ -14,7 +14,8 @@
       "!!**/dist",
       "!!**/build",
       "!!**/.astro",
-      "!!apps/coral-docs"
+      "!!apps/coral-docs",
+      "!!**/__tests__"
     ]
   },
   "formatter": {
@@ -22,7 +23,6 @@
     "indentStyle": "space",
     "indentWidth": 2,
     "lineWidth": 80
-
   },
   "linter": {
     "enabled": true,

@@ -40,7 +40,13 @@ function isColor(value: unknown): value is CoralColorType {
  * Check if a value is a Coral gradient object
  */
 function isGradient(value: unknown): value is CoralGradientType {
-  return typeof value === 'object' && value !== null && 'type' in value && 'colors' in value && 'angle' in value
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'type' in value &&
+    'colors' in value &&
+    'angle' in value
+  )
 }
 
 /**
@@ -123,7 +129,12 @@ function stylesToCSSProperties(styles: CoralStyleType): string {
   const styleEntries = Object.entries(styles)
     .filter(([, value]) => {
       // Filter out nested objects (media queries, pseudo-selectors)
-      return typeof value !== 'object' || isDimension(value) || isColor(value) || isGradient(value)
+      return (
+        typeof value !== 'object' ||
+        isDimension(value) ||
+        isColor(value) ||
+        isGradient(value)
+      )
     })
     .map(([key, value]) => {
       const cssKey = key.replace(/([A-Z])/g, '-$1').toLowerCase()
@@ -137,7 +148,9 @@ function stylesToCSSProperties(styles: CoralStyleType): string {
 /**
  * Convert breakpoint to CSS media query string
  */
-function breakpointToMediaQuery(breakpoint: ResponsiveStyle['breakpoint']): string {
+function breakpointToMediaQuery(
+  breakpoint: ResponsiveStyle['breakpoint'],
+): string {
   // Simple breakpoint
   if ('type' in breakpoint && 'value' in breakpoint) {
     return `(${breakpoint.type}: ${breakpoint.value})`
@@ -161,7 +174,11 @@ function breakpointToMediaQuery(breakpoint: ResponsiveStyle['breakpoint']): stri
 /**
  * Generate unique ID for a node based on its path in the tree
  */
-function generateNodeId(node: CoralNode, parentPath: string = '', index: number = 0): string {
+function generateNodeId(
+  node: CoralNode,
+  parentPath: string = '',
+  index: number = 0,
+): string {
   const nodeName = (node.name || node.elementType).toLowerCase()
   const currentPath = parentPath ? `${parentPath}-${index}` : 'root'
   return `coral-${currentPath}-${nodeName}`
@@ -170,10 +187,17 @@ function generateNodeId(node: CoralNode, parentPath: string = '', index: number 
 /**
  * Generate base CSS styles from Coral spec
  */
-function generateBaseCSS(node: CoralNode, idMapping: Map<CoralNode, string>): string {
+function generateBaseCSS(
+  node: CoralNode,
+  idMapping: Map<CoralNode, string>,
+): string {
   const baseStyles: Map<string, string> = new Map()
 
-  const collectBaseStyles = (n: CoralNode, parentPath: string = '', index: number = 0) => {
+  const collectBaseStyles = (
+    n: CoralNode,
+    parentPath: string = '',
+    index: number = 0,
+  ) => {
     const nodeId = idMapping.get(n) || generateNodeId(n, parentPath, index)
     idMapping.set(n, nodeId)
 
@@ -208,17 +232,21 @@ function generateBaseCSS(node: CoralNode, idMapping: Map<CoralNode, string>): st
 /**
  * Extract numeric value from breakpoint for sorting
  */
-function extractBreakpointValueForSorting(breakpoint: ResponsiveStyle['breakpoint']): number {
+function extractBreakpointValueForSorting(
+  breakpoint: ResponsiveStyle['breakpoint'],
+): number {
   if ('value' in breakpoint && typeof breakpoint.value === 'string') {
     const match = breakpoint.value.match(/^([\d.]+)(px|rem|em)$/i)
-    if (match && match[1] && match[2]) {
+    if (match?.[1] && match?.[2]) {
       const num = parseFloat(match[1])
       const unit = match[2].toLowerCase()
       return unit === 'px' ? num : num * 16 // Convert rem/em to px
     }
   }
   if ('min' in breakpoint && breakpoint.min) {
-    return extractBreakpointValueForSorting(breakpoint.min as ResponsiveStyle['breakpoint'])
+    return extractBreakpointValueForSorting(
+      breakpoint.min as ResponsiveStyle['breakpoint'],
+    )
   }
   return 0
 }
@@ -227,13 +255,16 @@ function extractBreakpointValueForSorting(breakpoint: ResponsiveStyle['breakpoin
  * Generate responsive CSS with media queries from Coral spec
  * Implements CSS cascade: each breakpoint includes base + all previous breakpoints
  */
-function generateResponsiveCSS(node: CoralNode, idMapping: Map<CoralNode, string>): string {
+function generateResponsiveCSS(
+  node: CoralNode,
+  idMapping: Map<CoralNode, string>,
+): string {
   const mediaQueries: Map<string, Map<string, string>> = new Map()
 
   const collectResponsiveStyles = (n: CoralNode) => {
-    // Check if node has responsiveStyles (from ElementTreeNode)
-    // For CoralRootNode, we need to check if responsiveStyles exist
-    const responsiveStyles = (n as unknown as { responsiveStyles?: ResponsiveStyle[] }).responsiveStyles
+    // Check if node has responsiveStyles
+    // CoralNode already has responsiveStyles as an optional property
+    const responsiveStyles = n.responsiveStyles
 
     if (responsiveStyles && responsiveStyles.length > 0) {
       const nodeId = idMapping.get(n)
@@ -243,7 +274,10 @@ function generateResponsiveCSS(node: CoralNode, idMapping: Map<CoralNode, string
 
       // Sort responsive styles by breakpoint value (mobile-first)
       const sortedStyles = [...responsiveStyles].sort((a, b) => {
-        return extractBreakpointValueForSorting(a.breakpoint) - extractBreakpointValueForSorting(b.breakpoint)
+        return (
+          extractBreakpointValueForSorting(a.breakpoint) -
+          extractBreakpointValueForSorting(b.breakpoint)
+        )
       })
 
       // Track accumulated styles as we process breakpoints (CSS cascade)
@@ -254,13 +288,16 @@ function generateResponsiveCSS(node: CoralNode, idMapping: Map<CoralNode, string
         if (!mediaQuery) continue
 
         // Merge this breakpoint's differences into accumulated styles
-        accumulatedStyles = { ...accumulatedStyles, ...(responsiveStyle.styles || {}) }
-
-        if (!mediaQueries.has(mediaQuery)) {
-          mediaQueries.set(mediaQuery, new Map())
+        accumulatedStyles = {
+          ...accumulatedStyles,
+          ...(responsiveStyle.styles || {}),
         }
 
-        const stylesMap = mediaQueries.get(mediaQuery)!
+        let stylesMap = mediaQueries.get(mediaQuery)
+        if (!stylesMap) {
+          stylesMap = new Map()
+          mediaQueries.set(mediaQuery, stylesMap)
+        }
         // Use accumulated styles (base + all breakpoints up to this one)
         const cssProperties = stylesToCSSProperties(accumulatedStyles)
         stylesMap.set(className, cssProperties)
@@ -287,7 +324,9 @@ function generateResponsiveCSS(node: CoralNode, idMapping: Map<CoralNode, string
     }
 
     if (rules.length > 0) {
-      cssBlocks.push(`@media ${mediaQuery} {\n${rules.map((r) => `  ${r.split('\n').join('\n  ')}`).join('\n\n')}\n}`)
+      cssBlocks.push(
+        `@media ${mediaQuery} {\n${rules.map((r) => `  ${r.split('\n').join('\n  ')}`).join('\n\n')}\n}`,
+      )
     }
   }
 
@@ -300,7 +339,10 @@ function generateResponsiveCSS(node: CoralNode, idMapping: Map<CoralNode, string
  * @param idMapping - Map of nodes to their generated IDs (will be populated)
  * @returns CSS string
  */
-export function generateCSS(spec: CoralRootNode, idMapping: Map<CoralNode, string>): string {
+export function generateCSS(
+  spec: CoralRootNode,
+  idMapping: Map<CoralNode, string>,
+): string {
   const baseCSS = generateBaseCSS(spec, idMapping)
   const responsiveCSS = generateResponsiveCSS(spec, idMapping)
 

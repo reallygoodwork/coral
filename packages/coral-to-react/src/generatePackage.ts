@@ -39,11 +39,7 @@ export async function generatePackage(
   pkg: LoadedPackage,
   options: Options = {},
 ): Promise<PackageGenerationResult> {
-  const {
-    componentFormat = 'function',
-    styleFormat = 'inline',
-    includeTypes = true,
-  } = options
+  const { styleFormat = 'inline', includeTypes = true } = options
 
   const components: GeneratedFile[] = []
   const styles: GeneratedFile[] = []

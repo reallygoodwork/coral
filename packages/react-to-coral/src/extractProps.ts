@@ -3,6 +3,7 @@ import * as t from '@babel/types'
 
 import type {
   CoralComponentPropertyType,
+  CoralComponentPropertyWithMetadata,
   CoralTSTypes,
 } from '@reallygoodwork/coral-core'
 
@@ -17,20 +18,20 @@ export const extractProps = (
 ): CoralComponentPropertyType | undefined => {
   if (!param) return undefined
 
-  const props: Record<string, any> = {}
+  const props: CoralComponentPropertyType = {}
 
   if (param.type === 'ObjectPattern') {
     param.properties.forEach((prop) => {
       if (prop.type === 'RestElement') {
         props[`...${(prop.argument as t.Identifier).name}`] = {
           value: `...${(prop.argument as t.Identifier).name}`,
-          type: 'any',
+          type: null,
         }
       } else if (t.isObjectProperty(prop)) {
         const name = (prop.key as t.Identifier).name
-        let type: CoralTSTypes | string = 'any'
+        let type: CoralTSTypes | string = null
         let isOptional = false
-        let defaultValue: any
+        let defaultValue: unknown
 
         // Check if property has a default value
         if (t.isAssignmentPattern(prop.value)) {
@@ -84,10 +85,16 @@ export const extractProps = (
         }
 
         // Create comprehensive property documentation
-        const propInfo: any = {
+        const propInfo = {
           type: type,
           value: name,
           optional: isOptional,
+        } as {
+          type: CoralTSTypes | string
+          value: string
+          optional?: boolean
+          defaultValue?: unknown
+          description?: string
         }
 
         // Add default value if present
@@ -107,7 +114,7 @@ export const extractProps = (
     })
   } else if (param.type === 'Identifier') {
     // Handle type annotation on the identifier (like React.FC<PropType>)
-    let resolvedProps: Record<string, any> = {}
+    let resolvedProps: CoralComponentPropertyType = {}
 
     if (param.typeAnnotation && t.isTSTypeAnnotation(param.typeAnnotation)) {
       resolvedProps =
@@ -127,7 +134,7 @@ export const extractProps = (
         (t.isTSTypeAnnotation(param.typeAnnotation) ||
           t.isTypeAnnotation(param.typeAnnotation))
           ? getTypeFromAnnotation(param.typeAnnotation)
-          : 'any'
+          : null
       props[param.name] = {
         value: param.name,
         type: type,
@@ -142,7 +149,7 @@ export const extractProps = (
 /**
  * Extract default value from assignment pattern
  */
-const extractDefaultValue = (node: t.Expression): any => {
+const extractDefaultValue = (node: t.Expression): unknown => {
   if (t.isNumericLiteral(node)) {
     return node.value
   } else if (t.isStringLiteral(node)) {
@@ -160,8 +167,7 @@ const extractDefaultValue = (node: t.Expression): any => {
   } else {
     // For complex expressions, return the code representation
     try {
-      // biome-ignore lint/suspicious/noExplicitAny: Type mismatch between @babel/generator and @babel/types versions
-      return generate(node as any).code
+      return generate(node as unknown as t.Node).code
     } catch {
       return 'unknown'
     }
@@ -177,7 +183,7 @@ const resolveTypeReference = (
     string,
     t.TSTypeAliasDeclaration | t.TSInterfaceDeclaration
   >,
-): Record<string, any> | null => {
+): CoralComponentPropertyType | null => {
   if (!typeDefinitions || typeDefinitions.size === 0) {
     return null
   }
@@ -216,20 +222,22 @@ const resolveTypeReference = (
  */
 const extractPropsFromTypeLiteral = (
   typeLiteral: t.TSTypeLiteral,
-): Record<string, any> => {
-  const props: Record<string, any> = {}
+): CoralComponentPropertyType => {
+  const props: CoralComponentPropertyType = {}
 
   typeLiteral.members.forEach((member) => {
     if (t.isTSPropertySignature(member) && t.isIdentifier(member.key)) {
       const name = member.key.name
       const isOptional = member.optional || false
-      let type: CoralTSTypes | string = 'any'
+      let type: CoralComponentPropertyWithMetadata['type'] = null
 
       if (member.typeAnnotation) {
-        type = getTypeFromAnnotation(member.typeAnnotation)
+        const extractedType = getTypeFromAnnotation(member.typeAnnotation)
+        // getTypeFromAnnotation returns CoralTSTypes | string, which is compatible with the type field
+        type = extractedType as CoralComponentPropertyWithMetadata['type']
       }
 
-      const propInfo: any = {
+      const propInfo: CoralComponentPropertyWithMetadata = {
         type: type,
         value: name,
         optional: isOptional,
@@ -254,20 +262,22 @@ const extractPropsFromTypeLiteral = (
  */
 const extractPropsFromInterface = (
   interfaceDecl: t.TSInterfaceDeclaration,
-): Record<string, any> => {
-  const props: Record<string, any> = {}
+): CoralComponentPropertyType => {
+  const props: CoralComponentPropertyType = {}
 
   interfaceDecl.body.body.forEach((member) => {
     if (t.isTSPropertySignature(member) && t.isIdentifier(member.key)) {
       const name = member.key.name
       const isOptional = member.optional || false
-      let type: CoralTSTypes | string = 'any'
+      let type: CoralComponentPropertyWithMetadata['type'] = null
 
       if (member.typeAnnotation) {
-        type = getTypeFromAnnotation(member.typeAnnotation)
+        const extractedType = getTypeFromAnnotation(member.typeAnnotation)
+        // getTypeFromAnnotation returns CoralTSTypes | string, which is compatible with the type field
+        type = extractedType as CoralComponentPropertyWithMetadata['type']
       }
 
-      const propInfo: any = {
+      const propInfo: CoralComponentPropertyWithMetadata = {
         type: type,
         value: name,
         optional: isOptional,

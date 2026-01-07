@@ -72,7 +72,7 @@ export const convertTailwindScaletoPixels = (scale?: string) => {
   }
 
   // if scale is a number, multiply by 4 and return px
-  if (!isNaN(Number(scale))) {
+  if (!Number.isNaN(Number(scale))) {
     return Number(scale) * 4
   }
 }

@@ -164,7 +164,11 @@ describe('transformUIElementToBaseNode', () => {
 
     const result = transformUIElementToBaseNode(element)
 
-    expect(result.elementAttributes?.['data-options']).toEqual(['option1', 'option2', 'option3'])
+    expect(result.elementAttributes?.['data-options']).toEqual([
+      'option1',
+      'option2',
+      'option3',
+    ])
   })
 
   it('should filter out invalid attribute types', () => {
@@ -239,7 +243,11 @@ describe('transformUIElementToBaseNode', () => {
     const header = result.children?.[0]
     expect(header?.elementType).toBe('header')
     expect(header?.children).toHaveLength(1)
-    if (header?.children && Array.isArray(header.children) && header.children.length > 0) {
+    if (
+      header?.children &&
+      Array.isArray(header.children) &&
+      header.children.length > 0
+    ) {
       expect(header.children[0]?.elementType).toBe('h1')
       expect(header.children[0]?.textContent).toBe('Article Title')
     }
@@ -247,9 +255,15 @@ describe('transformUIElementToBaseNode', () => {
     const section = result.children?.[1]
     expect(section?.elementType).toBe('section')
     expect(section?.children).toHaveLength(1)
-    if (section?.children && Array.isArray(section.children) && section.children.length > 0) {
+    if (
+      section?.children &&
+      Array.isArray(section.children) &&
+      section.children.length > 0
+    ) {
       expect(section.children[0]?.elementType).toBe('p')
-      expect(section.children[0]?.textContent).toBe('Article content goes here.')
+      expect(section.children[0]?.textContent).toBe(
+        'Article content goes here.',
+      )
     }
   })
 })

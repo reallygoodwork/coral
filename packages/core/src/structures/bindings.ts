@@ -251,7 +251,10 @@ export function isBinding(value: unknown): boolean {
 /**
  * Apply a transform to a value
  */
-export function applyTransform(value: unknown, transform: PropTransform['$transform']): unknown {
+export function applyTransform(
+  value: unknown,
+  transform: PropTransform['$transform'],
+): unknown {
   switch (transform) {
     case 'boolean':
       return Boolean(value)
@@ -286,7 +289,9 @@ export function resolveComputed(
     case 'template': {
       // First input is template, rest are values
       const [template, ...values] = resolvedInputs
-      return String(template).replace(/\{(\d+)\}/g, (_, i) => String(values[Number(i)] ?? ''))
+      return String(template).replace(/\{(\d+)\}/g, (_, i) =>
+        String(values[Number(i)] ?? ''),
+      )
     }
 
     case 'ternary': {
@@ -307,13 +312,19 @@ export function resolveComputed(
  * Extract a value from an object using a dot-notation path
  */
 export function extractValue(obj: unknown, path: string): unknown {
+  /**
+   * Type guard to check if value is a record
+   */
+  function isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null && !Array.isArray(value)
+  }
+
   const parts = path.split('.')
   let current: unknown = obj
 
   for (const part of parts) {
-    if (current === null || current === undefined) return undefined
-    if (typeof current !== 'object') return undefined
-    current = (current as Record<string, unknown>)[part]
+    if (!isRecord(current)) return undefined
+    current = current[part]
   }
 
   return current

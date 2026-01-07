@@ -17,8 +17,14 @@ export const zTokenContextSchema = z
   .object({
     name: z.string().describe('Context name (e.g., "light", "dark")'),
     description: z.string().optional().describe('Context description'),
-    default: z.boolean().optional().describe('Whether this is the default context'),
-    mediaQuery: z.string().optional().describe('CSS media query to auto-activate'),
+    default: z
+      .boolean()
+      .optional()
+      .describe('Whether this is the default context'),
+    mediaQuery: z
+      .string()
+      .optional()
+      .describe('CSS media query to auto-activate'),
   })
   .describe('Token context definition')
 
@@ -188,7 +194,9 @@ export const zCoralConfigSchema = z
     tokens: zTokensConfigSchema.optional().describe('Tokens configuration'),
 
     /** Components configuration */
-    components: zComponentsConfigSchema.optional().describe('Components configuration'),
+    components: zComponentsConfigSchema
+      .optional()
+      .describe('Components configuration'),
 
     /** Assets configuration */
     assets: zAssetsConfigSchema.describe('Assets configuration'),
@@ -242,7 +250,10 @@ export function parsePackageRef(ref: string): [string, string | undefined] {
 /**
  * Create a default coral.config.json structure
  */
-export function createDefaultConfig(name: string, version = '0.1.0'): CoralConfig {
+export function createDefaultConfig(
+  name: string,
+  version = '0.1.0',
+): CoralConfig {
   return {
     $schema: 'https://coral.design/config.schema.json',
     name,
@@ -275,14 +286,18 @@ export function validateConfig(config: unknown): {
 
   return {
     success: false,
-    errors: result.error.issues.map((e) => `${String(e.path.join('.'))}: ${e.message}`),
+    errors: result.error.issues.map(
+      (e) => `${String(e.path.join('.'))}: ${e.message}`,
+    ),
   }
 }
 
 /**
  * Get the default export target from config
  */
-export function getDefaultExportTarget(config: CoralConfig): ExportTarget | undefined {
+export function getDefaultExportTarget(
+  config: CoralConfig,
+): ExportTarget | undefined {
   if (!config.exports) return undefined
 
   // Prefer 'default' target, otherwise return first
@@ -292,7 +307,10 @@ export function getDefaultExportTarget(config: CoralConfig): ExportTarget | unde
 /**
  * Resolve paths relative to config file location
  */
-export function resolveConfigPath(basePath: string, relativePath: string): string {
+export function resolveConfigPath(
+  basePath: string,
+  relativePath: string,
+): string {
   if (relativePath.startsWith('./')) {
     return `${basePath}/${relativePath.slice(2)}`
   }

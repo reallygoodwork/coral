@@ -156,7 +156,11 @@ export function getSourcesByLayer(
  * Get ordered sources (primitives first, then semantic, then component)
  */
 export function getOrderedSources(index: TokenIndex): TokenSource[] {
-  const layerOrder: TokenSource['layer'][] = ['primitive', 'semantic', 'component']
+  const layerOrder: TokenSource['layer'][] = [
+    'primitive',
+    'semantic',
+    'component',
+  ]
   const withLayer = index.sources.filter((s) => s.layer)
   const withoutLayer = index.sources.filter((s) => !s.layer)
 
@@ -195,7 +199,10 @@ export function findContextDefinition(
 /**
  * Create default token index with light/dark contexts
  */
-export function createDefaultTokenIndex(name: string, version: string): TokenIndex {
+export function createDefaultTokenIndex(
+  name: string,
+  version: string,
+): TokenIndex {
   return {
     $schema: 'https://coral.design/tokens-index.schema.json',
     name,

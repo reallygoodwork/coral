@@ -99,7 +99,9 @@ describe('References Schema', () => {
     })
 
     it('isComponentReference should correctly identify component refs', () => {
-      expect(isComponentReference({ $component: { ref: './btn.json' } })).toBe(true)
+      expect(isComponentReference({ $component: { ref: './btn.json' } })).toBe(
+        true,
+      )
       expect(isComponentReference({ $prop: 'disabled' })).toBe(false)
     })
 
@@ -109,7 +111,9 @@ describe('References Schema', () => {
     })
 
     it('isExternalReference should correctly identify external refs', () => {
-      expect(isExternalReference({ $external: { package: 'x', path: 'y' } })).toBe(true)
+      expect(
+        isExternalReference({ $external: { package: 'x', path: 'y' } }),
+      ).toBe(true)
       expect(isExternalReference({ $prop: 'disabled' })).toBe(false)
     })
 
@@ -118,7 +122,9 @@ describe('References Schema', () => {
       expect(isAnyReference({ $prop: 'disabled' })).toBe(true)
       expect(isAnyReference({ $component: { ref: 'x' } })).toBe(true)
       expect(isAnyReference({ $asset: 'icon.svg' })).toBe(true)
-      expect(isAnyReference({ $external: { package: 'x', path: 'y' } })).toBe(true)
+      expect(isAnyReference({ $external: { package: 'x', path: 'y' } })).toBe(
+        true,
+      )
       expect(isAnyReference('string')).toBe(false)
       expect(isAnyReference(123)).toBe(false)
     })

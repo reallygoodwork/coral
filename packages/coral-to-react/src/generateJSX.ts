@@ -1,10 +1,9 @@
-import type { CoralNode } from '@reallygoodwork/coral-core'
+import type { ComponentInstance, CoralNode } from '@reallygoodwork/coral-core'
 import {
   extractComponentName,
   isComponentInstance,
   isPropBinding,
 } from '@reallygoodwork/coral-core'
-import type { ComponentInstance } from '@reallygoodwork/coral-core'
 import { stylesToInlineStyle } from './convertStyles'
 
 /**
@@ -42,7 +41,9 @@ function formatJSXAttributes(
     for (const [key, value] of Object.entries(elementAttributes)) {
       if (key === 'class' || key === 'className') {
         // Store existing className to combine with generated classes later
-        existingClassName = Array.isArray(value) ? value.join(' ') : String(value)
+        existingClassName = Array.isArray(value)
+          ? value.join(' ')
+          : String(value)
         continue // Skip adding it now, we'll add it later
       }
 
@@ -62,7 +63,9 @@ function formatJSXAttributes(
 
   // Combine existing className with generated CSS classes
   if (className || existingClassName) {
-    const combinedClasses = [existingClassName, className].filter(Boolean).join(' ')
+    const combinedClasses = [existingClassName, className]
+      .filter(Boolean)
+      .join(' ')
     attrs.push(`className="${combinedClasses}"`)
   }
 
@@ -76,7 +79,11 @@ function formatJSXAttributes(
 /**
  * Generate unique ID for a node based on its path in the tree
  */
-function generateNodeId(node: CoralNode, parentPath: string = '', index: number = 0): string {
+function generateNodeId(
+  node: CoralNode,
+  parentPath: string = '',
+  index: number = 0,
+): string {
   const nodeName = (node.name || node.elementType).toLowerCase()
   const currentPath = parentPath ? `${parentPath}-${index}` : 'root'
   return `coral-${currentPath}-${nodeName}`
@@ -104,12 +111,12 @@ export function generateJSXElement(
 
   // Handle component instances
   if (isComponentInstance(node)) {
+    // Type guard narrows node to ComponentInstance
     return generateComponentInstanceJSX(
-      node as unknown as ComponentInstance,
+      node,
       indent,
       idMapping,
       parentPath,
-      index,
       styleFormat,
     )
   }
@@ -134,7 +141,11 @@ export function generateJSXElement(
   }
 
   // Format attributes
-  const attributes = formatJSXAttributes(node.elementAttributes, className, inlineStyle)
+  const attributes = formatJSXAttributes(
+    node.elementAttributes,
+    className,
+    inlineStyle,
+  )
 
   // Handle self-closing elements
   if (isSelfClosing) {
@@ -152,7 +163,16 @@ export function generateJSXElement(
   if (node.children && node.children.length > 0) {
     for (let idx = 0; idx < node.children.length; idx++) {
       const child = node.children[idx] as CoralNode
-      children.push(generateJSXElement(child, indent + 1, idMapping, nodeId, idx, styleFormat))
+      children.push(
+        generateJSXElement(
+          child,
+          indent + 1,
+          idMapping,
+          nodeId,
+          idx,
+          styleFormat,
+        ),
+      )
     }
   }
 
@@ -172,7 +192,6 @@ function generateComponentInstanceJSX(
   indent: number,
   idMapping: Map<CoralNode, string>,
   parentPath: string,
-  index: number,
   styleFormat: 'inline' | 'className' = 'inline',
 ): string {
   const indentStr = '  '.repeat(indent)
@@ -207,7 +226,9 @@ function generateComponentInstanceJSX(
 
   // Add variant overrides
   if (instance.variantOverrides) {
-    for (const [variantName, value] of Object.entries(instance.variantOverrides)) {
+    for (const [variantName, value] of Object.entries(
+      instance.variantOverrides,
+    )) {
       propAttrs.push(`${variantName}="${value}"`)
     }
   }
@@ -225,10 +246,10 @@ function generateComponentInstanceJSX(
 
   // Handle slot bindings
   if (instance.slotBindings) {
-    const slots = Object.entries(instance.slotBindings)
-    if (slots.length > 0) {
+    const slotBindings = Object.values(instance.slotBindings)
+    if (slotBindings.length > 0) {
       const slotContent: string[] = []
-      for (const [slotName, binding] of slots) {
+      for (const binding of slotBindings) {
         if (typeof binding === 'string') {
           slotContent.push(`${indentStr}  ${binding}`)
         } else if (
@@ -243,7 +264,14 @@ function generateComponentInstanceJSX(
             const node = binding[idx] as CoralNode | undefined
             if (node) {
               slotContent.push(
-                generateJSXElement(node, indent + 1, idMapping, parentPath, idx, styleFormat),
+                generateJSXElement(
+                  node,
+                  indent + 1,
+                  idMapping,
+                  parentPath,
+                  idx,
+                  styleFormat,
+                ),
               )
             }
           }

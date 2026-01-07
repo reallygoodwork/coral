@@ -45,7 +45,8 @@ export const validateCommand = new Command('validate')
       if (allWarnings.length > 0) {
         console.log(`\n${allWarnings.length} warning(s):`)
         for (const warning of allWarnings) {
-          const location = 'path' in warning ? warning.path : warning.componentName
+          const location =
+            'path' in warning ? warning.path : warning.componentName
           console.log(`  [${warning.type}] ${location}: ${warning.message}`)
         }
       }

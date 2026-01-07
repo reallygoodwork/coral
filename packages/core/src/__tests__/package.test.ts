@@ -1,10 +1,10 @@
 import {
-  zCoralConfigSchema,
-  parsePackageRef,
   createDefaultConfig,
-  validateConfig,
   getDefaultExportTarget,
+  parsePackageRef,
   resolveConfigPath,
+  validateConfig,
+  zCoralConfigSchema,
 } from '../structures/package'
 
 describe('Package Schema', () => {
@@ -142,7 +142,7 @@ describe('Package Schema', () => {
 
       expect(result.success).toBe(false)
       expect(result.errors).toBeDefined()
-      expect(result.errors!.length).toBeGreaterThan(0)
+      expect(result.errors?.length).toBeGreaterThan(0)
     })
   })
 
@@ -188,7 +188,10 @@ describe('Package Schema', () => {
     })
 
     it('should resolve parent directory path', () => {
-      const resolved = resolveConfigPath('/project/components', '../tokens/index.json')
+      const resolved = resolveConfigPath(
+        '/project/components',
+        '../tokens/index.json',
+      )
       expect(resolved).toBe('/project/tokens/index.json')
     })
   })

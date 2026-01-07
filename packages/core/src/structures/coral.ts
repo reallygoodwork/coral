@@ -2,10 +2,7 @@ import * as z from 'zod'
 
 import { zBindableValueSchema, zEventBindingSchema } from './bindings'
 import { zCoralComponentPropertySchema } from './componentProperties'
-import {
-  zComponentInstanceRefSchema,
-  zPropBindingSchema,
-} from './composition'
+import { zComponentInstanceRefSchema, zPropBindingSchema } from './composition'
 import {
   zConditionalBehaviorSchema,
   zConditionalExpressionSchema,
@@ -142,9 +139,7 @@ export const zCoralSchema: z.ZodType<CoralNode> = z.lazy(() =>
         z.object({
           type: z.union([
             zCoralTSTypes,
-            z
-              .array(zCoralTSTypes)
-              .describe('An array of types used as or'),
+            z.array(zCoralTSTypes).describe('An array of types used as or'),
           ]),
           value: z.unknown().describe('The value of the variant property'),
         }),
@@ -374,11 +369,19 @@ export const zCoralRootSchema = zCoralSchema.and(
 
 import type { BindableValue, EventBinding } from './bindings'
 import type { ComponentInstanceRef, PropBinding } from './composition'
-import type { ConditionalBehavior, ConditionalExpression, ConditionalStyle } from './conditional'
+import type {
+  ConditionalBehavior,
+  ConditionalExpression,
+  ConditionalStyle,
+} from './conditional'
 import type { ComponentEventsDefinition } from './events'
 import type { ComponentPropsDefinition } from './props'
 import type { SlotBinding, SlotDefinition } from './slots'
-import type { CompoundVariantStyle, NodeVariantStyles, StateStyles } from './variantStyles'
+import type {
+  CompoundVariantStyle,
+  NodeVariantStyles,
+  StateStyles,
+} from './variantStyles'
 import type { ComponentVariants } from './variants'
 
 // Forward declare the type for recursive reference
@@ -398,7 +401,12 @@ export type CoralNode = {
   responsiveStyles?: z.infer<typeof zCoralResponsiveStylesSchema>
   textContent?: string | Record<string, unknown>
   tsType?: string
-  type?: 'COMPONENT' | 'INSTANCE' | 'COMPONENT_SET' | 'NODE' | 'COMPONENT_INSTANCE'
+  type?:
+    | 'COMPONENT'
+    | 'INSTANCE'
+    | 'COMPONENT_SET'
+    | 'NODE'
+    | 'COMPONENT_INSTANCE'
   variantProperties?: Record<
     string,
     {

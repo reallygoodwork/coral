@@ -1,8 +1,9 @@
-import type { CoralNode, CoralRootNode } from '../structures/coral'
 import {
   extractComponentName,
   findComponentInstances,
 } from '../structures/composition'
+import type { ConditionalExpression } from '../structures/conditional'
+import type { CoralNode, CoralRootNode } from '../structures/coral'
 import {
   isAssetReference,
   isComponentReference,
@@ -70,7 +71,9 @@ export function validatePackage(pkg: LoadedPackage): ValidationResult {
   // Build sets of known tokens, components, assets
   const knownTokens = new Set<string>()
   for (const [, tokenData] of pkg.tokens) {
-    collectTokenPaths(tokenData as Record<string, unknown>, '', knownTokens)
+    if (isRecord(tokenData)) {
+      collectTokenPaths(tokenData, '', knownTokens)
+    }
   }
 
   const knownComponents = new Set(pkg.components.keys())
@@ -110,7 +113,9 @@ function validateComponent(
 ) {
   // Collect defined props
   const definedProps = new Set(Object.keys(component.props ?? {}))
-  const definedComponentProps = new Set(Object.keys(component.componentProperties ?? {}))
+  const definedComponentProps = new Set(
+    Object.keys(component.componentProperties ?? {}),
+  )
   const allDefinedProps = new Set([...definedProps, ...definedComponentProps])
 
   // Add variant axes as props
@@ -188,7 +193,12 @@ function validateNode(
 
   // Check conditional expressions
   if (node.conditional) {
-    validateConditional(node.conditional, `${nodePath}/conditional`, definedProps, ctx)
+    validateConditional(
+      node.conditional,
+      `${nodePath}/conditional`,
+      definedProps,
+      ctx,
+    )
   }
 
   // Check conditional styles
@@ -208,7 +218,12 @@ function validateNode(
 
   // Check text content for prop references
   if (node.textContent && typeof node.textContent === 'object') {
-    validateStyleValue(node.textContent, `${nodePath}/textContent`, ctx, definedProps)
+    validateStyleValue(
+      node.textContent,
+      `${nodePath}/textContent`,
+      ctx,
+      definedProps,
+    )
   }
 
   // Check component instances
@@ -286,11 +301,30 @@ function validateStyleValue(
   }
 
   // Recurse into objects
-  if (typeof value === 'object' && value !== null && !isAnyKnownReference(value)) {
+  if (
+    typeof value === 'object' &&
+    value !== null &&
+    !isAnyKnownReference(value)
+  ) {
     for (const [key, nestedValue] of Object.entries(value)) {
       validateStyleValue(nestedValue, `${path}/${key}`, ctx, definedProps)
     }
   }
+}
+
+/**
+ * Type guard for conditional expressions
+ */
+function isConditionalExpression(expr: unknown): expr is ConditionalExpression {
+  if (typeof expr !== 'object' || expr === null) return false
+  return (
+    '$prop' in expr ||
+    '$not' in expr ||
+    '$and' in expr ||
+    '$or' in expr ||
+    '$eq' in expr ||
+    '$ne' in expr
+  )
 }
 
 function validateConditional(
@@ -299,45 +333,42 @@ function validateConditional(
   definedProps: Set<string>,
   ctx: ValidationContext,
 ) {
-  if (typeof expr !== 'object' || expr === null) return
+  if (!isConditionalExpression(expr)) return
 
   if ('$prop' in expr) {
-    const propRef = expr as { $prop: string }
-    if (!definedProps.has(propRef.$prop)) {
+    if (!definedProps.has(expr.$prop)) {
       ctx.errors.push({
         type: 'missing-prop',
         path,
-        reference: propRef.$prop,
-        message: `Prop "${propRef.$prop}" used in conditional is not defined`,
+        reference: expr.$prop,
+        message: `Prop "${expr.$prop}" used in conditional is not defined`,
       })
     }
   }
 
   if ('$not' in expr) {
-    validateConditional((expr as { $not: unknown }).$not, `${path}/$not`, definedProps, ctx)
+    validateConditional(expr.$not, `${path}/$not`, definedProps, ctx)
   }
 
   if ('$and' in expr) {
-    const items = (expr as { $and: unknown[] }).$and
-    items.forEach((item, i) =>
-      validateConditional(item, `${path}/$and[${i}]`, definedProps, ctx),
-    )
+    expr.$and.forEach((item, i) => {
+      validateConditional(item, `${path}/$and[${i}]`, definedProps, ctx)
+    })
   }
 
   if ('$or' in expr) {
-    const items = (expr as { $or: unknown[] }).$or
-    items.forEach((item, i) =>
-      validateConditional(item, `${path}/$or[${i}]`, definedProps, ctx),
-    )
+    expr.$or.forEach((item, i) => {
+      validateConditional(item, `${path}/$or[${i}]`, definedProps, ctx)
+    })
   }
 
   if ('$eq' in expr) {
-    const [left] = (expr as { $eq: [unknown, unknown] }).$eq
+    const [left] = expr.$eq
     validateConditional(left, `${path}/$eq[0]`, definedProps, ctx)
   }
 
   if ('$ne' in expr) {
-    const [left] = (expr as { $ne: [unknown, unknown] }).$ne
+    const [left] = expr.$ne
     validateConditional(left, `${path}/$ne[0]`, definedProps, ctx)
   }
 }
@@ -350,7 +381,9 @@ function validateCircularDependencies(pkg: LoadedPackage): ValidationError[] {
 
   for (const [name, component] of pkg.components) {
     const instances = findComponentInstances(component)
-    const deps = new Set(instances.map((i) => extractComponentName(i.instance.$component.ref)))
+    const deps = new Set(
+      instances.map((i) => extractComponentName(i.instance.$component.ref)),
+    )
     graph.set(name, deps)
   }
 
@@ -398,17 +431,28 @@ function validateCircularDependencies(pkg: LoadedPackage): ValidationError[] {
   return errors
 }
 
-function collectTokenPaths(obj: Record<string, unknown>, prefix: string, result: Set<string>) {
+/**
+ * Type guard to check if value is a record
+ */
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+function collectTokenPaths(
+  obj: Record<string, unknown>,
+  prefix: string,
+  result: Set<string>,
+) {
   for (const [key, value] of Object.entries(obj)) {
     if (key.startsWith('$')) continue
 
     const path = prefix ? `${prefix}.${key}` : key
 
-    if (typeof value === 'object' && value !== null) {
+    if (isRecord(value)) {
       if ('$value' in value) {
         result.add(path)
       } else {
-        collectTokenPaths(value as Record<string, unknown>, path, result)
+        collectTokenPaths(value, path, result)
       }
     }
   }

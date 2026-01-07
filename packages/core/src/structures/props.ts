@@ -3,11 +3,7 @@ import * as z from 'zod'
 /**
  * Primitive prop types
  */
-export const zPrimitivePropTypeSchema = z.enum([
-  'string',
-  'number',
-  'boolean',
-])
+export const zPrimitivePropTypeSchema = z.enum(['string', 'number', 'boolean'])
 
 export type PrimitivePropType = z.infer<typeof zPrimitivePropTypeSchema>
 
@@ -136,7 +132,10 @@ export const zComponentPropDefinitionSchema = z
     default: z.unknown().optional().describe('Default value when not provided'),
 
     /** Is this prop required? */
-    required: z.boolean().default(false).describe('Whether the prop is required'),
+    required: z
+      .boolean()
+      .default(false)
+      .describe('Whether the prop is required'),
 
     /** Human-readable description */
     description: z.string().optional().describe('Human-readable description'),
@@ -158,11 +157,16 @@ export const zComponentPropDefinitionSchema = z
       .describe('Validation constraints'),
 
     /** Group props in the editor UI */
-    group: z.string().optional().describe('Group name for organizing in editor'),
+    group: z
+      .string()
+      .optional()
+      .describe('Group name for organizing in editor'),
   })
   .describe('Full property definition')
 
-export type ComponentPropDefinition = z.infer<typeof zComponentPropDefinitionSchema>
+export type ComponentPropDefinition = z.infer<
+  typeof zComponentPropDefinitionSchema
+>
 
 /**
  * Props definition for a component
@@ -172,7 +176,9 @@ export const zComponentPropsDefinitionSchema = z
   .record(z.string(), zComponentPropDefinitionSchema)
   .describe('Component props definitions')
 
-export type ComponentPropsDefinition = z.infer<typeof zComponentPropsDefinitionSchema>
+export type ComponentPropsDefinition = z.infer<
+  typeof zComponentPropsDefinitionSchema
+>
 
 // ============================================================================
 // Utility Functions
@@ -258,14 +264,22 @@ export function validatePropValue(
 
   // Constraints validation
   if (constraints) {
-    const constraintError = validatePropConstraints(value, constraints, propName)
+    const constraintError = validatePropConstraints(
+      value,
+      constraints,
+      propName,
+    )
     if (constraintError) return constraintError
   }
 
   return null
 }
 
-function validatePropType(value: unknown, type: PropType, propName: string): string | null {
+function validatePropType(
+  value: unknown,
+  type: PropType,
+  propName: string,
+): string | null {
   if (type === 'string' && typeof value !== 'string') {
     return `Prop "${propName}" expected string, got ${typeof value}`
   }
@@ -315,22 +329,37 @@ function validatePropConstraints(
   }
 
   if (typeof value === 'string') {
-    if (constraints.minLength !== undefined && value.length < constraints.minLength) {
+    if (
+      constraints.minLength !== undefined &&
+      value.length < constraints.minLength
+    ) {
       return `Prop "${propName}" must have length >= ${constraints.minLength}`
     }
-    if (constraints.maxLength !== undefined && value.length > constraints.maxLength) {
+    if (
+      constraints.maxLength !== undefined &&
+      value.length > constraints.maxLength
+    ) {
       return `Prop "${propName}" must have length <= ${constraints.maxLength}`
     }
-    if (constraints.pattern !== undefined && !new RegExp(constraints.pattern).test(value)) {
+    if (
+      constraints.pattern !== undefined &&
+      !new RegExp(constraints.pattern).test(value)
+    ) {
       return `Prop "${propName}" must match pattern ${constraints.pattern}`
     }
   }
 
   if (Array.isArray(value)) {
-    if (constraints.minLength !== undefined && value.length < constraints.minLength) {
+    if (
+      constraints.minLength !== undefined &&
+      value.length < constraints.minLength
+    ) {
       return `Prop "${propName}" must have length >= ${constraints.minLength}`
     }
-    if (constraints.maxLength !== undefined && value.length > constraints.maxLength) {
+    if (
+      constraints.maxLength !== undefined &&
+      value.length > constraints.maxLength
+    ) {
       return `Prop "${propName}" must have length <= ${constraints.maxLength}`
     }
   }

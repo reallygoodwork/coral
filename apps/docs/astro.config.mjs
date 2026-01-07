@@ -1,7 +1,7 @@
 import starlight from '@astrojs/starlight'
 // import starlightThemeBlack from 'starlight-theme-black'
 // import starlightThemeNext from 'starlight-theme-next'
-import pagePlugin from '@pelagornis/page'
+// import pagePlugin from '@pelagornis/page'
 import { defineConfig } from 'astro/config'
 
 export default defineConfig({

@@ -1,16 +1,15 @@
 import {
-  zComponentInstanceSchema,
-  zComponentSetSchema,
+  buildDependencyGraph,
+  extractComponentName,
+  findCircularDependencies,
+  findComponentInstances,
   isComponentInstance,
   isPropBinding,
-  extractComponentName,
-  toPascalCase,
   toKebabCase,
-  findComponentInstances,
-  buildDependencyGraph,
-  findCircularDependencies,
+  toPascalCase,
+  zComponentInstanceSchema,
+  zComponentSetSchema,
 } from '../structures/composition'
-import type { CoralNode } from '../structures/coral'
 
 describe('Composition Schema', () => {
   describe('ComponentInstanceSchema', () => {
@@ -56,9 +55,17 @@ describe('Composition Schema', () => {
         description: 'Tabbed interface',
         members: [
           { name: 'Tabs', path: './tabs.coral.json', role: 'root' as const },
-          { name: 'TabList', path: './tab-list.coral.json', role: 'container' as const },
+          {
+            name: 'TabList',
+            path: './tab-list.coral.json',
+            role: 'container' as const,
+          },
           { name: 'Tab', path: './tab.coral.json', role: 'trigger' as const },
-          { name: 'TabPanel', path: './tab-panel.coral.json', role: 'content' as const },
+          {
+            name: 'TabPanel',
+            path: './tab-panel.coral.json',
+            role: 'content' as const,
+          },
         ],
         sharedContext: {
           properties: {
@@ -93,8 +100,12 @@ describe('Composition Schema', () => {
   describe('Utility Functions', () => {
     it('extractComponentName should extract name from path', () => {
       expect(extractComponentName('./button/button.coral.json')).toBe('Button')
-      expect(extractComponentName('./icon-button/icon-button.coral.json')).toBe('IconButton')
-      expect(extractComponentName('./data_table/data_table.coral.json')).toBe('DataTable')
+      expect(extractComponentName('./icon-button/icon-button.coral.json')).toBe(
+        'IconButton',
+      )
+      expect(extractComponentName('./data_table/data_table.coral.json')).toBe(
+        'DataTable',
+      )
     })
 
     it('toPascalCase should convert to PascalCase', () => {

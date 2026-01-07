@@ -1,7 +1,6 @@
 import type { CoralNode } from '../structures/coral'
 import type { CoralStyleType } from '../structures/styles'
 import type {
-  CompoundVariantStyle,
   NodeVariantStyles,
   StateStyles,
 } from '../structures/variantStyles'
@@ -82,7 +81,8 @@ export function resolveTreeStyles(
   const result = new Map<string, Partial<CoralStyleType>>()
 
   function walk(n: CoralNode) {
-    const nodeId = (n as CoralNode & { id?: string }).id ?? n.name
+    // Use name as ID if id is not present
+    const nodeId = 'id' in n && typeof n.id === 'string' ? n.id : n.name
     result.set(nodeId, resolveNodeStyles(n, activeVariants))
 
     if (n.children) {
@@ -125,7 +125,7 @@ export function resolveStateStyles(
     let resolved: Partial<CoralStyleType> = {}
 
     for (const [axisName, axisValue] of Object.entries(activeVariants)) {
-      const variantOverrides = (stateStyles as NodeVariantStyles)[axisName]?.[axisValue]
+      const variantOverrides = stateStyles[axisName]?.[axisValue]
       if (variantOverrides) {
         resolved = { ...resolved, ...variantOverrides }
       }
@@ -134,8 +134,8 @@ export function resolveStateStyles(
     return Object.keys(resolved).length > 0 ? resolved : undefined
   }
 
-  // Simple state styles
-  return stateStyles as Partial<CoralStyleType>
+  // Simple state styles - already validated by isVariantAwareStateStyles
+  return stateStyles
 }
 
 /**
@@ -189,7 +189,9 @@ export function getAllNodeStyles(
     hover: resolveStateStyles(node, 'hover', activeVariants),
     focus: resolveStateStyles(node, 'focus', activeVariants),
     active: resolveStateStyles(node, 'active', activeVariants),
-    disabled: node.stateStyles?.disabled as Partial<CoralStyleType> | undefined,
+    disabled: node.stateStyles?.disabled
+      ? resolveStateStyles(node, 'disabled', activeVariants)
+      : undefined,
     focusVisible: resolveStateStyles(node, 'focusVisible', activeVariants),
   }
 }
@@ -252,6 +254,8 @@ export function variantsToClassName(
   prefix = '',
 ): string {
   return Object.entries(variants)
-    .map(([axis, value]) => (prefix ? `${prefix}-${axis}-${value}` : `${axis}-${value}`))
+    .map(([axis, value]) =>
+      prefix ? `${prefix}-${axis}-${value}` : `${axis}-${value}`,
+    )
     .join(' ')
 }

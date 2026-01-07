@@ -1,4 +1,9 @@
-import type { CoralColorType, CoralGradientType, CoralStyleType, Dimension } from '@reallygoodwork/coral-core'
+import type {
+  CoralColorType,
+  CoralGradientType,
+  CoralStyleType,
+  Dimension,
+} from '@reallygoodwork/coral-core'
 
 /**
  * Checks if a value is a dimension object
@@ -32,7 +37,13 @@ function isColor(value: unknown): value is CoralColorType {
  * Checks if a value is a Coral gradient object
  */
 function isGradient(value: unknown): value is CoralGradientType {
-  return typeof value === 'object' && value !== null && 'type' in value && 'colors' in value && 'angle' in value
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'type' in value &&
+    'colors' in value &&
+    'angle' in value
+  )
 }
 
 /**
@@ -113,10 +124,21 @@ export function stylesToInlineStyle(styles?: CoralStyleType): string {
 
   for (const [key, value] of Object.entries(styles)) {
     // Skip nested objects (media queries, pseudo-selectors) for now
-    if (typeof value === 'object' && value !== null && !isDimension(value) && !isColor(value) && !isGradient(value)) {
+    if (
+      typeof value === 'object' &&
+      value !== null &&
+      !isDimension(value) &&
+      !isColor(value) &&
+      !isGradient(value)
+    ) {
       // Check if it's a nested style object (not a dimension, color, or gradient)
       const hasNestedObjects = Object.values(value).some(
-        (v) => typeof v === 'object' && v !== null && !isDimension(v) && !isColor(v) && !isGradient(v),
+        (v) =>
+          typeof v === 'object' &&
+          v !== null &&
+          !isDimension(v) &&
+          !isColor(v) &&
+          !isGradient(v),
       )
       if (hasNestedObjects) {
         continue // Skip responsive styles for now

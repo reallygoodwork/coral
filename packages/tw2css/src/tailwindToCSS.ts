@@ -130,17 +130,16 @@ const createStyleObject = (styles: StylesWithModifiers, className: string) => {
           outlineColor: convertTailwindScaletoPixels(`${subProperty}-${rest}`),
         }
       } else {
-        const classes = {
-          ...(mappings[mappingKey] as string[])?.reduce(
-            (acc, name) => ({
-              ...acc,
-              [name]: convertTailwindScaletoPixels(
+        const classes =
+          (mappings[mappingKey] as string[])?.reduce(
+            (acc, name) => {
+              acc[name] = convertTailwindScaletoPixels(
                 rest.length > 0 ? rest : subProperty,
-              ),
-            }),
-            {},
-          ),
-        }
+              )
+              return acc
+            },
+            {} as Record<string, unknown>,
+          ) ?? {}
 
         return { ...styles, ...classes }
       }
@@ -157,11 +156,17 @@ const createStyleObject = (styles: StylesWithModifiers, className: string) => {
             property: string
             value: string | number
           }
+          const fontSizeStyles =
+            fontSizeValue?.reduce(
+              (acc, item) => {
+                acc[item.property] = item.value
+                return acc
+              },
+              {} as Record<string, string | number>,
+            ) ?? {}
           return {
             ...styles,
-            ...fontSizeValue
-              ?.map((item) => ({ [item.property]: item.value }))
-              .reduce((acc, item) => ({ ...acc, ...item }), {}),
+            ...fontSizeStyles,
             lineHeight: lineHeightValue?.value,
           }
         } else if (

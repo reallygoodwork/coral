@@ -1,6 +1,7 @@
 import { HTMLElement, parse } from 'node-html-parser'
 import type { CoralRootNode } from '../structures/coral'
 import type { CoralResponsiveStyles } from '../structures/responsiveBreakpoint'
+import type { CoralStyleType } from '../structures/styles'
 import { parseHTMLNodeToSpec } from './parseHTMLNodeToSpec'
 import {
   extractMediaQueriesFromCSS,
@@ -32,14 +33,14 @@ export const transformHTMLToSpec = (html: string): CoralRootNode => {
     const mediaQueries = extractMediaQueriesFromCSS(cssContent)
     const responsiveStylesBySelector = new Map<
       string,
-      Array<{ mediaQuery: string; styles: Record<string, string> }>
+      Array<{ mediaQuery: string; styles: CoralStyleType }>
     >()
 
     // Group media queries by selector
     for (const mq of mediaQueries) {
       // Extract selector from mediaQuery string if it has one
       const selectorMatch = mq.mediaQuery.match(/\[(.*?)\]/)
-      if (selectorMatch && selectorMatch[1]) {
+      if (selectorMatch?.[1]) {
         const selector = selectorMatch[1].trim()
         const cleanMediaQuery = mq.mediaQuery.replace(/\[.*?\]/, '').trim()
 
@@ -65,10 +66,10 @@ export const transformHTMLToSpec = (html: string): CoralRootNode => {
 
   // Find the first non-style element child (skip text nodes, comments, style tags, etc.)
   const firstElementChild = root.childNodes.find(
-    (child) =>
+    (child): child is HTMLElement =>
       child instanceof HTMLElement &&
       child.rawTagName.toLowerCase() !== 'style',
-  ) as HTMLElement
+  )
 
   if (!firstElementChild) {
     throw new Error('No valid HTML element found (excluding style tags)')

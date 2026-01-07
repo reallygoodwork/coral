@@ -26,7 +26,10 @@ export const zEventParameterSchema = z
     description: z.string().optional().describe('Parameter description'),
 
     /** Is this parameter optional? */
-    optional: z.boolean().default(false).describe('Whether parameter is optional'),
+    optional: z
+      .boolean()
+      .default(false)
+      .describe('Whether parameter is optional'),
   })
   .describe('Event parameter definition')
 
@@ -65,7 +68,9 @@ export const zComponentEventDefinitionSchema = z
   })
   .describe('Event definition')
 
-export type ComponentEventDefinition = z.infer<typeof zComponentEventDefinitionSchema>
+export type ComponentEventDefinition = z.infer<
+  typeof zComponentEventDefinitionSchema
+>
 
 /**
  * Events definition for a component
@@ -93,7 +98,9 @@ export const zComponentEventsDefinitionSchema = z
   .record(z.string(), zComponentEventDefinitionSchema)
   .describe('Component events definitions')
 
-export type ComponentEventsDefinition = z.infer<typeof zComponentEventsDefinitionSchema>
+export type ComponentEventsDefinition = z.infer<
+  typeof zComponentEventsDefinitionSchema
+>
 
 // ============================================================================
 // Utility Functions
@@ -136,10 +143,7 @@ export function isEventHandlerName(name: string): boolean {
 /**
  * Generate JSDoc comment for an event
  */
-export function generateEventJSDoc(
-  eventName: string,
-  event: ComponentEventDefinition,
-): string {
+export function generateEventJSDoc(event: ComponentEventDefinition): string {
   const lines: string[] = ['/**']
 
   if (event.description) {

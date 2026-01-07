@@ -76,8 +76,14 @@ import { zIndex } from './zIndex'
 
 interface Mapping {
   [key: string]:
-    | { property: string; value: string | number | { value: number; unit: string } }
-    | { property: string; value: string | number | { value: number; unit: string } }[]
+    | {
+        property: string
+        value: string | number | { value: number; unit: string }
+      }
+    | {
+        property: string
+        value: string | number | { value: number; unit: string }
+      }[]
     | string[]
 }
 

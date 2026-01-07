@@ -22,46 +22,49 @@ export type ConditionalExpression =
  * - Equality check: { "$eq": [{ "$prop": "size" }, "lg"] }
  * - Not equal: { "$ne": [{ "$prop": "size" }, "sm"] }
  */
-export const zConditionalExpressionSchema: z.ZodType<ConditionalExpression> = z.lazy(() =>
-  z.union([
-    // Simple prop reference: { "$prop": "showIcon" }
-    z
-      .object({ $prop: z.string() })
-      .describe('Reference to a boolean prop'),
+export const zConditionalExpressionSchema: z.ZodType<ConditionalExpression> =
+  z.lazy(() =>
+    z.union([
+      // Simple prop reference: { "$prop": "showIcon" }
+      z
+        .object({ $prop: z.string() })
+        .describe('Reference to a boolean prop'),
 
-    // Negation: { "$not": { "$prop": "loading" } }
-    z
-      .object({ $not: zConditionalExpressionSchema })
-      .describe('Logical NOT - negates the expression'),
+      // Negation: { "$not": { "$prop": "loading" } }
+      z
+        .object({ $not: zConditionalExpressionSchema })
+        .describe('Logical NOT - negates the expression'),
 
-    // All must be true: { "$and": [...] }
-    z
-      .object({ $and: z.array(zConditionalExpressionSchema) })
-      .describe('Logical AND - all expressions must be true'),
+      // All must be true: { "$and": [...] }
+      z
+        .object({ $and: z.array(zConditionalExpressionSchema) })
+        .describe('Logical AND - all expressions must be true'),
 
-    // Any must be true: { "$or": [...] }
-    z
-      .object({ $or: z.array(zConditionalExpressionSchema) })
-      .describe('Logical OR - any expression must be true'),
+      // Any must be true: { "$or": [...] }
+      z
+        .object({ $or: z.array(zConditionalExpressionSchema) })
+        .describe('Logical OR - any expression must be true'),
 
-    // Equality check: { "$eq": [{ "$prop": "size" }, "lg"] }
-    z
-      .object({ $eq: z.tuple([zConditionalExpressionSchema, z.unknown()]) })
-      .describe('Equality comparison'),
+      // Equality check: { "$eq": [{ "$prop": "size" }, "lg"] }
+      z
+        .object({ $eq: z.tuple([zConditionalExpressionSchema, z.unknown()]) })
+        .describe('Equality comparison'),
 
-    // Not equal: { "$ne": [{ "$prop": "size" }, "sm"] }
-    z
-      .object({ $ne: z.tuple([zConditionalExpressionSchema, z.unknown()]) })
-      .describe('Not equal comparison'),
-  ]),
-)
+      // Not equal: { "$ne": [{ "$prop": "size" }, "sm"] }
+      z
+        .object({ $ne: z.tuple([zConditionalExpressionSchema, z.unknown()]) })
+        .describe('Not equal comparison'),
+    ]),
+  )
 
 /**
  * Behavior when conditional evaluates to false
  */
 export const zConditionalBehaviorSchema = z
   .enum(['hide', 'dim', 'outline'])
-  .describe('Behavior when conditional is false: hide removes element, dim reduces opacity, outline shows placeholder')
+  .describe(
+    'Behavior when conditional is false: hide removes element, dim reduces opacity, outline shows placeholder',
+  )
 
 export type ConditionalBehavior = z.infer<typeof zConditionalBehaviorSchema>
 
@@ -70,8 +73,12 @@ export type ConditionalBehavior = z.infer<typeof zConditionalBehaviorSchema>
  */
 export const zConditionalStyleSchema = z.lazy(() =>
   z.object({
-    condition: zConditionalExpressionSchema.describe('The condition to evaluate'),
-    styles: z.record(z.string(), z.unknown()).describe('Styles to apply when condition is true'),
+    condition: zConditionalExpressionSchema.describe(
+      'The condition to evaluate',
+    ),
+    styles: z
+      .record(z.string(), z.unknown())
+      .describe('Styles to apply when condition is true'),
   }),
 )
 
@@ -128,13 +135,15 @@ export function evaluateCondition(
 
   if ('$eq' in expression) {
     const [left, right] = expression.$eq
-    const leftValue = '$prop' in left ? props[left.$prop] : evaluateCondition(left, props)
+    const leftValue =
+      '$prop' in left ? props[left.$prop] : evaluateCondition(left, props)
     return leftValue === right
   }
 
   if ('$ne' in expression) {
     const [left, right] = expression.$ne
-    const leftValue = '$prop' in left ? props[left.$prop] : evaluateCondition(left, props)
+    const leftValue =
+      '$prop' in left ? props[left.$prop] : evaluateCondition(left, props)
     return leftValue !== right
   }
 
@@ -144,7 +153,9 @@ export function evaluateCondition(
 /**
  * Type guard to check if a value is a conditional expression
  */
-export function isConditionalExpression(value: unknown): value is ConditionalExpression {
+export function isConditionalExpression(
+  value: unknown,
+): value is ConditionalExpression {
   if (typeof value !== 'object' || value === null) {
     return false
   }

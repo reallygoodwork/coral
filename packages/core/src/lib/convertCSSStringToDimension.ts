@@ -1,22 +1,5 @@
-import type { Dimension, DimensionUnit } from '../structures/dimension'
-
-const validUnits: DimensionUnit[] = [
-  'px',
-  'em',
-  'rem',
-  'vw',
-  'vh',
-  'vmin',
-  'vmax',
-  '%',
-  'ch',
-  'ex',
-  'cm',
-  'mm',
-  'in',
-  'pt',
-  'pc',
-]
+import type { Dimension } from '../structures/dimension'
+import { zDimensionUnitSchema } from '../structures/dimension'
 
 /**
  * Converts a CSS dimension string (e.g., "16px", "1.5rem", "100%") to a Dimension object
@@ -57,11 +40,13 @@ export function cssStringToDimension(
 
     const parsedValue = parseFloat(numValue)
 
-    if (!Number.isNaN(parsedValue) && validUnits.includes(unit as DimensionUnit)) {
+    // Validate unit using schema
+    const unitResult = zDimensionUnitSchema.safeParse(unit)
+    if (!Number.isNaN(parsedValue) && unitResult.success) {
       // Return dimension object
       return {
         value: parsedValue,
-        unit: unit as DimensionUnit,
+        unit: unitResult.data,
       }
     }
   }

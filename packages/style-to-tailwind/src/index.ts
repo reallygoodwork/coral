@@ -1,7 +1,15 @@
 import type { CoralStyleType } from '@reallygoodwork/coral-core'
-import { colorToTailwind, colorToArbitrary, hexToTailwindColor } from './colorConverter'
+import {
+  colorToArbitrary,
+  colorToTailwind,
+  hexToTailwindColor,
+} from './colorConverter'
 import { reverseMappings } from './generateReverseMappings'
-import { convertToTailwindScale, buildScaleClass, getPropertyPrefix } from './scaleConverter'
+import {
+  buildScaleClass,
+  convertToTailwindScale,
+  getPropertyPrefix,
+} from './scaleConverter'
 
 export type StyleObject = {
   [key: string]: string | number | ColorObject | StyleObject
@@ -49,7 +57,10 @@ function isNestedStyleObject(value: unknown): boolean {
 /**
  * Convert a CSS property-value pair to Tailwind class
  */
-function convertToTailwindClass(property: string, value: string | number | ColorObject): string | null {
+function convertToTailwindClass(
+  property: string,
+  value: string | number | ColorObject,
+): string | null {
   // Handle color objects
   if (isColorObject(value)) {
     const colorClass = colorToTailwind(property, value)
@@ -91,7 +102,7 @@ function convertToTailwindClass(property: string, value: string | number | Color
 
     // Parse numeric values with units (e.g., "16px", "1rem")
     const numMatch = value.match(/^(-?[\d.]+)([a-z%]+)?$/)
-    if (numMatch && numMatch[1]) {
+    if (numMatch?.[1]) {
       const num = parseFloat(numMatch[1])
       const unit = numMatch[2]
 
@@ -120,7 +131,10 @@ function convertToTailwindClass(property: string, value: string | number | Color
 /**
  * Convert property-value to Tailwind arbitrary value syntax
  */
-function propertyToArbitrary(property: string, value: string | number | ColorObject): string {
+function propertyToArbitrary(
+  property: string,
+  value: string | number | ColorObject,
+): string {
   const prefix = getPropertyPrefix(property)
   const valueStr = isColorObject(value)
     ? value.hex || '#000000'
@@ -153,7 +167,9 @@ function propertyToArbitrary(property: string, value: string | number | ColorObj
  * // Returns: ['p-4', 'bg-blue-500', 'text-sm']
  * ```
  */
-export function styleToTailwind(styles: CoralStyleType | StyleObject): string[] {
+export function styleToTailwind(
+  styles: CoralStyleType | StyleObject,
+): string[] {
   const classes: string[] = []
 
   for (const [property, value] of Object.entries(styles)) {
@@ -162,7 +178,10 @@ export function styleToTailwind(styles: CoralStyleType | StyleObject): string[] 
       continue
     }
 
-    const twClass = convertToTailwindClass(property, value as string | number | ColorObject)
+    const twClass = convertToTailwindClass(
+      property,
+      value as string | number | ColorObject,
+    )
     if (twClass) {
       classes.push(twClass)
     }
@@ -177,11 +196,13 @@ export function styleToTailwind(styles: CoralStyleType | StyleObject): string[] 
  * @param styles - Coral style object
  * @returns Space-separated Tailwind class string
  */
-export function styleToTailwindString(styles: CoralStyleType | StyleObject): string {
+export function styleToTailwindString(
+  styles: CoralStyleType | StyleObject,
+): string {
   return styleToTailwind(styles).join(' ')
 }
 
 // Re-export utilities
 export { colorToTailwind, hexToTailwindColor } from './colorConverter'
-export { convertToTailwindScale, buildScaleClass } from './scaleConverter'
 export { reverseMappings } from './generateReverseMappings'
+export { buildScaleClass, convertToTailwindScale } from './scaleConverter'

@@ -229,7 +229,8 @@ export function isComponentInstance(node: unknown): node is ComponentInstance {
     typeof node === 'object' &&
     node !== null &&
     'type' in node &&
-    (node as { type: unknown }).type === 'COMPONENT_INSTANCE'
+    node.type === 'COMPONENT_INSTANCE' &&
+    '$component' in node
   )
 }
 
@@ -250,7 +251,7 @@ export function isPropBinding(value: unknown): value is { $prop: string } {
  */
 export function extractComponentName(ref: string): string {
   const match = ref.match(/([^/]+)\.coral\.json$/)
-  if (match && match[1]) {
+  if (match?.[1]) {
     return toPascalCase(match[1])
   }
   return ref
@@ -298,19 +299,44 @@ export function findComponentInstances(
     results.push({ instance: node, path })
   }
 
+  // Type guard for nodes with children
+  function hasChildren(n: unknown): n is { children: unknown[] } {
+    return (
+      typeof n === 'object' &&
+      n !== null &&
+      'children' in n &&
+      Array.isArray(n.children)
+    )
+  }
+
+  // Type guard for nodes with slotFallback
+  function hasSlotFallback(n: unknown): n is { slotFallback: unknown[] } {
+    return (
+      typeof n === 'object' &&
+      n !== null &&
+      'slotFallback' in n &&
+      Array.isArray(n.slotFallback)
+    )
+  }
+
   // Check children
-  if ('children' in node && Array.isArray((node as { children: unknown }).children)) {
-    const children = (node as { children: unknown[] }).children
-    for (let i = 0; i < children.length; i++) {
-      results.push(...findComponentInstances(children[i], `${path}/children[${i}]`))
+  if (hasChildren(node)) {
+    for (let i = 0; i < node.children.length; i++) {
+      results.push(
+        ...findComponentInstances(node.children[i], `${path}/children[${i}]`),
+      )
     }
   }
 
   // Check slot fallback
-  if ('slotFallback' in node && Array.isArray((node as { slotFallback: unknown }).slotFallback)) {
-    const fallback = (node as { slotFallback: unknown[] }).slotFallback
-    for (let i = 0; i < fallback.length; i++) {
-      results.push(...findComponentInstances(fallback[i], `${path}/slotFallback[${i}]`))
+  if (hasSlotFallback(node)) {
+    for (let i = 0; i < node.slotFallback.length; i++) {
+      results.push(
+        ...findComponentInstances(
+          node.slotFallback[i],
+          `${path}/slotFallback[${i}]`,
+        ),
+      )
     }
   }
 
@@ -327,7 +353,9 @@ export function buildDependencyGraph(
 
   for (const [name, component] of components) {
     const instances = findComponentInstances(component.root)
-    const deps = new Set(instances.map((i) => extractComponentName(i.instance.$component.ref)))
+    const deps = new Set(
+      instances.map((i) => extractComponentName(i.instance.$component.ref)),
+    )
     graph.set(name, deps)
   }
 

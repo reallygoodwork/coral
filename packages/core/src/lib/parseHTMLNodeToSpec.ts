@@ -1,6 +1,8 @@
 import { tailwindToCSS } from '@reallygoodwork/coral-tw2css'
 import { HTMLElement, type TextNode } from 'node-html-parser'
 import type { CoralRootNode } from '../structures/coral'
+import { zCoralElementTypeSchema } from '../structures/elementType'
+import type { CoralStyleType } from '../structures/styles'
 import { cssStringToDimension } from './convertCSSStringToDimension'
 import { createAttributesObject } from './createAttributesObject'
 import { extractResponsiveStylesFromObject } from './parseMediaQuery'
@@ -125,13 +127,24 @@ export const parseHTMLNodeToSpec = (node: HTMLElement): CoralRootNode => {
   const convertedStyles = convertDimensionProperties(combinedStyles)
 
   // Extract responsive styles from media queries (if any exist in the style object)
-  const { baseStyles, responsiveStyles } =
-    extractResponsiveStylesFromObject(convertedStyles)
+  // Type assertion needed here because convertDimensionProperties returns Record<string, unknown>
+  // but extractResponsiveStylesFromObject expects Record<string, CoralStyleType>
+  // The function validates the structure internally
+  const { baseStyles, responsiveStyles } = extractResponsiveStylesFromObject(
+    convertedStyles as Record<string, CoralStyleType>,
+  )
+
+  // Validate and parse element type
+  const rawElementType = node.rawTagName.toLowerCase()
+  const elementTypeResult = zCoralElementTypeSchema.safeParse(rawElementType)
+  const elementType = elementTypeResult.success
+    ? elementTypeResult.data
+    : ('div' as const)
 
   // Create the spec object
   const spec: CoralRootNode = {
     name: pascalCaseString(node.rawTagName),
-    elementType: node.rawTagName.toLowerCase() as CoralRootNode['elementType'],
+    elementType,
     styles: baseStyles,
   }
 
@@ -153,16 +166,28 @@ export const parseHTMLNodeToSpec = (node: HTMLElement): CoralRootNode => {
     spec.children = []
   }
 
+  // Type guard for TextNode
+  function isTextNode(node: unknown): node is TextNode {
+    return (
+      typeof node === 'object' &&
+      node !== null &&
+      'nodeType' in node &&
+      node.nodeType === 3 &&
+      'text' in node &&
+      typeof (node as TextNode).text === 'string'
+    )
+  }
+
   // Get direct text nodes (not from child elements)
   const directTextNodes = node.childNodes.filter(
-    (childNode) =>
-      childNode.nodeType === 3 && !(childNode as TextNode).isWhitespace,
+    (childNode) => isTextNode(childNode) && !childNode.isWhitespace,
   )
 
   // Set text content only from direct text nodes
   if (directTextNodes.length > 0) {
     spec.textContent = directTextNodes
-      .map((childNode) => (childNode as TextNode).text.trim())
+      .map((childNode) => (isTextNode(childNode) ? childNode.text.trim() : ''))
+      .filter((text) => text.length > 0)
       .join(' ')
   }
 

@@ -4,7 +4,7 @@ const outlineWidthScale = [0, 1, 2, 4, 8]
 const outlineWidthMappings: Record<string, unknown> = {}
 
 // outline (default is 1px solid)
-outlineWidthMappings['outline'] = {
+outlineWidthMappings.outline = {
   property: 'outlineWidth',
   value: 1,
 }

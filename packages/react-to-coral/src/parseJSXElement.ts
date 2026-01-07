@@ -2,6 +2,7 @@ import generate from '@babel/generator'
 import * as t from '@babel/types'
 import type {
   CoralComponentPropertyType,
+  CoralComponentPropertyWithMetadata,
   CoralMethodType,
   CoralStateType,
   CoralTSTypes,
@@ -19,36 +20,36 @@ const getPropInfo = (
 ): {
   type: CoralTSTypes | string
   optional?: boolean
-  defaultValue?: any
+  defaultValue?: unknown
   description?: string
 } => {
   if (!result.componentProperties || result.componentProperties.length === 0) {
-    return { type: 'any' }
+    return { type: null }
   }
 
   // Get the first component properties object (there should typically be only one)
   const props = result.componentProperties[0]
   if (!props || typeof props !== 'object') {
-    return { type: 'any' }
+    return { type: null }
   }
 
   const propDef = props[propName]
   if (!propDef || typeof propDef !== 'object') {
-    return { type: 'any' }
+    return { type: null }
   }
 
   // Type assertion: propDef is a property definition object
   const prop = propDef as {
     type?: CoralTSTypes | string
     optional?: boolean
-    defaultValue?: any
+    defaultValue?: unknown
     description?: string
-    value?: any
+    value?: unknown
   }
 
   // Return the enhanced property information
   return {
-    type: prop.type || 'any',
+    type: prop.type ?? null,
     optional: prop.optional,
     defaultValue: prop.defaultValue,
     description: prop.description,
@@ -92,8 +93,8 @@ export const parseJSXElement = (
         const propInfo = getPropInfo(propName, result)
 
         // Store comprehensive property information in the Coral ComponentProperty format
-        const propertyData: any = {
-          type: propInfo.type,
+        const propertyData: CoralComponentPropertyWithMetadata = {
+          type: propInfo.type as CoralComponentPropertyWithMetadata['type'],
           value: value,
         }
 
@@ -112,10 +113,8 @@ export const parseJSXElement = (
       }
     } else if (t.isJSXSpreadAttribute(attr)) {
       // Handle spread attributes like {...props}
-      // biome-ignore lint/suspicious/noExplicitAny: Type mismatch between @babel/generator and @babel/types versions
-      const spreadKey = `...${generate(attr.argument as any).code}`
-      // biome-ignore lint/suspicious/noExplicitAny: Type mismatch between @babel/generator and @babel/types versions
-      const spreadValue = `{...${generate(attr.argument as any).code}}`
+      const spreadKey = `...${generate(attr.argument as unknown as t.Node).code}`
+      const spreadValue = `{...${generate(attr.argument as unknown as t.Node).code}}`
       componentProperties[spreadKey] = {
         type: 'object',
         value: spreadValue,
@@ -137,14 +136,15 @@ export const parseJSXElement = (
     } else if (t.isJSXExpressionContainer(child)) {
       // Handle JSX expressions in children
       if (!t.isJSXEmptyExpression(child.expression)) {
-        // biome-ignore lint/suspicious/noExplicitAny: Type mismatch between @babel/generator and @babel/types versions
-        const expressionCode = generate(child.expression as any).code
+        const expressionCode = generate(
+          child.expression as unknown as t.Node,
+        ).code
         children.push({
           elementType: 'jsx-expression',
           isComponent: false,
           componentProperties: {
             expression: {
-              type: 'any',
+              type: null,
               value: expressionCode,
             },
           },
@@ -188,14 +188,15 @@ const parseJSXFragment = (node: t.JSXFragment, result: Result): UIElement => {
     } else if (t.isJSXExpressionContainer(child)) {
       // Handle JSX expressions in fragment children
       if (!t.isJSXEmptyExpression(child.expression)) {
-        // biome-ignore lint/suspicious/noExplicitAny: Type mismatch between @babel/generator and @babel/types versions
-        const expressionCode = generate(child.expression as any).code
+        const expressionCode = generate(
+          child.expression as unknown as t.Node,
+        ).code
         children.push({
           elementType: 'jsx-expression',
           isComponent: false,
           componentProperties: {
             expression: {
-              type: 'any',
+              type: null,
               value: expressionCode,
             },
           },

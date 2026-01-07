@@ -4,8 +4,11 @@ import * as path from 'node:path'
 import { Command } from 'commander'
 
 import { loadPackage } from '../../lib/packageLoader'
-import { writeComponent, createComponentScaffold } from '../../lib/packageWriter'
-import { addComponentToIndex, zComponentIndexSchema } from '../../structures/componentIndex'
+import {
+  createComponentScaffold,
+  writeComponent,
+} from '../../lib/packageWriter'
+import { addComponentToIndex } from '../../structures/componentIndex'
 
 export const addCommand = new Command('add')
   .description('Add a new component to the package')
@@ -50,15 +53,20 @@ export const addCommand = new Command('add')
         })
 
         // Write component file
-        const componentPath = await writeComponent(packagePath, name, component, {
-          writeFile: async (filePath, content) => {
-            await fs.mkdir(path.dirname(filePath), { recursive: true })
-            await fs.writeFile(filePath, content, 'utf-8')
+        const componentPath = await writeComponent(
+          packagePath,
+          name,
+          component,
+          {
+            writeFile: async (filePath, content) => {
+              await fs.mkdir(path.dirname(filePath), { recursive: true })
+              await fs.writeFile(filePath, content, 'utf-8')
+            },
+            mkdir: async (dirPath) => {
+              await fs.mkdir(dirPath, { recursive: true })
+            },
           },
-          mkdir: async (dirPath) => {
-            await fs.mkdir(dirPath, { recursive: true })
-          },
-        })
+        )
 
         // Update component index
         if (pkg.componentIndex) {
@@ -71,7 +79,11 @@ export const addCommand = new Command('add')
           })
 
           const indexPath = path.resolve(packagePath, 'components/index.json')
-          await fs.writeFile(indexPath, JSON.stringify(updatedIndex, null, 2), 'utf-8')
+          await fs.writeFile(
+            indexPath,
+            JSON.stringify(updatedIndex, null, 2),
+            'utf-8',
+          )
         }
 
         console.log(`✓ Created component at ${componentPath}`)

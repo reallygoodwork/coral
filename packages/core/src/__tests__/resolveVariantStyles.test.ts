@@ -94,7 +94,10 @@ describe('resolveVariantStyles', () => {
         ],
       }
 
-      const styles = resolveNodeStyles(node, { intent: 'destructive', size: 'sm' })
+      const styles = resolveNodeStyles(node, {
+        intent: 'destructive',
+        size: 'sm',
+      })
       expect(styles.fontWeight).toBe('bold')
       expect(styles.backgroundColor).toBe('#dc3545')
       expect(styles.padding).toBe('4px 8px')

@@ -163,7 +163,9 @@ describe('Package Generation', () => {
     const result = await generatePackage(mockPackage)
 
     // Button should come before Card since Card depends on Button
-    const buttonIndex = result.components.findIndex((f) => f.path === 'Button.tsx')
+    const buttonIndex = result.components.findIndex(
+      (f) => f.path === 'Button.tsx',
+    )
     const cardIndex = result.components.findIndex((f) => f.path === 'Card.tsx')
 
     expect(buttonIndex).toBeLessThan(cardIndex)

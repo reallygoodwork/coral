@@ -1,9 +1,9 @@
+import type { PropReference, TokenReference } from '../structures/references'
 import {
   isAssetReference,
   isPropReference,
   isTokenReference,
 } from '../structures/references'
-import type { TokenReference, PropReference } from '../structures/references'
 import type { LoadedPackage } from './packageLoader'
 
 /**
@@ -56,7 +56,10 @@ export function createReferenceResolver(
   return {
     resolveToken(ref: TokenReference, context = tokenContext): unknown {
       // If different context requested, re-flatten
-      const tokens = context === tokenContext ? flatTokens : flattenTokens(pkg.tokens, context)
+      const tokens =
+        context === tokenContext
+          ? flatTokens
+          : flattenTokens(pkg.tokens, context)
 
       const value = tokens.get(ref.$token)
       if (value === undefined) {
@@ -88,13 +91,26 @@ function flattenTokens(
 ): Map<string, unknown> {
   const result = new Map<string, unknown>()
 
+  /**
+   * Type guard to check if value is a record
+   */
+  function isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null && !Array.isArray(value)
+  }
+
   for (const [, tokenData] of tokens) {
-    flattenObject(tokenData as Record<string, unknown>, '', result, context)
+    if (isRecord(tokenData)) {
+      flattenObject(tokenData, '', result, context)
+    }
   }
 
   // Second pass: resolve internal references
   for (const [path, value] of result) {
-    if (typeof value === 'string' && value.startsWith('{') && value.endsWith('}')) {
+    if (
+      typeof value === 'string' &&
+      value.startsWith('{') &&
+      value.endsWith('}')
+    ) {
       const refPath = value.slice(1, -1)
       const resolved = result.get(refPath)
       if (resolved !== undefined) {
@@ -120,22 +136,27 @@ function flattenObject(
 
     if (typeof value === 'object' && value !== null) {
       // Check if it's a token definition
-      if ('$value' in value) {
+      if ('$value' in value && typeof value === 'object') {
         const tokenValue = value as { $value: unknown }
         let resolved = tokenValue.$value
 
         // Handle contextual values
-        if (typeof resolved === 'object' && resolved !== null && '$contexts' in resolved) {
+        if (
+          typeof resolved === 'object' &&
+          resolved !== null &&
+          '$contexts' in resolved
+        ) {
           const contextual = resolved as {
             $contexts: Record<string, unknown>
             $default?: string
           }
           resolved =
-            contextual.$contexts[context] ?? contextual.$contexts[contextual.$default ?? 'light']
+            contextual.$contexts[context] ??
+            contextual.$contexts[contextual.$default ?? 'light']
         }
 
         result.set(path, resolved)
-      } else {
+      } else if (typeof value === 'object' && value !== null) {
         // Recurse into nested object
         flattenObject(value as Record<string, unknown>, path, result, context)
       }
@@ -187,7 +208,11 @@ export function resolveValue(
 
   // Recurse into objects
   if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-    return resolveStyleReferences(value as Record<string, unknown>, resolver, props)
+    return resolveStyleReferences(
+      value as Record<string, unknown>,
+      resolver,
+      props,
+    )
   }
 
   // Arrays

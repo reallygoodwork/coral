@@ -10,7 +10,9 @@ export interface ValidationResult {
   warnings: ValidationError[]
 }
 
-export const validateReactComponent = (componentCode: string): ValidationResult => {
+export const validateReactComponent = (
+  componentCode: string,
+): ValidationResult => {
   const errors: ValidationError[] = []
   const warnings: ValidationError[] = []
 
@@ -34,15 +36,21 @@ export const validateReactComponent = (componentCode: string): ValidationResult 
   }
 
   // Check for basic React component patterns
-  const hasReactImport = /import\s+.*React.*from\s+['"]react['"]/.test(componentCode)
-  const hasFunctionComponent = /(?:function\s+\w+|const\s+\w+\s*=.*=>|export\s+default\s+function)/.test(componentCode)
+  const hasReactImport = /import\s+.*React.*from\s+['"]react['"]/.test(
+    componentCode,
+  )
+  const hasFunctionComponent =
+    /(?:function\s+\w+|const\s+\w+\s*=.*=>|export\s+default\s+function)/.test(
+      componentCode,
+    )
   const hasJSX = /<[A-Za-z]/.test(componentCode)
 
   if (!hasReactImport) {
     warnings.push({
       type: 'structure',
       message: 'No React import found',
-      suggestion: 'Add \'import React from "react"\' or similar import statement',
+      suggestion:
+        'Add \'import React from "react"\' or similar import statement',
     })
   }
 
@@ -50,7 +58,8 @@ export const validateReactComponent = (componentCode: string): ValidationResult 
     errors.push({
       type: 'structure',
       message: 'No valid React component found',
-      suggestion: 'Component should be a function declaration, arrow function, or exported function',
+      suggestion:
+        'Component should be a function declaration, arrow function, or exported function',
     })
   }
 
@@ -63,7 +72,9 @@ export const validateReactComponent = (componentCode: string): ValidationResult 
   }
 
   // Check for common syntax issues
-  const unclosedBraces = (componentCode.match(/{/g) || []).length - (componentCode.match(/}/g) || []).length
+  const unclosedBraces =
+    (componentCode.match(/{/g) || []).length -
+    (componentCode.match(/}/g) || []).length
   if (unclosedBraces !== 0) {
     errors.push({
       type: 'syntax',
@@ -72,22 +83,28 @@ export const validateReactComponent = (componentCode: string): ValidationResult 
     })
   }
 
-  const unclosedParens = (componentCode.match(/\(/g) || []).length - (componentCode.match(/\)/g) || []).length
+  const unclosedParens =
+    (componentCode.match(/\(/g) || []).length -
+    (componentCode.match(/\)/g) || []).length
   if (unclosedParens !== 0) {
     errors.push({
       type: 'syntax',
       message: `Mismatched parentheses: ${Math.abs(unclosedParens)} ${unclosedParens > 0 ? 'opening' : 'closing'} parentheses`,
-      suggestion: 'Ensure all opening parentheses have corresponding closing parentheses',
+      suggestion:
+        'Ensure all opening parentheses have corresponding closing parentheses',
     })
   }
 
   // Check for unsupported features
-  const hasClassComponent = /class\s+\w+\s+extends\s+(React\.)?Component/.test(componentCode)
+  const hasClassComponent = /class\s+\w+\s+extends\s+(React\.)?Component/.test(
+    componentCode,
+  )
   if (hasClassComponent) {
     warnings.push({
       type: 'compatibility',
       message: 'Class components detected',
-      suggestion: 'Consider converting to functional components for better parsing support',
+      suggestion:
+        'Consider converting to functional components for better parsing support',
     })
   }
 
@@ -163,7 +180,9 @@ export const formatValidationResults = (result: ValidationResult): string => {
   if (result.errors.length > 0) {
     lines.push('\nErrors:')
     result.errors.forEach((error, index) => {
-      lines.push(`  ${index + 1}. [${error.type.toUpperCase()}] ${error.message}`)
+      lines.push(
+        `  ${index + 1}. [${error.type.toUpperCase()}] ${error.message}`,
+      )
       if (error.suggestion) {
         lines.push(`     💡 ${error.suggestion}`)
       }
@@ -173,7 +192,9 @@ export const formatValidationResults = (result: ValidationResult): string => {
   if (result.warnings.length > 0) {
     lines.push('\nWarnings:')
     result.warnings.forEach((warning, index) => {
-      lines.push(`  ${index + 1}. [${warning.type.toUpperCase()}] ${warning.message}`)
+      lines.push(
+        `  ${index + 1}. [${warning.type.toUpperCase()}] ${warning.message}`,
+      )
       if (warning.suggestion) {
         lines.push(`     💡 ${warning.suggestion}`)
       }

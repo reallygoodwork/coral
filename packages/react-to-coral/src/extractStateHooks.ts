@@ -70,8 +70,8 @@ const extractUseState = (
         initialValue = undefined
         type = 'undefined'
       } else {
-        // biome-ignore lint/suspicious/noExplicitAny: Type mismatch between @babel/generator and @babel/types versions
-        initialValue = generate(arg as any).code
+        // Type assertion needed due to Babel type system limitations
+        initialValue = generate(arg as unknown as t.Node).code
         type = null
       }
     }
@@ -110,13 +110,13 @@ const extractUseEffect = (
         name: 'useEffect',
         setterName: '',
         initialValue: effectCallback
-          // biome-ignore lint/suspicious/noExplicitAny: Type mismatch between @babel/generator and @babel/types versions
-          ? generate(effectCallback as any).code
+          ? generate(effectCallback as unknown as t.Node).code
           : undefined,
         tsType: 'function',
         hookType: 'useEffect',
-        // biome-ignore lint/suspicious/noExplicitAny: Type mismatch between @babel/generator and @babel/types versions
-        dependencies: dependencies ? generate(dependencies as any).code : undefined,
+        dependencies: dependencies
+          ? generate(dependencies as unknown as t.Node).code
+          : undefined,
       })
     }
   }
@@ -150,12 +150,14 @@ const extractUseReducer = (
       result.stateHooks.push({
         name: stateName,
         setterName: dispatchName,
-        // biome-ignore lint/suspicious/noExplicitAny: Type mismatch between @babel/generator and @babel/types versions
-        initialValue: initialState ? generate(initialState as any).code : undefined,
+        initialValue: initialState
+          ? generate(initialState as unknown as t.Node).code
+          : undefined,
         tsType: null,
         hookType: 'useReducer',
-        // biome-ignore lint/suspicious/noExplicitAny: Type mismatch between @babel/generator and @babel/types versions
-        reducer: reducer ? generate(reducer as any).code : undefined,
+        reducer: reducer
+          ? generate(reducer as unknown as t.Node).code
+          : undefined,
       })
     }
   }
@@ -178,8 +180,9 @@ const extractUseContext = (
     result.stateHooks.push({
       name: contextName,
       setterName: '',
-      // biome-ignore lint/suspicious/noExplicitAny: Type mismatch between @babel/generator and @babel/types versions
-      initialValue: contextArg ? generate(contextArg as any).code : undefined,
+      initialValue: contextArg
+        ? generate(contextArg as unknown as t.Node).code
+        : undefined,
       tsType: null,
       hookType: 'useContext',
     })
@@ -205,12 +208,14 @@ const extractUseMemo = (
     result.stateHooks.push({
       name: memoName,
       setterName: '',
-      // biome-ignore lint/suspicious/noExplicitAny: Type mismatch between @babel/generator and @babel/types versions
-      initialValue: memoCallback ? generate(memoCallback as any).code : undefined,
+      initialValue: memoCallback
+        ? generate(memoCallback as unknown as t.Node).code
+        : undefined,
       tsType: null,
       hookType: 'useMemo',
-      // biome-ignore lint/suspicious/noExplicitAny: Type mismatch between @babel/generator and @babel/types versions
-      dependencies: dependencies ? generate(dependencies as any).code : undefined,
+      dependencies: dependencies
+        ? generate(dependencies as unknown as t.Node).code
+        : undefined,
     })
   }
 }
@@ -234,12 +239,14 @@ const extractUseCallback = (
     result.stateHooks.push({
       name: callbackName,
       setterName: '',
-      // biome-ignore lint/suspicious/noExplicitAny: Type mismatch between @babel/generator and @babel/types versions
-      initialValue: callback ? generate(callback as any).code : undefined,
+      initialValue: callback
+        ? generate(callback as unknown as t.Node).code
+        : undefined,
       tsType: 'function',
       hookType: 'useCallback',
-      // biome-ignore lint/suspicious/noExplicitAny: Type mismatch between @babel/generator and @babel/types versions
-      dependencies: dependencies ? generate(dependencies as any).code : undefined,
+      dependencies: dependencies
+        ? generate(dependencies as unknown as t.Node).code
+        : undefined,
     })
   }
 }

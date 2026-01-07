@@ -6,11 +6,13 @@ import type { CoralTSTypes } from '@reallygoodwork/coral-core'
 /**
  * Enhanced type extraction that captures detailed TypeScript type information
  */
-export const getTypeFromAnnotation = (annotation: t.TypeAnnotation | t.TSTypeAnnotation): CoralTSTypes | string => {
+export const getTypeFromAnnotation = (
+  annotation: t.TypeAnnotation | t.TSTypeAnnotation,
+): CoralTSTypes | string => {
   if (t.isTSTypeAnnotation(annotation)) {
     return extractTSType(annotation.typeAnnotation)
   }
-  return 'any' as CoralTSTypes
+  return null
 }
 
 /**
@@ -28,6 +30,8 @@ const extractTSType = (typeAnnotation: t.TSType): CoralTSTypes | string => {
     return 'undefined'
   } else if (t.isTSNullKeyword(typeAnnotation)) {
     return 'null'
+  } else if (t.isTSAnyKeyword(typeAnnotation)) {
+    return 'any'
   }
 
   // Array types
@@ -88,15 +92,14 @@ const extractTSType = (typeAnnotation: t.TSType): CoralTSTypes | string => {
   }
 
   // Optional types (T | undefined)
-  else if (t.isTSOptionalType && t.isTSOptionalType(typeAnnotation)) {
+  else if (t.isTSOptionalType(typeAnnotation)) {
     return `${extractTSType(typeAnnotation.typeAnnotation)} | undefined`
   }
 
   // Fallback: try to generate the code representation
   try {
-    // biome-ignore lint/suspicious/noExplicitAny: Type mismatch between @babel/generator and @babel/types versions
-    return generate(typeAnnotation as any).code
+    return generate(typeAnnotation as unknown as t.Node).code
   } catch {
-    return 'any'
+    return null
   }
 }

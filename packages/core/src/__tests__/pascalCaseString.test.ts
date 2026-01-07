@@ -17,8 +17,12 @@ describe('pascalCaseString', () => {
   })
 
   it('should handle mixed separators', () => {
-    expect(pascalCaseString('hello-world_test space')).toBe('HelloWorldTestSpace')
-    expect(pascalCaseString('user-profile_data name')).toBe('UserProfileDataName')
+    expect(pascalCaseString('hello-world_test space')).toBe(
+      'HelloWorldTestSpace',
+    )
+    expect(pascalCaseString('user-profile_data name')).toBe(
+      'UserProfileDataName',
+    )
   })
 
   it('should handle single words', () => {

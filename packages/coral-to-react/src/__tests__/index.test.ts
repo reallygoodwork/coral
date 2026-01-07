@@ -62,7 +62,9 @@ describe('coralToReact', () => {
     }
 
     const result = await coralToReact(coralSpec)
-    expect(result.reactCode).toMatch(/<img[^>]*src="test\.jpg"[^>]*alt="Test"[^>]*\/>/)
+    expect(result.reactCode).toMatch(
+      /<img[^>]*src="test\.jpg"[^>]*alt="Test"[^>]*\/>/,
+    )
     expect(result.reactCode).toMatch(/<br[^>]*\/>/)
   })
 
@@ -88,7 +90,9 @@ describe('coralToReact', () => {
     expect(result.reactCode).toContain('interface ButtonProps')
     expect(result.reactCode).toContain('label: string')
     expect(result.reactCode).toContain('onClick?: function')
-    expect(result.reactCode).toContain('export function Button(props: ButtonProps)')
+    expect(result.reactCode).toContain(
+      'export function Button(props: ButtonProps)',
+    )
   })
 
   it('should generate state hooks', async () => {
@@ -108,7 +112,9 @@ describe('coralToReact', () => {
     }
 
     const result = await coralToReact(coralSpec)
-    expect(result.reactCode).toContain('const [count, setCount] = useState<number>(0)')
+    expect(result.reactCode).toContain(
+      'const [count, setCount] = useState<number>(0)',
+    )
   })
 
   it('should generate methods', async () => {
@@ -149,7 +155,9 @@ describe('coralToReact', () => {
 
     const result = await coralToReact(coralSpec)
     // Styles might be converted to CSS classes, so we check for either style or className
-    const hasStyle = result.reactCode.includes('style={{') || result.reactCode.includes('className')
+    const hasStyle =
+      result.reactCode.includes('style={{') ||
+      result.reactCode.includes('className')
     expect(hasStyle).toBe(true)
     if (result.reactCode.includes('style={{')) {
       expect(result.reactCode).toContain('fontSize: 16')

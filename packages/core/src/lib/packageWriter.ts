@@ -1,5 +1,6 @@
 import type { ComponentIndex } from '../structures/componentIndex'
 import type { CoralRootNode } from '../structures/coral'
+import { zCoralElementTypeSchema } from '../structures/elementType'
 import type { CoralConfig } from '../structures/package'
 import type { TokenIndex } from '../structures/tokenIndex'
 
@@ -199,9 +200,17 @@ export function createComponentScaffold(
     description?: string
   },
 ): CoralRootNode {
+  // Validate element type
+  const elementTypeResult = zCoralElementTypeSchema.safeParse(
+    options?.elementType ?? 'div',
+  )
+  const elementType = elementTypeResult.success
+    ? elementTypeResult.data
+    : ('div' as const)
+
   return {
     name,
-    elementType: (options?.elementType ?? 'div') as 'div',
+    elementType,
     type: 'NODE',
     $meta: {
       name,

@@ -87,8 +87,12 @@ export function generateStateHooks(stateHooks?: CoralStateType[]): string {
   }
 
   // Separate useState hooks from other hooks
-  const useStateHooks = stateHooks.filter((s) => !s.hookType || s.hookType === 'useState')
-  const otherHooks = stateHooks.filter((s) => s.hookType && s.hookType !== 'useState')
+  const useStateHooks = stateHooks.filter(
+    (s) => !s.hookType || s.hookType === 'useState',
+  )
+  const otherHooks = stateHooks.filter(
+    (s) => s.hookType && s.hookType !== 'useState',
+  )
 
   const lines: string[] = []
 

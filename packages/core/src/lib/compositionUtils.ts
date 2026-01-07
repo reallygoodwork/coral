@@ -1,12 +1,11 @@
-import type { CoralNode, CoralRootNode } from '../structures/coral'
+import type { ComponentInstance } from '../structures/composition'
 import {
   extractComponentName,
   findComponentInstances,
-  toPascalCase,
 } from '../structures/composition'
-import type { ComponentInstance } from '../structures/composition'
-import { isSlotForward, isSlotPropReference } from '../structures/slots'
+import type { CoralNode, CoralRootNode } from '../structures/coral'
 import type { SlotBinding } from '../structures/slots'
+import { isSlotForward, isSlotPropReference } from '../structures/slots'
 import type { LoadedPackage } from './packageLoader'
 import { resolvePropBinding } from './resolveProps'
 
@@ -88,7 +87,11 @@ export function resolveComponentInstance(
 
   if (instance.slotBindings) {
     for (const [slotName, binding] of Object.entries(instance.slotBindings)) {
-      resolvedSlots[slotName] = resolveSlotBinding(binding, parentProps, parentSlots)
+      resolvedSlots[slotName] = resolveSlotBinding(
+        binding,
+        parentProps,
+        parentSlots,
+      )
     }
   }
 
@@ -135,14 +138,24 @@ function resolveSlotBinding(
     return parentSlots[binding.$slot] ?? []
   }
 
+  // Type guard for CoralNode
+  function isCoralNode(value: unknown): value is CoralNode {
+    return (
+      typeof value === 'object' &&
+      value !== null &&
+      'name' in value &&
+      'elementType' in value
+    )
+  }
+
   // Array of nodes
   if (Array.isArray(binding)) {
-    return binding as CoralNode[]
+    return binding.filter(isCoralNode)
   }
 
   // Single node
-  if (typeof binding === 'object' && binding !== null && 'name' in binding) {
-    return [binding as CoralNode]
+  if (isCoralNode(binding)) {
+    return [binding]
   }
 
   return []
@@ -163,13 +176,34 @@ export function flattenComponentTree(
   slots: Record<string, CoralNode[]>,
   pkg: LoadedPackage,
 ): CoralNode {
-  if (node.type === 'COMPONENT_INSTANCE' && node.$component) {
-    const instance = node as unknown as ComponentInstance
+  if (
+    node.type === 'COMPONENT_INSTANCE' &&
+    '$component' in node &&
+    typeof node.$component === 'object' &&
+    node.$component !== null &&
+    'ref' in node.$component &&
+    typeof (node.$component as { ref: unknown }).ref === 'string'
+  ) {
+    // Create a ComponentInstance from the node
+    // ComponentInstance requires 'id' but CoralNode doesn't have it, so we use name as id
+    const instance: ComponentInstance = {
+      id: node.name,
+      name: node.name,
+      type: 'COMPONENT_INSTANCE',
+      $component: node.$component as ComponentInstance['$component'],
+      propBindings: 'propBindings' in node ? node.propBindings : undefined,
+      eventBindings: 'eventBindings' in node ? node.eventBindings : undefined,
+      slotBindings: 'slotBindings' in node ? node.slotBindings : undefined,
+      variantOverrides:
+        'variantOverrides' in node ? node.variantOverrides : undefined,
+      styleOverrides:
+        'styleOverrides' in node ? node.styleOverrides : undefined,
+    }
     const resolved = resolveComponentInstance(instance, props, slots, pkg)
 
     // Recursively flatten the resolved component's root
     return flattenComponentTree(
-      resolved.component as CoralNode,
+      resolved.component,
       resolved.resolvedProps,
       resolved.resolvedSlots,
       pkg,
@@ -237,9 +271,10 @@ export function getComponentDependencies(component: CoralRootNode): string[] {
  * @param pkg - Loaded package to validate
  * @returns Validation result
  */
-export function validateComposition(
-  pkg: LoadedPackage,
-): { valid: boolean; errors: string[] } {
+export function validateComposition(pkg: LoadedPackage): {
+  valid: boolean
+  errors: string[]
+} {
   const errors: string[] = []
 
   // Build dependency graph

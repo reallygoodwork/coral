@@ -55,8 +55,14 @@ describe('parseJSXElement', () => {
     const parsed = parseJSXElement(jsxElement, result)
 
     expect(parsed.elementType).toBe('div')
-    expect(parsed.componentProperties?.className).toEqual({ type: 'any', value: 'container' })
-    expect(parsed.componentProperties?.id).toEqual({ type: 'any', value: 'main' })
+    expect(parsed.componentProperties?.className).toEqual({
+      type: null,
+      value: 'container',
+    })
+    expect(parsed.componentProperties?.id).toEqual({
+      type: null,
+      value: 'main',
+    })
     expect(parsed.textContent).toBe('Content')
   })
 
@@ -69,7 +75,10 @@ describe('parseJSXElement', () => {
 
     expect(parsed.elementType).toBe('MyComponent')
     expect(parsed.isComponent).toBe(true)
-    expect(parsed.componentProperties?.prop).toEqual({ type: 'any', value: 'value' })
+    expect(parsed.componentProperties?.prop).toEqual({
+      type: null,
+      value: 'value',
+    })
   })
 
   it('should parse nested elements', () => {
@@ -101,8 +110,14 @@ describe('parseJSXElement', () => {
 
     expect(parsed.elementType).toBe('img')
     expect(parsed.isComponent).toBe(false)
-    expect(parsed.componentProperties?.src).toEqual({ type: 'any', value: 'test.jpg' })
-    expect(parsed.componentProperties?.alt).toEqual({ type: 'any', value: 'Test' })
+    expect(parsed.componentProperties?.src).toEqual({
+      type: null,
+      value: 'test.jpg',
+    })
+    expect(parsed.componentProperties?.alt).toEqual({
+      type: null,
+      value: 'Test',
+    })
     expect(parsed.textContent).toBeUndefined()
     expect(parsed.children).toHaveLength(0)
   })

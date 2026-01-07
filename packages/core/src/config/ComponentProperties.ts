@@ -25,18 +25,18 @@ export const zComponentProperties = z.object({
       z.string(),
       z.number(),
       z.boolean(),
-      z.array(z.any()),
-      z.record(z.string(), z.any()),
+      z.array(z.unknown()),
+      z.record(z.string(), z.unknown()),
       functionSchema(
         z.function({
           input: z.tuple([]),
-          output: z.any(),
+          output: z.unknown(),
         }),
       ),
       createAsyncFunctionSchema(
         z.function({
           input: z.tuple([]),
-          output: z.any(),
+          output: z.unknown(),
         }),
       ),
       z.undefined(),

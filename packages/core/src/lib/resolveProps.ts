@@ -1,3 +1,4 @@
+import type { EventBinding } from '../structures/bindings'
 import {
   applyTransform,
   extractValue,
@@ -7,13 +8,6 @@ import {
   isPropReference,
   isPropTransform,
   resolveComputed,
-} from '../structures/bindings'
-import type {
-  ComputedValue,
-  EventBinding,
-  EventReference,
-  InlineHandler,
-  PropTransform,
 } from '../structures/bindings'
 
 /**
@@ -148,15 +142,27 @@ export function resolveEventBinding(
     switch (binding.$handler) {
       case 'preventDefault':
         return (event: unknown) => {
-          if (event && typeof event === 'object' && 'preventDefault' in event) {
-            ;(event as Event).preventDefault()
+          if (
+            event &&
+            typeof event === 'object' &&
+            'preventDefault' in event &&
+            typeof (event as { preventDefault: unknown }).preventDefault ===
+              'function'
+          ) {
+            ;(event as { preventDefault: () => void }).preventDefault()
           }
         }
 
       case 'stopPropagation':
         return (event: unknown) => {
-          if (event && typeof event === 'object' && 'stopPropagation' in event) {
-            ;(event as Event).stopPropagation()
+          if (
+            event &&
+            typeof event === 'object' &&
+            'stopPropagation' in event &&
+            typeof (event as { stopPropagation: unknown }).stopPropagation ===
+              'function'
+          ) {
+            ;(event as { stopPropagation: () => void }).stopPropagation()
           }
         }
 
@@ -222,7 +228,12 @@ export function resolveAllEventBindings(
   const resolved: Record<string, (...args: unknown[]) => void> = {}
 
   for (const [name, binding] of Object.entries(bindings)) {
-    const handler = resolveEventBinding(binding, parentEvents, parentProps, setParentProp)
+    const handler = resolveEventBinding(
+      binding,
+      parentEvents,
+      parentProps,
+      setParentProp,
+    )
     if (handler) {
       resolved[name] = handler
     }
@@ -246,7 +257,9 @@ function isReference(value: unknown): boolean {
 /**
  * Collect all prop names referenced in bindings
  */
-export function collectReferencedProps(bindings: Record<string, unknown>): string[] {
+export function collectReferencedProps(
+  bindings: Record<string, unknown>,
+): string[] {
   const props = new Set<string>()
 
   function collect(value: unknown) {
@@ -258,7 +271,11 @@ export function collectReferencedProps(bindings: Record<string, unknown>): strin
       for (const input of value.$inputs) {
         collect(input)
       }
-    } else if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+    } else if (
+      typeof value === 'object' &&
+      value !== null &&
+      !Array.isArray(value)
+    ) {
       for (const v of Object.values(value)) {
         collect(v)
       }

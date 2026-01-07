@@ -1,1 +1,1 @@
-export { transformReactComponentToSpec } from "./transformReactComponentToCoralSpec";
+export { transformReactComponentToSpec } from './transformReactComponentToCoralSpec'

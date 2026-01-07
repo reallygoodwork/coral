@@ -1,3 +1,5 @@
-export const createAttributesObject = (attributes: Record<string, string | number | boolean>) => {
+export const createAttributesObject = (
+  attributes: Record<string, string | number | boolean>,
+) => {
   return attributes
 }

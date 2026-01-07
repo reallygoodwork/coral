@@ -9,7 +9,12 @@ export const margin = {
       value: 'auto',
     },
   ],
-  'm-': ['marginInlineStart', 'marginInlineEnd', 'marginBlockStart', 'marginBlockEnd'],
+  'm-': [
+    'marginInlineStart',
+    'marginInlineEnd',
+    'marginBlockStart',
+    'marginBlockEnd',
+  ],
   'my-': ['marginBlockStart', 'marginBlockEnd'],
   'mx-': ['marginInlineStart', 'marginInlineEnd'],
   'ml-': ['marginInlineStart'],

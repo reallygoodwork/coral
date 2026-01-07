@@ -44,8 +44,16 @@ describe('extractProps', () => {
     expect(result).toBeDefined()
     expect(result).toHaveProperty('title')
     expect(result).toHaveProperty('count')
-    expect(result?.title).toEqual({ value: 'title', type: 'any', optional: false })
-    expect(result?.count).toEqual({ value: 'count', type: 'any', optional: false })
+    expect(result?.title).toEqual({
+      value: 'title',
+      type: null,
+      optional: false,
+    })
+    expect(result?.count).toEqual({
+      value: 'count',
+      type: null,
+      optional: false,
+    })
   })
 
   it('should extract props with TypeScript types', () => {
@@ -69,7 +77,7 @@ describe('extractProps', () => {
     expect(result).toBeDefined()
     expect(result).toHaveProperty('title')
     expect('...rest' in (result || {})).toBe(true)
-    expect(result?.['...rest']).toEqual({ value: '...rest', type: 'any' })
+    expect(result?.['...rest']).toEqual({ value: '...rest', type: null })
   })
 
   it('should handle identifier parameters', () => {
@@ -80,7 +88,11 @@ describe('extractProps', () => {
 
     expect(result).toBeDefined()
     expect(result).toHaveProperty('props')
-    expect(result?.props).toEqual({ value: 'props', type: 'any', optional: false })
+    expect(result?.props).toEqual({
+      value: 'props',
+      type: null,
+      optional: false,
+    })
   })
 
   it('should handle typed identifier parameters', () => {

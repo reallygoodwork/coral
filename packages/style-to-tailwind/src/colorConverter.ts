@@ -171,9 +171,7 @@ function colorDistance(
   c1: { r: number; g: number; b: number },
   c2: { r: number; g: number; b: number },
 ): number {
-  return Math.sqrt(
-    Math.pow(c1.r - c2.r, 2) + Math.pow(c1.g - c2.g, 2) + Math.pow(c1.b - c2.b, 2),
-  )
+  return Math.sqrt((c1.r - c2.r) ** 2 + (c1.g - c2.g) ** 2 + (c1.b - c2.b) ** 2)
 }
 
 /**
@@ -183,7 +181,10 @@ function colorDistance(
  * @param color - Coral color object
  * @returns Tailwind color class or null
  */
-export function colorToTailwind(property: string, color: ColorObject): string | null {
+export function colorToTailwind(
+  property: string,
+  color: ColorObject,
+): string | null {
   // Use hex value for matching
   if (!color.hex) return null
 
@@ -210,7 +211,10 @@ export function colorToTailwind(property: string, color: ColorObject): string | 
 /**
  * Convert arbitrary color to Tailwind arbitrary value
  */
-export function colorToArbitrary(property: string, color: ColorObject | string): string {
+export function colorToArbitrary(
+  property: string,
+  color: ColorObject | string,
+): string {
   const hexValue = typeof color === 'string' ? color : color.hex || '#000000'
 
   const prefixMap: Record<string, string> = {

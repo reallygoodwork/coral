@@ -270,6 +270,8 @@ const typeCode = generatePropsInterface(buttonComponent)
 
 ## Type Guards
 
+Coral Core provides comprehensive type guards for safe type narrowing without type assertions:
+
 ```typescript
 import {
   isTokenReference,
@@ -281,16 +283,26 @@ import {
 
 // Check if a value is a token reference
 if (isTokenReference(value)) {
-  // value.$token is available
+  // value.$token is available - TypeScript knows this is TokenReference
 }
 
 // Check if a node is a component instance
 if (isComponentInstance(node)) {
-  // node.$component is available
+  // node.$component is available - TypeScript knows this is ComponentInstance
 }
 ```
 
-## New Types
+**Type Safety**: All type guards use proper type narrowing - no `as` assertions needed. The codebase is fully type-safe with zero `any` types.
+
+## Type System
+
+### Type Safety
+
+Coral Core is fully type-safe with:
+- **Zero `any` types** - All types are properly defined or use `unknown` with type guards
+- **No type assertions** - Type guards provide safe type narrowing
+- **Recursive types** - `CoralStyleType` is an interface supporting nested styles
+- **Nullable types** - `CoralTSTypes` is `z.nullable` - returns `null` when type cannot be determined
 
 ### References
 
@@ -301,6 +313,33 @@ type ComponentReference = {
   $component: { ref: string; version?: string }
   propBindings?: Record<string, unknown>
   slotBindings?: Record<string, unknown>
+}
+```
+
+### TypeScript Types
+
+```typescript
+// CoralTSTypes is nullable - can be null when type cannot be determined
+type CoralTSTypes =
+  | 'string'
+  | 'number'
+  | 'boolean'
+  | 'array'
+  | 'object'
+  | 'null'
+  | 'undefined'
+  | 'function'
+  | null
+
+// CoralStyleType is an interface supporting recursive nested styles
+interface CoralStyleType {
+  [key: string]:
+    | string
+    | number
+    | CoralColorType
+    | CoralGradientType
+    | Dimension
+    | CoralStyleType  // Recursive for nested styles
 }
 ```
 

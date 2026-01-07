@@ -2,7 +2,6 @@ import type {
   CoralComponentPropertyType,
   CoralRootNode,
   CoralTSTypes,
-  ComponentPropsDefinition,
 } from '@reallygoodwork/coral-core'
 import { generatePropsInterface as generateCorePropsInterface } from '@reallygoodwork/coral-core'
 
@@ -49,7 +48,9 @@ export function generatePropsInterface(
     componentName = componentName || spec.componentName || spec.name
   } else {
     // Otherwise, it's already componentProperties
-    componentProperties = componentPropertiesOrSpec as CoralComponentPropertyType | undefined
+    componentProperties = componentPropertiesOrSpec as
+      | CoralComponentPropertyType
+      | undefined
   }
 
   if (!componentProperties || Object.keys(componentProperties).length === 0) {
@@ -60,7 +61,11 @@ export function generatePropsInterface(
   const properties: string[] = []
 
   for (const [propName, propValue] of Object.entries(componentProperties)) {
-    if (typeof propValue === 'object' && propValue !== null && 'type' in propValue) {
+    if (
+      typeof propValue === 'object' &&
+      propValue !== null &&
+      'type' in propValue
+    ) {
       const prop = propValue as {
         type?: CoralTSTypes | CoralTSTypes[]
         defaultValue?: unknown
@@ -76,7 +81,9 @@ export function generatePropsInterface(
     } else {
       // Simple value, infer type
       const typeStr =
-        typeof propValue === 'object' && propValue !== null && 'value' in propValue
+        typeof propValue === 'object' &&
+        propValue !== null &&
+        'value' in propValue
           ? typeof (propValue as { value: unknown }).value
           : typeof propValue
       properties.push(`  ${propName}?: ${typeStr}`)

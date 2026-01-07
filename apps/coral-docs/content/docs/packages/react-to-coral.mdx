@@ -463,7 +463,8 @@ export default function Greeting({ name }) {
 
 const spec = transformReactComponentToSpec(simpleComponent);
 console.log(spec.componentName); // "Greeting"
-console.log(spec.componentProperties); // { name: { type: 'any', value: 'name' } }
+console.log(spec.componentProperties); // { name: { type: null, value: 'name' } }
+// Note: type is null when TypeScript type cannot be determined (aligns with CoralTSTypes schema)
 ```
 
 ### Component with State
@@ -802,6 +803,38 @@ try {
   console.error('Validation failed:', error.message);
   // Error message includes details about what failed
 }
+```
+
+---
+
+## Type Safety
+
+The `react-to-coral` package is fully type-safe:
+
+- **Zero `any` types** - All types use `unknown` with proper type guards
+- **Type-safe AST traversal** - Uses proper Babel types throughout (`t.Node`, `NodePath<T>`)
+- **Nullable types** - Returns `null` for `CoralTSTypes` when type cannot be determined (aligns with `z.nullable` schema)
+- **Proper type extraction** - TypeScript types are extracted and validated using Zod schemas
+- **No type assertions** - Type guards provide safe type narrowing instead of `as` assertions
+
+### Type Extraction Behavior
+
+When extracting prop types from React components:
+
+- **Known types** (`string`, `number`, `boolean`, etc.) → Returns the literal type string
+- **Complex types** (`MyType`, `string[]`, `() => void`) → Returns the type as a string representation
+- **Unknown types** (no type annotation) → Returns `null` (not `'any'`) to align with `CoralTSTypes` schema
+- **TypeScript `any` keyword** → Returns `'any'` as a string (explicit `any` type)
+
+```typescript
+// Example: Component without type annotations
+const Component = ({ title, count }) => { ... }
+// Result: { title: { type: null, value: 'title' }, count: { type: null, value: 'count' } }
+
+// Example: Component with TypeScript types
+interface Props { title: string; count?: number }
+const Component = ({ title, count }: Props) => { ... }
+// Result: { title: { type: 'string', value: 'title' }, count: { type: 'number', value: 'count', optional: true } }
 ```
 
 ---

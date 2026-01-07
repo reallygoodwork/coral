@@ -36,7 +36,11 @@ export function generateReverseMappings(): {
     }
 
     // Handle object mappings
-    if (typeof mapping === 'object' && mapping !== null && !Array.isArray(mapping)) {
+    if (
+      typeof mapping === 'object' &&
+      mapping !== null &&
+      !Array.isArray(mapping)
+    ) {
       // Single property-value pair
       if ('property' in mapping && 'value' in mapping) {
         const { property, value } = mapping as {
@@ -50,7 +54,10 @@ export function generateReverseMappings(): {
         }
 
         // Convert value to string for lookup
-        const valueKey = typeof value === 'object' ? `${value.value}${value.unit}` : String(value)
+        const valueKey =
+          typeof value === 'object'
+            ? `${value.value}${value.unit}`
+            : String(value)
 
         // Store the mapping
         propertyValue[property][valueKey] = twClass
@@ -75,7 +82,9 @@ export function generateReverseMappings(): {
             }
 
             const valueKey =
-              typeof value === 'object' ? `${value.value}${value.unit}` : String(value)
+              typeof value === 'object'
+                ? `${value.value}${value.unit}`
+                : String(value)
             propertyValue[property][valueKey] = twClass
           }
         }

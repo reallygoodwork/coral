@@ -101,12 +101,15 @@ describe('JSX Fragments and Spread Operators', () => {
     expect(result.componentName).toBe('ExpressionComponent')
     expect(result.elementType).toBe('div')
     expect(result.children).toBeDefined()
-    expect(Array.isArray(result.children) ? result.children.length : 0).toBeGreaterThan(0)
+    expect(
+      Array.isArray(result.children) ? result.children.length : 0,
+    ).toBeGreaterThan(0)
 
     // Check that JSX expressions are captured
     const children = Array.isArray(result.children) ? result.children : []
     const expressionChildren = children.filter(
-      (child: Record<string, unknown>) => child.elementType === 'jsx-expression',
+      (child: Record<string, unknown>) =>
+        child.elementType === 'jsx-expression',
     )
     expect(expressionChildren).toBeDefined()
     expect(expressionChildren.length).toBeGreaterThan(0)
@@ -141,9 +144,14 @@ describe('JSX Fragments and Spread Operators', () => {
 
     // Check nested fragment
     const children = Array.isArray(result.children) ? result.children : []
-    const nestedFragment = children.find((child: Record<string, unknown>) => child.elementType === 'React.Fragment')
+    const nestedFragment = children.find(
+      (child: Record<string, unknown>) =>
+        child.elementType === 'React.Fragment',
+    )
     expect(nestedFragment).toBeDefined()
-    const nestedChildren = Array.isArray(nestedFragment?.children) ? nestedFragment.children : []
+    const nestedChildren = Array.isArray(nestedFragment?.children)
+      ? nestedFragment.children
+      : []
     expect(nestedChildren.length).toBe(2) // h2, p
   })
 
@@ -178,13 +186,19 @@ describe('JSX Fragments and Spread Operators', () => {
     expect(Object.keys(props)).toContain('...props')
     expect(Object.keys(props)).toContain('...additionalProps')
     // props.style might be an object with {type, value} structure
-    const styleValue = typeof props.style === 'object' && props.style !== null && 'value' in props.style
-      ? (props.style as { value: string }).value
-      : String(props.style)
+    const styleValue =
+      typeof props.style === 'object' &&
+      props.style !== null &&
+      'value' in props.style
+        ? (props.style as { value: string }).value
+        : String(props.style)
     expect(styleValue).toContain('...style')
-    const onClickValue = typeof props.onClick === 'object' && props.onClick !== null && 'value' in props.onClick
-      ? (props.onClick as { value: string }).value
-      : String(props.onClick)
+    const onClickValue =
+      typeof props.onClick === 'object' &&
+      props.onClick !== null &&
+      'value' in props.onClick
+        ? (props.onClick as { value: string }).value
+        : String(props.onClick)
     expect(onClickValue).toContain('console.log')
   })
 })

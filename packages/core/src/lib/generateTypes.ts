@@ -1,6 +1,6 @@
 import type { CoralRootNode } from '../structures/coral'
-import type { ComponentEventDefinition, ComponentEventsDefinition } from '../structures/events'
-import type { ComponentPropsDefinition, PropType } from '../structures/props'
+import type { ComponentEventDefinition } from '../structures/events'
+import type { PropType } from '../structures/props'
 import type { ComponentVariants } from '../structures/variants'
 
 /**
@@ -23,7 +23,8 @@ import type { ComponentVariants } from '../structures/variants'
  * ```
  */
 export function generatePropsInterface(component: CoralRootNode): string {
-  const name = component.$meta?.name ?? component.componentName ?? component.name
+  const name =
+    component.$meta?.name ?? component.componentName ?? component.name
   const lines: string[] = []
 
   lines.push(`export interface ${name}Props {`)
@@ -139,7 +140,8 @@ function eventParamsToTS(event: ComponentEventDefinition): string {
  * @returns Complete TypeScript declaration file content
  */
 export function generateComponentTypes(component: CoralRootNode): string {
-  const name = component.$meta?.name ?? component.componentName ?? component.name
+  const name =
+    component.$meta?.name ?? component.componentName ?? component.name
   const version = component.$meta?.version ?? '0.0.0'
 
   const lines: string[] = [
@@ -177,7 +179,8 @@ export function generatePackageTypes(
     lines.push(generatePropsInterface(component))
     lines.push('')
 
-    const name = component.$meta?.name ?? component.componentName ?? component.name
+    const name =
+      component.$meta?.name ?? component.componentName ?? component.name
     lines.push(`export declare const ${name}: React.FC<${name}Props>;`)
     lines.push('')
   }
@@ -200,7 +203,9 @@ export function generateComponentJSDoc(component: CoralRootNode): string {
   if (component.componentVariants?.axes) {
     for (const axis of component.componentVariants.axes) {
       const values = axis.values.join(' | ')
-      lines.push(` * @param ${axis.name} - ${axis.description ?? `Variant: ${values}`}`)
+      lines.push(
+        ` * @param ${axis.name} - ${axis.description ?? `Variant: ${values}`}`,
+      )
     }
   }
 

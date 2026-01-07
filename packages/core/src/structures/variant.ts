@@ -1,19 +1,19 @@
-import * as z from "zod";
+import * as z from 'zod'
 
-import { zCoralStyleSchema } from "./styles";
-import { zCoralNameSchema } from "./utilities";
+import { zCoralStyleSchema } from './styles'
+import { zCoralNameSchema } from './utilities'
 
 export const zCoralVariantSchema = z.object({
-  name: zCoralNameSchema.describe("The name of the variant"),
+  name: zCoralNameSchema.describe('The name of the variant'),
   figmaNodeRef: z
     .string()
     .nullish()
-    .describe("The reference to the Figma node"),
+    .describe('The reference to the Figma node'),
   options: z
-    .record(z.string(), z.any())
+    .record(z.string(), z.unknown())
     .nullish()
-    .describe("The options of the variant"),
+    .describe('The options of the variant'),
   styles: zCoralStyleSchema.nullish(),
-});
+})
 
-export type CoralVariantType = z.infer<typeof zCoralVariantSchema>;
+export type CoralVariantType = z.infer<typeof zCoralVariantSchema>

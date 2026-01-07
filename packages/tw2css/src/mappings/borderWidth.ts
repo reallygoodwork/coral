@@ -1,6 +1,14 @@
 const borderScale = [0, 1, 2, 4, 8]
 
-const borderClassnames = ['border-s', 'border-e', 'border-t', 'border-b', 'border-x', 'border-y', 'border']
+const borderClassnames = [
+  'border-s',
+  'border-e',
+  'border-t',
+  'border-b',
+  'border-x',
+  'border-y',
+  'border',
+]
 
 const borderWidthMappings: Record<string, unknown> = {}
 

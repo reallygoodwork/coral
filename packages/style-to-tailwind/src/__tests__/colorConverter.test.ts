@@ -1,4 +1,8 @@
-import { hexToTailwindColor, colorToTailwind, colorToArbitrary } from '../colorConverter'
+import {
+  hexToTailwindColor,
+  colorToTailwind,
+  colorToArbitrary,
+} from '../colorConverter'
 import type { ColorObject } from '../index'
 
 describe('colorConverter', () => {
@@ -105,7 +109,9 @@ describe('colorConverter', () => {
     })
 
     it('should handle string hex values', () => {
-      expect(colorToArbitrary('backgroundColor', '#ff0000')).toBe('bg-[#ff0000]')
+      expect(colorToArbitrary('backgroundColor', '#ff0000')).toBe(
+        'bg-[#ff0000]',
+      )
       expect(colorToArbitrary('color', '#00ff00')).toBe('text-[#00ff00]')
     })
 
@@ -116,7 +122,9 @@ describe('colorConverter', () => {
         hsl: { h: 210, s: 65, l: 20, a: 1 },
       }
 
-      expect(colorToArbitrary('customProperty', color)).toBe('customProperty-[#123456]')
+      expect(colorToArbitrary('customProperty', color)).toBe(
+        'customProperty-[#123456]',
+      )
     })
   })
 })

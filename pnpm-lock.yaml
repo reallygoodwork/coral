@@ -154,6 +154,9 @@ importers:
 
   packages/coral-to-html:
     devDependencies:
+      '@jest/test-sequencer':
+        specifier: ^30.2.0
+        version: 30.2.0
       '@reallygoodwork/coral-core':
         specifier: workspace:*
         version: link:../core
@@ -206,6 +209,9 @@ importers:
         specifier: ^2.2.0
         version: 2.6.0
     devDependencies:
+      '@jest/test-sequencer':
+        specifier: ^30.2.0
+        version: 30.2.0
       '@reallygoodwork/coral-core':
         specifier: workspace:*
         version: link:../core
@@ -255,6 +261,9 @@ importers:
         specifier: ^4.1.13
         version: 4.1.13
     devDependencies:
+      '@jest/test-sequencer':
+        specifier: ^30.2.0
+        version: 30.2.0
       '@reallygoodwork/coral-tw2css':
         specifier: workspace:*
         version: link:../tw2css
@@ -304,6 +313,9 @@ importers:
         specifier: ^7.28.5
         version: 7.28.5
     devDependencies:
+      '@jest/test-sequencer':
+        specifier: ^30.2.0
+        version: 30.2.0
       '@reallygoodwork/coral-core':
         specifier: workspace:*
         version: link:../core
@@ -356,6 +368,9 @@ importers:
         specifier: workspace:*
         version: link:../tw2css
     devDependencies:
+      '@jest/test-sequencer':
+        specifier: ^30.2.0
+        version: 30.2.0
       '@reallygoodwork/typescript-config':
         specifier: workspace:*
         version: link:../../utilities/typescript-config
@@ -390,6 +405,9 @@ importers:
         specifier: ^2.9.3
         version: 2.9.3
     devDependencies:
+      '@jest/test-sequencer':
+        specifier: ^30.2.0
+        version: 30.2.0
       '@reallygoodwork/typescript-config':
         specifier: workspace:*
         version: link:../../utilities/typescript-config

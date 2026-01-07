@@ -1,6 +1,8 @@
 import * as t from '@babel/types'
 
-export const getParamName = (param: t.Identifier | t.Pattern | t.RestElement): string => {
+export const getParamName = (
+  param: t.Identifier | t.Pattern | t.RestElement,
+): string => {
   if (t.isIdentifier(param)) return param.name
   if (t.isRestElement(param)) {
     return `...${t.isIdentifier(param.argument) ? param.argument.name : 'rest'}`

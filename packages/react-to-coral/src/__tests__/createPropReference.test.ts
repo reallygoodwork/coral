@@ -11,7 +11,13 @@ describe('createPropReference', () => {
 
   it('should identify a state hook reference', () => {
     const result = {
-      stateHooks: [{ name: 'myState', setterName: 'setMyState', tsType: 'string' as const }],
+      stateHooks: [
+        {
+          name: 'myState',
+          setterName: 'setMyState',
+          tsType: 'string' as const,
+        },
+      ],
     }
     const propRef = createPropReference('myState', result)
     expect(propRef).toEqual({ type: 'state', value: 'myState' })

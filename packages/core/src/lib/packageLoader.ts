@@ -1,11 +1,11 @@
-import { zComponentIndexSchema } from '../structures/componentIndex'
 import type { ComponentIndex } from '../structures/componentIndex'
-import { zCoralRootSchema } from '../structures/coral'
+import { zComponentIndexSchema } from '../structures/componentIndex'
 import type { CoralRootNode } from '../structures/coral'
-import { parsePackageRef, zCoralConfigSchema } from '../structures/package'
+import { zCoralRootSchema } from '../structures/coral'
 import type { CoralConfig } from '../structures/package'
-import { zTokenIndexSchema } from '../structures/tokenIndex'
+import { parsePackageRef, zCoralConfigSchema } from '../structures/package'
 import type { TokenIndex } from '../structures/tokenIndex'
+import { zTokenIndexSchema } from '../structures/tokenIndex'
 
 /**
  * Loaded package data structure
@@ -88,9 +88,13 @@ export async function loadPackage(
     for (const extendRef of config.extends) {
       const [packageName] = parsePackageRef(extendRef)
       const packagePath =
-        (await options.resolvePackage?.(packageName)) ?? `node_modules/${packageName}`
+        (await options.resolvePackage?.(packageName)) ??
+        `node_modules/${packageName}`
 
-      const extended = await loadPackage(`${packagePath}/coral.config.json`, options)
+      const extended = await loadPackage(
+        `${packagePath}/coral.config.json`,
+        options,
+      )
       extendedPackages.push(extended)
     }
   }
@@ -215,7 +219,10 @@ function resolvePath(base: string, relative: string): string {
 /**
  * Get a component by name from a loaded package
  */
-export function getComponent(pkg: LoadedPackage, name: string): CoralRootNode | undefined {
+export function getComponent(
+  pkg: LoadedPackage,
+  name: string,
+): CoralRootNode | undefined {
   return pkg.components.get(name)
 }
 

@@ -84,7 +84,10 @@ export const zComponentIndexSchema = z
     components: z.array(zComponentEntrySchema).describe('Component entries'),
 
     /** Category definitions */
-    categories: z.array(zCategorySchema).optional().describe('Category definitions'),
+    categories: z
+      .array(zCategorySchema)
+      .optional()
+      .describe('Category definitions'),
   })
   .describe('Component index')
 
@@ -97,7 +100,10 @@ export type ComponentIndex = z.infer<typeof zComponentIndexSchema>
 /**
  * Create an empty component index
  */
-export function createComponentIndex(name: string, version: string): ComponentIndex {
+export function createComponentIndex(
+  name: string,
+  version: string,
+): ComponentIndex {
   return {
     $schema: 'https://coral.design/components-index.schema.json',
     name,

@@ -57,7 +57,11 @@ describe('Variants Schema', () => {
     it('should validate full component variants', () => {
       const variants = {
         axes: [
-          { name: 'intent', values: ['primary', 'secondary'], default: 'primary' },
+          {
+            name: 'intent',
+            values: ['primary', 'secondary'],
+            default: 'primary',
+          },
           { name: 'size', values: ['sm', 'md', 'lg'], default: 'md' },
         ],
         compounds: [{ conditions: { intent: 'primary', size: 'lg' } }],
@@ -124,7 +128,10 @@ describe('Variants Schema', () => {
     ]
 
     it('should return no errors for valid values', () => {
-      const errors = validateVariantValues({ intent: 'primary', size: 'lg' }, axes)
+      const errors = validateVariantValues(
+        { intent: 'primary', size: 'lg' },
+        axes,
+      )
       expect(errors).toHaveLength(0)
     })
 
@@ -144,18 +151,26 @@ describe('Variants Schema', () => {
   describe('matchesCompoundCondition', () => {
     it('should match when all conditions are met', () => {
       const compound = { conditions: { intent: 'primary', size: 'lg' } }
-      expect(matchesCompoundCondition(compound, { intent: 'primary', size: 'lg' })).toBe(true)
+      expect(
+        matchesCompoundCondition(compound, { intent: 'primary', size: 'lg' }),
+      ).toBe(true)
     })
 
     it('should not match when some conditions are not met', () => {
       const compound = { conditions: { intent: 'primary', size: 'lg' } }
-      expect(matchesCompoundCondition(compound, { intent: 'primary', size: 'sm' })).toBe(false)
-      expect(matchesCompoundCondition(compound, { intent: 'secondary', size: 'lg' })).toBe(false)
+      expect(
+        matchesCompoundCondition(compound, { intent: 'primary', size: 'sm' }),
+      ).toBe(false)
+      expect(
+        matchesCompoundCondition(compound, { intent: 'secondary', size: 'lg' }),
+      ).toBe(false)
     })
 
     it('should match when extra values are present', () => {
       const compound = { conditions: { intent: 'primary' } }
-      expect(matchesCompoundCondition(compound, { intent: 'primary', size: 'lg' })).toBe(true)
+      expect(
+        matchesCompoundCondition(compound, { intent: 'primary', size: 'lg' }),
+      ).toBe(true)
     })
   })
 })

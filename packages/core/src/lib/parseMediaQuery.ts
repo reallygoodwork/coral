@@ -1,4 +1,11 @@
-import type { BreakpointType, RangeBreakpoint, ResponsiveStyle, SimpleBreakpoint } from '../structures/responsiveBreakpoint'
+import type {
+  BreakpointType,
+  RangeBreakpoint,
+  ResponsiveStyle,
+  SimpleBreakpoint,
+} from '../structures/responsiveBreakpoint'
+import { zBreakpointTypeSchema } from '../structures/responsiveBreakpoint'
+import type { CoralStyleType } from '../structures/styles'
 
 /**
  * Parses a CSS media query string and extracts breakpoint information
@@ -19,10 +26,14 @@ export function parseMediaQuery(
     .trim()
 
   // Remove media types like 'screen and', 'print and', etc.
-  const withoutMediaType = normalized.replace(/^(screen|print|all|speech)\s+and\s+/i, '')
+  const withoutMediaType = normalized.replace(
+    /^(screen|print|all|speech)\s+and\s+/i,
+    '',
+  )
 
   // Extract all conditions in parentheses
-  const conditionRegex = /\((min-width|max-width|min-height|max-height)\s*:\s*([^)]+)\)/gi
+  const conditionRegex =
+    /\((min-width|max-width|min-height|max-height)\s*:\s*([^)]+)\)/gi
   const matches = [...withoutMediaType.matchAll(conditionRegex)]
 
   if (matches.length === 0) {
@@ -39,8 +50,12 @@ export function parseMediaQuery(
 
     if (!type || !value) return null
 
+    // Validate breakpoint type using schema
+    const typeResult = zBreakpointTypeSchema.safeParse(type)
+    if (!typeResult.success) return null
+
     return {
-      type: type as BreakpointType,
+      type: typeResult.data,
       value: value.trim(),
     }
   }
@@ -54,7 +69,11 @@ export function parseMediaQuery(
 
     if (!type || !value) continue
 
-    const cleanType = type.toLowerCase() as BreakpointType
+    // Validate breakpoint type using schema
+    const typeResult = zBreakpointTypeSchema.safeParse(type.toLowerCase())
+    if (!typeResult.success) continue
+
+    const cleanType = typeResult.data
 
     if (cleanType === 'min-width' || cleanType === 'min-height') {
       rangeBreakpoint.min = {
@@ -80,7 +99,10 @@ export function extractMediaQueriesFromCSS(
   cssString: string,
   selector?: string,
 ): Array<{ mediaQuery: string; styles: Record<string, string> }> {
-  const mediaQueries: Array<{ mediaQuery: string; styles: Record<string, string> }> = []
+  const mediaQueries: Array<{
+    mediaQuery: string
+    styles: Record<string, string>
+  }> = []
 
   // Match @media blocks
   const mediaQueryRegex = /@media\s+([^{]+)\{([^}]+(?:\{[^}]*\}[^}]*)*)\}/gi
@@ -96,10 +118,13 @@ export function extractMediaQueriesFromCSS(
 
     // If a selector is provided, only extract styles for that selector
     if (selector) {
-      const selectorRegex = new RegExp(`${escapeRegex(selector)}\\s*\\{([^}]+)\\}`, 'i')
+      const selectorRegex = new RegExp(
+        `${escapeRegex(selector)}\\s*\\{([^}]+)\\}`,
+        'i',
+      )
       const selectorMatch = content.match(selectorRegex)
 
-      if (selectorMatch && selectorMatch[1]) {
+      if (selectorMatch?.[1]) {
         const styles = parseStyleString(selectorMatch[1])
         mediaQueries.push({ mediaQuery, styles })
       }
@@ -136,7 +161,9 @@ function parseStyleString(styleString: string): Record<string, string> {
     const [prop, value] = declaration.split(':').map((s) => s.trim())
     if (prop && value) {
       // Convert kebab-case to camelCase for JS compatibility
-      const camelProp = prop.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())
+      const camelProp = prop.replace(/-([a-z])/g, (_, letter) =>
+        letter.toUpperCase(),
+      )
       styles[camelProp] = value
     }
   })
@@ -155,7 +182,7 @@ function escapeRegex(str: string): string {
  * Converts parsed media queries to Coral ResponsiveStyle format
  */
 export function mediaQueriesToResponsiveStyles(
-  mediaQueries: Array<{ mediaQuery: string; styles: Record<string, string> }>,
+  mediaQueries: Array<{ mediaQuery: string; styles: CoralStyleType }>,
 ): ResponsiveStyle[] {
   const responsiveStyles: ResponsiveStyle[] = []
 
@@ -194,18 +221,24 @@ export function mediaQueriesToResponsiveStyles(
  * Example: { "@media (min-width: 768px)": { padding: "20px" } }
  * Also supports: { "(min-width: 768px)": { padding: "20px" } } (Tailwind format)
  */
-export function extractResponsiveStylesFromObject(stylesObject: Record<string, any>): {
-  baseStyles: Record<string, any>
+export function extractResponsiveStylesFromObject(
+  stylesObject: Record<string, CoralStyleType>,
+): {
+  baseStyles: CoralStyleType
   responsiveStyles: ResponsiveStyle[]
 } {
-  const baseStyles: Record<string, any> = {}
-  const mediaQueriesArray: Array<{ mediaQuery: string; styles: Record<string, string> }> = []
+  const baseStyles: CoralStyleType = {}
+  const mediaQueriesArray: Array<{
+    mediaQuery: string
+    styles: CoralStyleType
+  }> = []
 
   for (const [key, value] of Object.entries(stylesObject)) {
     // Check if this is a media query key
     // Supports both "@media (min-width: 768px)" and "(min-width: 768px)" formats (Tailwind)
     const isMediaQuery =
-      key.startsWith('@media') || (key.startsWith('(') && (key.includes('width') || key.includes('height')))
+      key.startsWith('@media') ||
+      (key.startsWith('(') && (key.includes('width') || key.includes('height')))
 
     if (isMediaQuery) {
       // Normalize to @media format if it's not already

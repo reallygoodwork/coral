@@ -2,14 +2,15 @@
  * Generate Class Variance Authority (CVA) configuration from Coral variants
  */
 
-import { styleToTailwind } from '@reallygoodwork/style-to-tailwind'
-import type { CoralNode, CoralRootNode } from '@reallygoodwork/coral-core'
 import type {
   ComponentVariants,
+  CoralNode,
+  CoralRootNode,
+  CoralStyleType,
   NodeVariantStyles,
-  CompoundVariantStyle,
   StateStyles,
 } from '@reallygoodwork/coral-core'
+import { styleToTailwind } from '@reallygoodwork/style-to-tailwind'
 
 /**
  * CVA configuration object structure
@@ -100,11 +101,14 @@ export function generateCVA(
   }
 
   // Check if component has variants
-  const hasVariants = spec.componentVariants?.axes && spec.componentVariants.axes.length > 0
+  const hasVariants =
+    spec.componentVariants?.axes && spec.componentVariants.axes.length > 0
 
   if (!hasVariants) {
     // No variants - just return base styles
-    const baseClasses = node.styles ? styleToTailwind(node.styles).join(' ') : ''
+    const baseClasses = node.styles
+      ? styleToTailwind(node.styles).join(' ')
+      : ''
 
     // But still handle state styles if requested
     let stateConfigs: CVAGenerationResult['stateConfigs']
@@ -152,7 +156,10 @@ export function generateCVA(
 /**
  * Generate CVA config object from node and variants
  */
-function generateCVAConfig(node: CoralNode, componentVariants: ComponentVariants): CVAConfig {
+function generateCVAConfig(
+  node: CoralNode,
+  componentVariants: ComponentVariants,
+): CVAConfig {
   const config: CVAConfig = {}
 
   // Base styles from node.styles
@@ -230,9 +237,22 @@ function generateStateCVAConfigsNoVariants(
     if (!stateStyle) continue
 
     // For components without variants, all state styles are simple
-    const classes = styleToTailwind(stateStyle as any)
-    ;(stateConfigs as any)[state] = {
+    // TypeScript knows stateStyle is CoralStyleType here since we're in the no-variants function
+    const classes = styleToTailwind(stateStyle as CoralStyleType)
+    const config: CVAConfig = {
       base: classes.join(' '),
+    }
+    // Type-safe assignment using type assertion for the specific state key
+    if (state === 'hover') {
+      stateConfigs.hover = config
+    } else if (state === 'focus') {
+      stateConfigs.focus = config
+    } else if (state === 'active') {
+      stateConfigs.active = config
+    } else if (state === 'disabled') {
+      stateConfigs.disabled = config
+    } else if (state === 'focusVisible') {
+      stateConfigs.focusVisible = config
     }
   }
 
@@ -269,12 +289,37 @@ function generateStateCVAConfigs(
         styles: undefined,
         variantStyles: stateStyle as NodeVariantStyles,
       }
-      ;(stateConfigs as any)[state] = generateCVAConfig(stateNode, componentVariants)
+      const config = generateCVAConfig(stateNode, componentVariants)
+      // Type-safe assignment using type assertion for the specific state key
+      if (state === 'hover') {
+        stateConfigs.hover = config
+      } else if (state === 'focus') {
+        stateConfigs.focus = config
+      } else if (state === 'active') {
+        stateConfigs.active = config
+      } else if (state === 'disabled') {
+        stateConfigs.disabled = config
+      } else if (state === 'focusVisible') {
+        stateConfigs.focusVisible = config
+      }
     } else {
       // Simple state styles (not variant-aware)
-      const classes = styleToTailwind(stateStyle as any)
-      ;(stateConfigs as any)[state] = {
+      // TypeScript knows stateStyle is CoralStyleType here since it's not variant-aware
+      const classes = styleToTailwind(stateStyle as CoralStyleType)
+      const config: CVAConfig = {
         base: classes.join(' '),
+      }
+      // Type-safe assignment using type assertion for the specific state key
+      if (state === 'hover') {
+        stateConfigs.hover = config
+      } else if (state === 'focus') {
+        stateConfigs.focus = config
+      } else if (state === 'active') {
+        stateConfigs.active = config
+      } else if (state === 'disabled') {
+        stateConfigs.disabled = config
+      } else if (state === 'focusVisible') {
+        stateConfigs.focusVisible = config
       }
     }
   }
@@ -285,7 +330,9 @@ function generateStateCVAConfigs(
 /**
  * Check if state styles are variant-aware
  */
-function isVariantAwareStateStyles(styles: unknown): styles is NodeVariantStyles {
+function isVariantAwareStateStyles(
+  styles: unknown,
+): styles is NodeVariantStyles {
   if (typeof styles !== 'object' || styles === null) {
     return false
   }
@@ -330,7 +377,10 @@ function isVariantAwareStateStyles(styles: unknown): styles is NodeVariantStyles
   if (nestedKeys.length === 0) return false
 
   // If nested object has 'hex', 'r', 'g', 'b' keys, it's a color object (NOT variant-aware)
-  if ('hex' in firstValue || ('r' in firstValue && 'g' in firstValue && 'b' in firstValue)) {
+  if (
+    'hex' in firstValue ||
+    ('r' in firstValue && 'g' in firstValue && 'b' in firstValue)
+  ) {
     return false
   }
 
@@ -385,7 +435,10 @@ function generateCVACode(config: CVAConfig): string {
   }
 
   // Default variants
-  if (config.defaultVariants && Object.keys(config.defaultVariants).length > 0) {
+  if (
+    config.defaultVariants &&
+    Object.keys(config.defaultVariants).length > 0
+  ) {
     lines.push('    defaultVariants: {')
     for (const [axis, value] of Object.entries(config.defaultVariants)) {
       lines.push(`      ${axis}: '${value}',`)

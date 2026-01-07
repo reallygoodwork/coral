@@ -17,16 +17,24 @@ export const zCoralMethodSchema = z
             tsType: z
               .union([zCoralTSTypes, z.array(zCoralTSTypes)])
               .nullish()
-              .describe('The default value of the parameter as a TypeScript type'),
-            defaultValue: z.any().nullish(),
+              .describe(
+                'The default value of the parameter as a TypeScript type',
+              ),
+            defaultValue: z.unknown().nullish(),
           })
-          .describe('An object representing a parameter argument of the method'),
+          .describe(
+            'An object representing a parameter argument of the method',
+          ),
       ]),
     ),
     stateInteractions: z
       .object({
-        reads: z.array(z.string()).describe('The state properties that the method reads'),
-        writes: z.array(z.string()).describe('The state properties that the method writes'),
+        reads: z
+          .array(z.string())
+          .describe('The state properties that the method reads'),
+        writes: z
+          .array(z.string())
+          .describe('The state properties that the method writes'),
       })
       .nullish()
       .describe(

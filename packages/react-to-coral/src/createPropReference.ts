@@ -13,16 +13,12 @@ export const createPropReference = (
     componentProperties?: Array<CoralComponentPropertyType>
   },
 ): PropReference => {
-  if (result.methods && result.methods.some((m) => m.name === value)) {
+  if (result.methods?.some((m) => m.name === value)) {
     return { type: 'method', value }
-  } else if (
-    result.stateHooks &&
-    result.stateHooks.some((s) => s.name === value)
-  ) {
+  } else if (result.stateHooks?.some((s) => s.name === value)) {
     return { type: 'state', value }
   } else if (
-    result.componentProperties &&
-    result.componentProperties.some((p) =>
+    result.componentProperties?.some((p) =>
       Object.keys(p).some((key) => key === value),
     )
   ) {
