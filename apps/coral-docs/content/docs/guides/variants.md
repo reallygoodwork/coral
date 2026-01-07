@@ -3,7 +3,7 @@ title: "Component Variants"
 description: Learn how to create flexible, multi-variant components using Coral's CVA-style variant system.
 ---
 
-# Component Variants
+## Introduction
 
 Coral's variant system allows you to define component-level variants with per-node style responses—similar to [class-variance-authority (CVA)](https://cva.style/) but built into the specification format.
 

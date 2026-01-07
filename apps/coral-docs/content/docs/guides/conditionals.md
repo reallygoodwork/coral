@@ -3,7 +3,7 @@ title: "Conditional Rendering"
 description: Learn how to conditionally render nodes and apply styles based on prop values.
 ---
 
-# Conditional Rendering
+## Introduction
 
 Coral supports conditional rendering—showing, hiding, or styling nodes based on prop values using a powerful expression syntax.
 

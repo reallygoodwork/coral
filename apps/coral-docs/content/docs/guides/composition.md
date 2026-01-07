@@ -3,7 +3,7 @@ title: "Component Composition"
 description: Learn how to embed components within components using slots and prop bindings.
 ---
 
-# Component Composition
+## Introduction
 
 Coral supports powerful component composition—embedding components within other components, defining slots for content injection, and binding props and events across component boundaries.
 

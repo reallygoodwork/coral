@@ -3,7 +3,7 @@ title: "Package System"
 description: Learn how to organize, distribute, and manage Coral design systems using the package system.
 ---
 
-# Package System
+## Introduction
 
 The Coral package system provides a standardized way to organize design systems. A package bundles components, tokens, and assets together with metadata and build configurations.
 

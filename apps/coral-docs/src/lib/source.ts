@@ -2,12 +2,21 @@ import { docs } from 'fumadocs-mdx:collections/server';
 import { type InferPageType, loader } from 'fumadocs-core/source';
 import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
 import type * as PageTree from 'fumadocs-core/page-tree';
+import { icons } from 'lucide-react';
+import { createElement } from 'react';
 
 // See https://fumadocs.dev/docs/headless/source-api for more info
 export const source = loader({
   baseUrl: '/',
   source: docs.toFumadocsSource(),
   plugins: [lucideIconsPlugin()],
+  icon(icon) {
+    if (!icon) {
+      // You may set a default icon
+      return;
+    }
+    if (icon in icons) return createElement(icons[icon as keyof typeof icons]);
+  },
 });
 
 /**
@@ -87,3 +96,5 @@ export async function getLLMText(page: InferPageType<typeof source>) {
 
 ${processed}`;
 }
+
+export type Page = InferPageType<typeof source>;

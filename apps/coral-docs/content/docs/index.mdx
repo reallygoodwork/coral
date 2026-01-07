@@ -1,9 +1,10 @@
 ---
-title: What is Coral UI?
+title: Overview
 description: Framework-agnostic UI specification format for design systems
+icon: package-open
 ---
 
-# Welcome to Coral
+## Introduction
 
 Coral is a specification format for describing UI components in a framework-agnostic way. Define your component structure, styling, variants, interactivity, and responsive behavior in a portable JSON format that can be transformed into various output formats.
 
@@ -20,7 +21,7 @@ Coral is a specification format for describing UI components in a framework-agno
 
 CVA-style variant definitions with per-node style responses:
 
-```json
+```json twoslash
 {
   "componentVariants": {
     "axes": [
@@ -41,7 +42,7 @@ CVA-style variant definitions with per-node style responses:
 
 Organize your design system with `coral.config.json`:
 
-```bash
+```bash twoslash
 coral init my-design-system
 coral add component Button
 coral validate
@@ -52,7 +53,7 @@ coral build --target types
 
 Embed components within components:
 
-```json
+```json twoslash
 {
   "type": "COMPONENT_INSTANCE",
   "$component": { "ref": "./button/button.coral.json" },

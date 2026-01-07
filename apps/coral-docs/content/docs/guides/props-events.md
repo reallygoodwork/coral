@@ -3,7 +3,7 @@ title: "Props & Events"
 description: Learn how to define typed props and events for your Coral components.
 ---
 
-# Props & Events
+## Introduction
 
 Coral components support typed props and events, enabling type-safe component APIs with full TypeScript generation.
 
